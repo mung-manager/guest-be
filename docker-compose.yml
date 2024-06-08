@@ -1,0 +1,60 @@
+version: "3.9"
+
+volumes:
+  postgres: {}
+
+services:
+  redis:
+    container_name: redis
+    image: redis:7.2.2
+    ports:
+      - "6379:6379"
+    environment:
+      - TZ=Asia/Seoul
+      - /etc/localtime:/etc/localtime:ro
+    restart: on-failure
+    networks:
+      - app_net
+
+  postgres_db:
+    container_name: postgres_db
+    image: postgis/postgis:16-3.4
+    volumes:
+      - postgres:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mung_manager
+      - TZ=Asia/Seoul
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "5432:5432"
+    restart: on-failure
+    networks:
+      - app_net
+
+  guest_service:
+    container_name: guest_service
+    build:
+      context: .
+      dockerfile: ../guest-be/docker/local.Dockerfile
+    entrypoint: sh -c "poetry run gunicorn config.wsgi --workers=5 -b 0.0.0.0:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.django.local
+      - TZ=Asia/Seoul
+      - /etc/localtime:/etc/localtime:ro
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+      - redis
+    restart: on-failure
+    networks:
+      - app_net
+
+networks:
+  app_net:
+    driver: bridge
+    
