@@ -1,9 +1,11 @@
 from datetime import datetime
 
+import sentry_sdk
 from django.core.exceptions import ValidationError
 from rest_framework.exceptions import APIException
 from rest_framework.response import Response
 
+from config.django.base import SERVER_ENV
 from config.settings.logging import logger
 from mung_manager.errors.exceptions import UnknownServerException, ValidationException
 
@@ -20,25 +22,18 @@ def default_exception_handler(exc: Exception, context: dict) -> Response:
     Returns:
         Response: 예외 처리 결과로 생성된 Response 객체
     """
-    # 로그 출력
-    logger.error(f"[EXCEPTION_HANDLER]\n" f"[{datetime.now()}]\n" f"> exc\n" f"{exc}\n" f"> context\n" f"{context}")
+    # 로그 출력 및 센트리 보고
+    exception_logging_and_report(exc, context)
 
     # 익셉션 핸들러를 통해 API 예외 처리를 시도
-    # rest_framework에서 제공하는 APIException을 상속받은 예외를 처리하기 위해
     if isinstance(exc, APIException):
-        response = handle_api_exception(exc=exc, context=context)
+        return handle_api_exception(exc=exc, context=context)
 
-    # 익센션 핸들러를 통해 Django 유효성 검사 예외 처리를 시도
-    # Django 데이터 유효성 검사에서 발생한 예외를 처리하기 위해
+    # 익셉션 핸들러를 통해 Django 유효성 검사 예외 처리를 시도
     if isinstance(exc, ValidationError):
-        # @TODO: 슬랙 알림
-        response = handle_django_validation_exception(exc=exc, context=context)
+        return handle_django_validation_exception(exc=exc, context=context)
 
-    # 익셉션 핸들러에서 처리가 완료되었다면 해당 Response를 반환
-    if "response" in locals():
-        return response
-
-    # @TODO: 슬랙 알림
+    # 처리되지 않은 예외는 UnknownServerException으로 처리
     return handle_api_exception(exc=UnknownServerException(), context=context)
 
 
@@ -84,3 +79,16 @@ def handle_django_validation_exception(exc: ValidationError, context: dict) -> R
         message = exc
 
     return Response(data={"code": code, "message": message}, status=status_code)
+
+
+def exception_logging_and_report(exc: Exception, context: dict):
+    """예외를 로깅하고 필요한 경우 센트리에 보고하는 함수입니다.
+
+    Args:
+        exc (Exception): 발생한 예외 객체
+        context (dict): 예외가 발생한 컨텍스트 정보
+    """
+    logger.error(f"[EXCEPTION_HANDLER]\n[{datetime.now()}]\n> exc\n{exc}\n> context\n{context}")
+
+    if SERVER_ENV in ["config.django.dev", "config.django.prod"]:
+        sentry_sdk.capture_exception(exc)
