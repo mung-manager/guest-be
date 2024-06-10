@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
-from mung_manager.users.enums import AuthGroup
+# from mung_manager.users.enums import AuthGroup
 
 
 class IsPartnerPermission(permissions.BasePermission):
@@ -16,11 +16,12 @@ class IsPartnerPermission(permissions.BasePermission):
         Returns:
             bool: 유저의 권한이 사장님이면 True, 아니면 False를 반환
         """
-        try:
-            if request.user.groups.first().id == AuthGroup.PARTNER.value:  # type: ignore
-                return True
-
-            return False
-
-        except Exception:
-            return False
+        # try:
+        #     if request.user.groups.first().id == AuthGroup.PARTNER.value:  # type: ignore
+        #         return True
+        #
+        #     return False
+        #
+        # except Exception:
+        #     return False
+        pass

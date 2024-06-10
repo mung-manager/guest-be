@@ -26,4 +26,3 @@ class DeletedRecord(models.Model):
     class Meta:
         db_table = "deleted_record"
         managed = False
-

@@ -1,12 +1,11 @@
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+
+# from django.urls import include, path
+
 
 urlpatterns = [
-    # path(
-    #     "",
-    #     include(("")),
-    # ),
+
 ]
 
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa

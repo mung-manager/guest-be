@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import os
 import sys
+
 from config.django.base import SERVER_ENV
+
 
 def main():
     """Run administrative tasks."""
