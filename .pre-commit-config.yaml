@@ -21,6 +21,12 @@ repos:
         args: ['-l', '120', '-t', 'py311']
         exclude: .*/migrations/.*|.*urls\.py
 
+  - repo: https://github.com/pycqa/bandit
+    rev: 1.7.8
+    hooks:
+      - id: bandit
+        args: [ '--skip', 'B101,B110,B105' ]
+
 #  - repo: https://github.com/myint/autoflake
 #    rev: v2.3.1
 #    hooks:
