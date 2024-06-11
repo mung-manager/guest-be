@@ -20,9 +20,6 @@ class DeletedRecord(models.Model):
     data = models.JSONField(db_comment="원본 데이터")
     deleted_at = models.DateTimeField(auto_now_add=True, db_comment="삭제 시간")
 
-    def __str__(self):
-        return f"[{self.id}]: {self.original_table} - {self.original_id}"
-
     class Meta:
         db_table = "deleted_record"
         managed = False
