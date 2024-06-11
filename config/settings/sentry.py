@@ -3,7 +3,7 @@ from config.django.base import SERVER_ENV
 
 SENTRY_DSN = env("SENTRY_DSN", default="")
 
-if SENTRY_DSN:
+if SENTRY_DSN and SERVER_ENV != "config.django.local":
     environment = SERVER_ENV
     track_performance = environment == "config.django.prod"
 
