@@ -11,7 +11,6 @@ services:
       - "6379:6379"
     environment:
       - TZ=Asia/Seoul
-      - /etc/localtime:/etc/localtime:ro
     restart: on-failure
     networks:
       - app_net
@@ -26,7 +25,6 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=mung_manager
       - TZ=Asia/Seoul
-      - /etc/localtime:/etc/localtime:ro
     ports:
       - "5432:5432"
     restart: on-failure
@@ -42,7 +40,6 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.django.local
       - TZ=Asia/Seoul
-      - /etc/localtime:/etc/localtime:ro
     volumes:
       - .:/app
     ports:
