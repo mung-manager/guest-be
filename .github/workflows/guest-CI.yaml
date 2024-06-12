@@ -24,23 +24,23 @@ jobs:
 
       # 3. Docker 빌드
       - name: Build docker
-        run: docker compose build postgres_db partner_service
+        run: docker compose build postgres_db guest_service
 
       # 4. isort 실행 (코드 정렬 검사)
       - name: Run isort
-        run: docker compose run partner_service poetry run isort mung_manager/ --check
+        run: docker compose run guest_service poetry run isort mung_manager/ --check
 
       # 5. black 실행 (코드 포매팅 검사)
       - name: Run black
-        run: docker compose run partner_service poetry run black mung_manager/ --check
+        run: docker compose run guest_service poetry run black mung_manager/ --check
 
       # 6. flake8 실행 (코드 린팅 검사)
       - name: Run flake8
-        run: docker compose run partner_service poetry run flake8
+        run: docker compose run guest_service poetry run flake8
 
       # 7. mypy 실행 (타입 검사)
       - name: Run mypy
-        run: docker compose run partner_service poetry run mypy --config mypy.ini mung_manager/
+        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
 
       # 8. Slack 알림
       - name: Notify Slack on Success
