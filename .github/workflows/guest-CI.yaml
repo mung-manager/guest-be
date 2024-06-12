@@ -7,8 +7,8 @@ on:
 jobs:
   guest-format-lint:
     runs-on: ubuntu-latest
-    env:
-      DJANGO_SETTINGS_MODULE: config.django.test
+#    env:
+#      DJANGO_SETTINGS_MODULE: config.django.test
     steps:
       # 1. 저장소 체크아웃
       - name: Checkout code
