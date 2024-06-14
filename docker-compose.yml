@@ -25,8 +25,6 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=mung_manager
       - TZ=Asia/Seoul
-    ports:
-      - "5432:5432"
     restart: on-failure
     networks:
       - app_net
@@ -35,10 +33,10 @@ services:
     container_name: guest_service
     build:
       context: .
-      dockerfile: ../guest-be/docker/local.Dockerfile
-    entrypoint: sh -c "poetry run gunicorn config.wsgi --workers=5 -b 0.0.0.0:8000"
+      dockerfile: docker/local.Dockerfile
+    command: poetry run python manage.py runserver
     environment:
-      - DJANGO_SETTINGS_MODULE=config.django.local
+      - DJANGO_SETTINGS_MODULE=config.django.test # github action - config.django.test / local - config.django.local
       - TZ=Asia/Seoul
     volumes:
       - .:/app
