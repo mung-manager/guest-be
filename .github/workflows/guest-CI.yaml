@@ -1,0 +1,112 @@
+name: Guest CI
+
+on:
+  pull_request:
+    branches: [ "develop", "main" ]
+
+jobs:
+  guest-format-lint:
+    runs-on: ubuntu-latest
+#    env:
+#      DJANGO_SETTINGS_MODULE: config.django.test
+    steps:
+      # 1. 저장소 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. 환경 변수 파일 생성
+      - name: Create env file
+        env:
+          DJANGO_GUEST_ENV: ${{ secrets.DJANGO_GUEST_ENV }}
+        run: |
+          touch .env.guest
+          echo "$DJANGO_GUEST_ENV" >> .env.guest
+
+      # 3. Docker 빌드
+      - name: Build docker
+        run: docker compose build postgres_db guest_service
+
+      # 4. isort 실행 (코드 정렬 검사)
+      - name: Run isort
+        run: docker compose run guest_service poetry run isort mung_manager/ --check
+
+      # 5. black 실행 (코드 포매팅 검사)
+      - name: Run black
+        run: docker compose run guest_service poetry run black mung_manager/ --check
+
+      # 6. flake8 실행 (코드 린팅 검사)
+      - name: Run flake8
+        run: docker compose run guest_service poetry run flake8
+
+      # 7. mypy 실행 (타입 검사)
+      - name: Run mypy
+        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
+
+      # 8. Slack 알림
+      - name: Notify Slack on Success
+        if: success()
+        id: slack-success
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "attachments": [
+                {
+                  "color": "#36a64f",
+                  "title": "${{ github.repository }}",
+                  "title_link": "https://github.com/${{ github.repository }}",
+                  "text": "GitHub Action format-lint CI 성공 😄",
+                  "fields": [
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Tag",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack on Failure
+        if: failure()
+        id: slack-failure
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "attachments": [
+                {
+                  "color": "#ff0000",
+                  "title": "${{ github.repository }}",
+                  "title_link": "https://github.com/${{ github.repository }}",
+                  "text": "GitHub Action format-lint CI 실패 😭",
+                  "fields": [
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Tag",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+  #  @TODO: 테스트 job 설정
