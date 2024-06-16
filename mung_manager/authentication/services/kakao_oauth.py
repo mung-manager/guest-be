@@ -48,7 +48,7 @@ class KakaoLoginFlowService(AbstractKakaoLoginFlowService):
             "client_secret": self._credentials.client_secret,
             "code": code,
         }
-        response = requests.post(self.KAKAO_ACCESS_TOKEN_OBTAIN_URL, data=data)
+        response = requests.post(self.KAKAO_ACCESS_TOKEN_OBTAIN_URL, data=data, timeout=10)
 
         if response.status_code != 200:
             raise AuthenticationFailedException("Failed to get access token from Kakao.")
@@ -67,8 +67,7 @@ class KakaoLoginFlowService(AbstractKakaoLoginFlowService):
         """
         access_token = kakao_token.access_token
         response = requests.get(
-            self.KAKAO_USER_INFO_URL,
-            headers={"Authorization": f"Bearer {access_token}"},
+            self.KAKAO_USER_INFO_URL, headers={"Authorization": f"Bearer {access_token}"}, timeout=10
         )
 
         if response.status_code != 200:

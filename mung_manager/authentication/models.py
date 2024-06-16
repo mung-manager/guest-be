@@ -55,7 +55,7 @@ class User(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
         verbose_name="user permissions",
     )
 
-    objects = UserManager()
+    objects = UserManager()  # type: ignore
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "phone_number", "gender", "birth"]

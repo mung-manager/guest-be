@@ -1,7 +1,6 @@
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
-from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from mung_manager.authentication.apis.apis import KakaoLoginAPI
 from mung_manager.common.base.api_managers import BaseAPIManager
@@ -14,7 +13,6 @@ from mung_manager.schemas.errors.authentications import (
 )
 from mung_manager.schemas.errors.commons import (
     ErrorInvalidParameterFormatSchema,
-    ErrorInvalidTokenSchema,
     ErrorUnknownServerSchema,
 )
 

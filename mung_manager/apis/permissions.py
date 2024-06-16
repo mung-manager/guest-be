@@ -24,4 +24,3 @@ class IsPartnerPermission(permissions.BasePermission):
         #
         # except Exception:
         #     return False
-        pass

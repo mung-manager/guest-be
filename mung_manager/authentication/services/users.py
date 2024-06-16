@@ -1,16 +1,10 @@
-from collections import OrderedDict
-
 from django.db import transaction
 
 from mung_manager.authentication.models import User
 from mung_manager.authentication.selectors.users import UserSelector
 from mung_manager.authentication.services.abstracts import AbstractUserService
 from mung_manager.common.constants import SYSTEM_CODE
-from mung_manager.common.services import update_model
-from mung_manager.errors.exceptions import (
-    AlreadyExistsException,
-    AuthenticationFailedException,
-)
+from mung_manager.errors.exceptions import AuthenticationFailedException
 
 
 class UserService(AbstractUserService):

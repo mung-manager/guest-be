@@ -4,16 +4,11 @@ from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.views import TokenRefreshView
 
 from mung_manager.authentication.containers import AuthenticationContainer
 from mung_manager.authentication.enums import UserProvider
 from mung_manager.common.base.serializers import BaseSerializer
-from mung_manager.errors.exceptions import (
-    AuthenticationFailedException,
-    InvalidTokenException,
-)
+from mung_manager.errors.exceptions import AuthenticationFailedException
 
 
 class KakaoLoginAPI(APIView):
