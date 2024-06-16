@@ -1,4 +1,9 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    Group,
+    Permission,
+    PermissionsMixin,
+)
 from django.db import models
 
 from mung_manager.authentication.managers import UserManager
@@ -30,6 +35,24 @@ class User(AbstractBaseUser, TimeStampedModel, PermissionsMixin):
         on_delete=models.CASCADE,
         related_name="users",
         db_comment="유저 소셜 제공자 아이디",
+    )
+    groups = models.ManyToManyField(
+        Group,
+        related_name="user_set",
+        related_query_name="user",
+        blank=True,
+        help_text=(
+            "The groups this user belongs to. A user will get all permissions " "granted to each of their groups."
+        ),
+        verbose_name="groups",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="user_set",
+        related_query_name="user",
+        blank=True,
+        help_text=("Specific permissions for this user."),
+        verbose_name="user permissions",
     )
 
     objects = UserManager()
