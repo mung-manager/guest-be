@@ -46,12 +46,12 @@ class SwaggerSetup:
 
         return urlpatterns + [
             path(
-                "partner/json/docs",
+                "guest/json/docs",
                 SpectacularJSONAPIView.as_view(),
                 name="schema-json",
             ),
             path(
-                "partner/swagger/docs",
+                "guest/swagger/docs",
                 SpectacularSwaggerView.as_view(url_name="schema-json"),
                 name="swagger-ui",
             ),
