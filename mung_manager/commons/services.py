@@ -3,7 +3,7 @@ from typing import Any, Dict, List, Tuple
 from django.db import models
 from django.utils import timezone
 
-from mung_manager.common.types import DjangoModelType
+from mung_manager.commons.types import DjangoModelType
 
 
 def update_model(

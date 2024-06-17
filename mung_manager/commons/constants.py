@@ -11,7 +11,7 @@ class SYSTEM_CODE:
     INVALID_TOKEN = ("token_not_valid", "Token is invalid or expired.")
     AUTHENTICATION_FAILED = (
         "authentication_failed",
-        "Incorrect authentication credentials.",
+        "Incorrect authentications credentials.",
     )
     PERMISSION_DENIED = (
         "permission_denied",

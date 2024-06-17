@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.exceptions import APIException
 
-from mung_manager.common.constants import SYSTEM_CODE
+from mung_manager.commons.constants import SYSTEM_CODE
 
 
 class BaseAPIException(APIException):

@@ -4,7 +4,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.permissions import BasePermission
 
 from mung_manager.apis.authentication import JWTAuthentication
-from mung_manager.apis.permissions import IsPartnerPermission
+from mung_manager.apis.permissions import IsGuestPermission
 
 if TYPE_CHECKING:
     from rest_framework.permissions import _PermissionClass
@@ -20,4 +20,4 @@ class APIAuthMixin:
     authentication_classes: Sequence[Type[BaseAuthentication]] = [
         JWTAuthentication,
     ]
-    permission_classes: PermissionClassesType = (IsPartnerPermission,)
+    permission_classes: PermissionClassesType = (IsGuestPermission,)

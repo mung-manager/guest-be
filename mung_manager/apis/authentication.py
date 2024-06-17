@@ -7,7 +7,7 @@ from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import Token
 from rest_framework_simplejwt.utils import get_md5_hash_password
 
-from mung_manager.common.constants import SYSTEM_CODE
+from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.errors.exceptions import (
     AuthenticationFailedException,
     InvalidTokenException,

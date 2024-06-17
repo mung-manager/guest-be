@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.utils import timezone
 
-from mung_manager.common.constants import SYSTEM_CODE
+from mung_manager.commons.constants import SYSTEM_CODE
 
 
 class InvalidPhoneNumberValidator(RegexValidator):

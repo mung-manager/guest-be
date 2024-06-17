@@ -5,7 +5,7 @@ from djangorestframework_camel_case.util import camelize
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer
 
-from mung_manager.common.constants import SYSTEM_CODE
+from mung_manager.commons.constants import SYSTEM_CODE
 
 
 class CamelCaseJSONRenderer(JSONRenderer):
