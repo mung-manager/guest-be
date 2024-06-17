@@ -4,11 +4,16 @@ from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from mung_manager.authentications.containers import AuthenticationContainer
 from mung_manager.authentications.enums import UserProvider
 from mung_manager.commons.base.serializers import BaseSerializer
-from mung_manager.errors.exceptions import AuthenticationFailedException
+from mung_manager.errors.exceptions import (
+    AuthenticationFailedException,
+    InvalidTokenException,
+)
 
 
 class KakaoLoginAPI(APIView):
@@ -78,3 +83,19 @@ class KakaoLoginAPI(APIView):
             }
         ).data
         return Response(data=auth_data, status=status.HTTP_200_OK)
+
+
+class JWTRefreshAPI(TokenRefreshView):
+    class OutputSerializer(BaseSerializer):
+        access_token = serializers.CharField(label="액세스 토큰")
+
+    def post(self, request: Request) -> Response:
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError:
+            raise InvalidTokenException("Token is invalid or expired")
+
+        token_data = self.OutputSerializer({"access_token": serializer.validated_data["access"]}).data
+        return Response(data=token_data, status=status.HTTP_200_OK)
