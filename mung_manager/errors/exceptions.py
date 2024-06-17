@@ -1,7 +1,7 @@
 from rest_framework import status
 
-from mung_manager.common.base.exceptions import BaseAPIException
-from mung_manager.common.constants import SYSTEM_CODE
+from mung_manager.commons.base.exceptions import BaseAPIException
+from mung_manager.commons.constants import SYSTEM_CODE
 
 
 class InvalidParameterFormatException(BaseAPIException):

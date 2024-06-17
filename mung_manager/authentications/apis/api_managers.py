@@ -3,7 +3,7 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 
 from mung_manager.authentications.apis.apis import KakaoLoginAPI
-from mung_manager.common.base.api_managers import BaseAPIManager
+from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationUserInactiveSchema,
     ErrorKakaoAccessTokenFailedSchema,

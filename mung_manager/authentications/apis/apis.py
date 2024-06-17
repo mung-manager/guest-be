@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 
 from mung_manager.authentications.containers import AuthenticationContainer
 from mung_manager.authentications.enums import UserProvider
-from mung_manager.common.base.serializers import BaseSerializer
+from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.errors.exceptions import AuthenticationFailedException
 
 

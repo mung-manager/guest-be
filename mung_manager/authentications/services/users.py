@@ -3,7 +3,7 @@ from django.db import transaction
 from mung_manager.authentications.models import User
 from mung_manager.authentications.selectors.users import UserSelector
 from mung_manager.authentications.services.abstracts import AbstractUserService
-from mung_manager.common.constants import SYSTEM_CODE
+from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.errors.exceptions import AuthenticationFailedException
 
 
