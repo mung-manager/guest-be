@@ -68,7 +68,7 @@ ErrorAuthenticationFailedSchema = OpenApiExample(
         "success": False,
         "statusCode": 401,
         "code": "authentication_failed",
-        "message": "Incorrect authentication credentials.",
+        "message": "Incorrect authentications credentials.",
         "data": {},
     },
     status_codes=["401"],

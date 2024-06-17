@@ -3,7 +3,7 @@ from typing import Any, Dict, Tuple
 
 from attrs import define
 
-from mung_manager.authentication.models import User
+from mung_manager.authentications.models import User
 from mung_manager.errors.exceptions import NotImplementedException
 
 

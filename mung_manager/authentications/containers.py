@@ -1,9 +1,9 @@
 from dependency_injector import containers, providers
 
-from mung_manager.authentication.selectors.users import UserSelector
-from mung_manager.authentication.services.auth import AuthService
-from mung_manager.authentication.services.kakao_oauth import KakaoLoginFlowService
-from mung_manager.authentication.services.users import UserService
+from mung_manager.authentications.selectors.users import UserSelector
+from mung_manager.authentications.services.auth import AuthService
+from mung_manager.authentications.services.kakao_oauth import KakaoLoginFlowService
+from mung_manager.authentications.services.users import UserService
 
 
 class AuthenticationContainer(containers.DeclarativeContainer):

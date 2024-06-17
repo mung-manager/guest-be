@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse_lazy
 
-from mung_manager.authentication.services.abstracts import (
+from mung_manager.authentications.services.abstracts import (
     AbstractKakaoLoginFlowService,
     KakaoAccessToken,
     KakaoLoginCredentials,

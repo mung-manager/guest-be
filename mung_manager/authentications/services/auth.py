@@ -3,8 +3,8 @@ from typing import Tuple
 from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from mung_manager.authentication.models import User
-from mung_manager.authentication.services.abstracts import AbstractAuthService
+from mung_manager.authentications.models import User
+from mung_manager.authentications.services.abstracts import AbstractAuthService
 from mung_manager.errors.exceptions import AuthenticationFailedException
 
 

@@ -6,7 +6,7 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 
-from mung_manager.authentication.managers import UserManager
+from mung_manager.authentications.managers import UserManager
 from mung_manager.common.base.models import SimpleModel, TimeStampedModel
 
 

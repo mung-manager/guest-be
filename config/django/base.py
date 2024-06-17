@@ -18,7 +18,7 @@ ALLOWED_HOSTS = ["*"]
 LOCAL_APPS = [
     "mung_manager.common.apps.CommonConfig",
     "mung_manager.schemas.apps.SchemasConfig",
-    "mung_manager.authentication.apps.AuthenticationConfig",
+    "mung_manager.authentications.apps.AuthenticationConfig",
 ]
 
 THIRD_PARTY_APPS = [
@@ -92,7 +92,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTH_USER_MODEL = "authentication.User"
+AUTH_USER_MODEL = "authentications.User"
 
 APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 

@@ -9,8 +9,8 @@ urlpatterns = [
         "guest/api/v1/auth",
         include(
             (
-                "mung_manager.authentication.apis.urls",
-                "api-authentication",
+                "mung_manager.authentications.apis.urls",
+                "api-authentications",
             )
         ),
     ),

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from mung_manager.authentication.apis.api_managers import KakaoLoginAPIManager
+from mung_manager.authentications.apis.api_managers import KakaoLoginAPIManager
 
 urlpatterns = [
     # oauth
