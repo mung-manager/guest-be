@@ -46,6 +46,13 @@ class AbstractCustomerSelector(ABC):
     ) -> Optional[Customer]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_queryset_by_phone_number_and_user_id_is_null(
+        self,
+        phone_number: str,
+    ) -> QuerySet[Customer]:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketSelector(ABC):
     @abstractmethod

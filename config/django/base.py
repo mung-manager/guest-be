@@ -19,6 +19,10 @@ LOCAL_APPS = [
     "mung_manager.commons.apps.CommonConfig",
     "mung_manager.schemas.apps.SchemasConfig",
     "mung_manager.authentications.apps.AuthenticationConfig",
+    "mung_manager.customers.apps.CustomersConfig",
+    "mung_manager.pet_kindergardens.apps.PetKindergardensConfig",
+    "mung_manager.reservations.apps.ReservationsConfig",
+    "mung_manager.tickets.apps.TicketsConfig",
 ]
 
 THIRD_PARTY_APPS = [

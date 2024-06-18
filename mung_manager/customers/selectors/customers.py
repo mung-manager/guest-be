@@ -147,3 +147,14 @@ class CustomerSelector(AbstractCustomerSelector):
             )
         except Customer.DoesNotExist:
             return None
+
+    def get_queryset_by_phone_number_and_user_id_is_null(self, phone_number: str) -> QuerySet[Customer]:
+        """이 함수는 전화번호로 user_id가 NULL인 고객 정보를 조회합니다.
+
+        Args:
+            phone_number (str): 고객 전화번호
+
+        Returns:
+            QuerySet[Customer]: 고객 리스트 쿼리셋이며 존재하지 않으면 빈 쿼리셋을 반환
+        """
+        return Customer.objects.filter(phone_number=phone_number, user_id__isnull=True)

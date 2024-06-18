@@ -41,6 +41,14 @@ class AbstractCustomerService(ABC):
     ) -> Optional[Customer]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def register_customer(
+        self,
+        user,
+        customer_id: int,
+    ) -> Customer:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketService(ABC):
     @abstractmethod

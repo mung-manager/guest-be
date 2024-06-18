@@ -293,3 +293,34 @@ class CustomerService(AbstractCustomerService):
 
         customer = self._customer_selector.get_with_undeleted_customer_pet_by_id(customer_id=customer_id)
         return customer
+
+    @transaction.atomic
+    def register_customer(
+        self,
+        user,
+        customer_id: int,
+    ) -> Customer:
+        """
+        이 함수는 고객 정보를 업데이트합니다.
+
+        Args:
+            user: 유저 객체
+            customer_id (int): 고객 아이디
+
+        Returns:
+            Customer: 고객 객체
+        """
+        # 고객이 존재하는지 검증
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_id(customer_id=customer_id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
+        )
+
+        # 유저 id 업데이트
+        fields = ["user"]
+        data = {"user": user}
+
+        customer, has_updated = update_model(instance=customer, fields=fields, data=data)
+
+        return customer

@@ -10,6 +10,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from mung_manager.authentications.containers import AuthenticationContainer
 from mung_manager.authentications.enums import UserProvider
 from mung_manager.commons.base.serializers import BaseSerializer
+from mung_manager.customers.containers import CustomerContainer
 from mung_manager.errors.exceptions import (
     AuthenticationFailedException,
     InvalidTokenException,
@@ -31,6 +32,8 @@ class KakaoLoginAPI(APIView):
         self._auth_service = AuthenticationContainer.auth_service()
         self._kakao_login_flow_service = AuthenticationContainer.kakao_login_flow_service()
         self._user_service = AuthenticationContainer.user_service()
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._customer_service = CustomerContainer.customer_service()
 
     def get(self, request: Request) -> Response:
         input_serializer = self.InputSerializer(data=request.GET)
@@ -72,6 +75,16 @@ class KakaoLoginAPI(APIView):
             social_provider=UserProvider.KAKAO.value,
             has_phone_number=has_phone_number,
         )
+
+        # 유저 등록
+        customer_queryset = self._customer_selector.get_queryset_by_phone_number_and_user_id_is_null(
+            phone_number=phone_number
+        )
+        for customer in customer_queryset:
+            self._customer_service.register_customer(
+                user=user,
+                customer_id=customer.id,
+            )
 
         # 유저 토큰 발급
         self._auth_service.authenticate_user(user)
