@@ -301,7 +301,7 @@ class CustomerService(AbstractCustomerService):
         customer_id: int,
     ) -> Customer:
         """
-        이 함수는 고객 정보를 업데이트합니다.
+        이 함수는 고객 정보에서 비어있는 user_id 값을 채웁니다.
 
         Args:
             user: 유저 객체

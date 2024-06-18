@@ -149,7 +149,7 @@ class CustomerSelector(AbstractCustomerSelector):
             return None
 
     def get_queryset_by_phone_number_and_user_id_is_null(self, phone_number: str) -> QuerySet[Customer]:
-        """이 함수는 전화번호로 user_id가 NULL인 고객 정보를 조회합니다.
+        """이 함수는 전화번호를 기준으로 user_id가 NULL인 고객 정보를 조회합니다.
 
         Args:
             phone_number (str): 고객 전화번호
