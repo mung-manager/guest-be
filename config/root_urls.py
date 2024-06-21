@@ -14,6 +14,15 @@ urlpatterns = [
             )
         ),
     ),
+    path(
+        "guest/api/v1/pet-kindergardens",
+        include(
+            (
+                "mung_manager.pet_kindergardens.apis.urls",
+                "api-pet-kindergardens",
+            )
+        ),
+    ),
 ]
 
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
