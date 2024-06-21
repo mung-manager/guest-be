@@ -26,7 +26,6 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
 
         return (
             PetKindergarden.objects.filter(customers__user=user)
-            .distinct()
             .annotate(full_address=Concat(F("road_address"), Value(" "), F("detail_address")))
             .values("id", "name", "full_address", "profile_thumbnail_url")
         )

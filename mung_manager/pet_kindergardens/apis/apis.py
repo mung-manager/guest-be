@@ -19,7 +19,6 @@ class PetKindergardenListAPI(APIAuthMixin, APIView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._pet_kindergarden_selector = PetKindergardenContainer.pet_kindergarden_selector()
-        self._pet_kindergarden_service = PetKindergardenContainer.pet_kindergarden_service()
 
     def get(self, request: Request) -> Response:
         pet_kindergardens = self._pet_kindergarden_selector.get_queryset_by_user(user=request.user)
