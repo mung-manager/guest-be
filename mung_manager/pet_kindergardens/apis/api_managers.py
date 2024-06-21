@@ -4,7 +4,6 @@ from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.pet_kindergardens.apis.apis import PetKindergardenListAPI
-
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
     ErrorAuthenticationUserDeletedSchema,
