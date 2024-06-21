@@ -1,14 +1,11 @@
 from django.db import transaction
 
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import (
-    get_object_or_not_found,
-)
+from mung_manager.commons.selectors import get_object_or_not_found
 from mung_manager.commons.services import update_model
 from mung_manager.customers.models import Customer
 from mung_manager.customers.selectors.customers import CustomerSelector
 from mung_manager.customers.services.abstracts import AbstractCustomerService
-
 
 
 class CustomerService(AbstractCustomerService):
