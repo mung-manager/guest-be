@@ -2,9 +2,11 @@ from rest_framework import serializers, status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.commons.base.serializers import BaseSerializer
+from mung_manager.customers.containers import CustomerContainer
 from mung_manager.pet_kindergardens.containers import PetKindergardenContainer
 
 
@@ -24,3 +26,37 @@ class PetKindergardenListAPI(APIAuthMixin, APIView):
         pet_kindergardens = self._pet_kindergarden_selector.get_queryset_by_user(user=request.user)
         pet_kindergardens_data = self.OutputSerializer(pet_kindergardens, many=True).data
         return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)
+
+
+class PetKindergardenSelectionAPI(APIAuthMixin, APIView):
+
+    class InputSerializer(BaseSerializer):
+        pet_kindergarden_id = serializers.IntegerField(label="유치원 id")
+
+    class OutputSerializer(BaseSerializer):
+        access_token = serializers.CharField(label="액세스 토큰")
+        refresh_token = serializers.CharField(label="리프레쉬 토큰")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._pet_kindergarden_service = PetKindergardenContainer.pet_kindergarden_service()
+
+    def post(self, request: Request) -> Response:
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        pet_kindergarden_id = input_serializer.data["pet_kindergarden_id"]
+        self._pet_kindergarden_service.validate_pet_kindergarten(user, pet_kindergarden_id)
+
+        refresh = RefreshToken.for_user(user)
+        refresh["pet_kindergarden_id"] = input_serializer.validated_data["pet_kindergarden_id"]
+
+        auth_data = self.OutputSerializer(
+            {
+                "access_token": str(refresh.access_token),
+                "refresh_token": str(refresh),
+            }
+        ).data
+        return Response(data=auth_data, status=status.HTTP_200_OK)

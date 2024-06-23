@@ -3,7 +3,10 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
-from mung_manager.pet_kindergardens.apis.apis import PetKindergardenListAPI
+from mung_manager.pet_kindergardens.apis.apis import (
+    PetKindergardenListAPI,
+    PetKindergardenSelectionAPI,
+)
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
     ErrorAuthenticationUserDeletedSchema,
@@ -59,3 +62,44 @@ class PetkindergardenListAPIManager(BaseAPIManager):
     )
     def get(self, request, *args, **kwargs):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class PetKindergardenSelectionAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "POST": PetKindergardenSelectionAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["반려동물 유치원"],
+        summary="반려동물 유치원 선택",
+        description="""
+            Rogic
+                - 유저가 예약할 반려견 유치원을 선택합니다.
+            """,
+        request=VIEWS_BY_METHOD["POST"]().cls.InputSerializer,
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["POST"]().cls.OutputSerializer,
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorPermissionDeniedSchema]
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["POST"]()(request, *args, **kwargs)

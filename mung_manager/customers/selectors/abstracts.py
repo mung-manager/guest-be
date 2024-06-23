@@ -19,3 +19,7 @@ class AbstractCustomerSelector(ABC):
         phone_number: str,
     ) -> QuerySet[Customer]:
         raise NotImplementedException()
+
+    @abstractmethod
+    def exists_by_user_and_pet_kindergarden(self, user, pet_kindergarden_id: int) -> bool:
+        raise NotImplementedException()
