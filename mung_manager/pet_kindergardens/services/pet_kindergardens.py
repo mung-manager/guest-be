@@ -13,7 +13,7 @@ class PetKindergardenService(AbstractPetKindergardenService):
     def __init__(self, customer_selector):
         self._customer_selector = customer_selector
 
-    def validate_pet_kindergarten(self, user, pet_kindergarden_id: int) -> None:
+    def validate_pet_kindergarden(self, user, pet_kindergarden_id: int) -> None:
         check_object_or_not_found(
             self._customer_selector.exists_by_user_and_pet_kindergarden(
                 pet_kindergarden_id=pet_kindergarden_id,
