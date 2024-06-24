@@ -21,5 +21,5 @@ class AbstractCustomerSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def exists_by_user_and_pet_kindergarden(self, user, pet_kindergarden_id: int) -> bool:
+    def exists_by_user_and_pet_kindergarden_id(self, user, pet_kindergarden_id: int) -> bool:
         raise NotImplementedException()
