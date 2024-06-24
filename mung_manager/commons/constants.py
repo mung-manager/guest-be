@@ -68,10 +68,6 @@ class SYSTEM_CODE:
         "already_exists_user_pet_kindergarden",
         "User already has a pet kindergarden.",
     )
-    INVALID_PET_KINDERGARDEN_ID = (
-        "invalid_pet_kindergarden_id",
-        "The user does not belong to that pet kindergarden.",
-    )
 
     # Reservation code
     NOT_FOUND_DAY_OFF = ("not_found_day_off", "Day off does not exist.")

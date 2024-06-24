@@ -19,6 +19,6 @@ class PetKindergardenService(AbstractPetKindergardenService):
                 pet_kindergarden_id=pet_kindergarden_id,
                 user=user,
             ),
-            msg=SYSTEM_CODE.message("INVALID_PET_KINDERGARDEN_ID"),
-            code=SYSTEM_CODE.code("INVALID_PET_KINDERGARDEN_ID"),
+            msg=SYSTEM_CODE.message("NOT_FOUND_PET_KINDERGARDEN"),
+            code=SYSTEM_CODE.code("NOT_FOUND_PET_KINDERGARDEN"),
         )
