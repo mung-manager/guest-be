@@ -2,9 +2,8 @@ from rest_framework import permissions
 from rest_framework.request import Request
 from rest_framework.views import APIView
 
-from mung_manager.apis.containers import ApiContainer
 from mung_manager.authentications.enums import AuthGroup
-from mung_manager.customers.selectors.customers import CustomerSelector
+from mung_manager.customers.containers import CustomerContainer
 
 
 class IsGuestPermission(permissions.BasePermission):
@@ -31,8 +30,9 @@ class IsGuestPermission(permissions.BasePermission):
 
 class PetKindergardenAccessPermission(permissions.BasePermission):
 
-    def __init__(self, customer_selector: CustomerSelector):
-        self._customer_selector = ApiContainer.customer_selector()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
 
     def has_permission(self, request: Request, view: APIView) -> bool:
         """
