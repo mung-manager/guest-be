@@ -19,8 +19,9 @@ from mung_manager.schemas.errors.commons import (
     ErrorAuthenticationFailedSchema,
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
+    ErrorNotFoundSchema,
     ErrorPermissionDeniedSchema,
-    ErrorUnknownServerSchema, ErrorNotFoundSchema
+    ErrorUnknownServerSchema,
 )
 
 
@@ -96,9 +97,7 @@ class PetKindergardenSelectionAPIManager(BaseAPIManager):
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorPermissionDeniedSchema]
             ),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorNotFoundSchema]
-            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(response=OpenApiTypes.OBJECT, examples=[ErrorNotFoundSchema]),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
             ),
