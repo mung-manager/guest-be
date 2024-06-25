@@ -36,7 +36,7 @@ class UserSelector(AbstractUserSelector):
             guest_group_id (int): 게스트 그룹 아이디
 
         Returns:
-            bool: 파트너 그룹에 속해 있으면 True, 아니면 False를 반환
+            bool: 게스트가 아니면서 파트너 그룹에 속해 있으면 True, 아니면 False를 반환
         """
         return User.objects.filter(id=user_id, groups__id=partner_group_id).exclude(groups__id=guest_group_id).exists()
 
