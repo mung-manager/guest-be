@@ -24,7 +24,9 @@ class UserSelector(AbstractUserSelector):
         except User.DoesNotExist:
             return None
 
-    def exists_by_user_id_and_group_id(self, user_id: int, partner_group_id: int, guest_group_id: int) -> bool:
+    def exists_by_user_id_and_group_id_for_group(
+        self, user_id: int, partner_group_id: int, guest_group_id: int
+    ) -> bool:
         """
         이 함수는 유저 아이디와 그룹 아이디로 해당 유저가 게스트가 아니면서 파트너인지 확인합니다.
 
@@ -37,3 +39,16 @@ class UserSelector(AbstractUserSelector):
             bool: 파트너 그룹에 속해 있으면 True, 아니면 False를 반환
         """
         return User.objects.filter(id=user_id, groups__id=partner_group_id).exclude(groups__id=guest_group_id).exists()
+
+    def exists_by_user_id_and_group_id_for_permission(self, user_id: int, group_id: int) -> bool:
+        """
+        이 함수는 유저 아이디와 그룹 아이디로 해당 유저가 게스트인지 확인합니다.
+
+        Args:
+            user_id (int): 유저 아이디
+            group_id (int): 게스트 그룹 아이디
+
+        Returns:
+            bool: 게스트이면 True, 아니면 False를 반환
+        """
+        return User.objects.filter(id=user_id, groups__id=group_id).exists()

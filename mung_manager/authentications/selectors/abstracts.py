@@ -11,5 +11,11 @@ class AbstractUserSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def exists_by_user_id_and_group_id(self, user_id: int, partner_group_id: int, guest_group_id: int) -> bool:
+    def exists_by_user_id_and_group_id_for_group(
+        self, user_id: int, partner_group_id: int, guest_group_id: int
+    ) -> bool:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def exists_by_user_id_and_group_id_for_permission(self, user_id: int, group_id: int) -> bool:
         raise NotImplementedException()

@@ -52,7 +52,7 @@ class UserService(AbstractUserService):
 
         if user is not None:
             # 해당 유저가 파트너 그룹에 속하면서 게스트 그룹에 속하지 않을 때
-            if self._user_selector.exists_by_user_id_and_group_id(
+            if self._user_selector.exists_by_user_id_and_group_id_for_group(
                 user.id, AuthGroup.PARTNER.value, AuthGroup.GUEST.value
             ):
                 user.groups.add(AuthGroup.GUEST.value)
