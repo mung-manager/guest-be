@@ -6,7 +6,7 @@ from rest_framework.permissions import BasePermission
 from mung_manager.apis.authentication import JWTAuthentication
 from mung_manager.apis.permissions import (
     IsGuestPermission,
-    PetKindergardenAccessPermission,
+    IsPetKindergardenMemberPermission,
 )
 
 if TYPE_CHECKING:
@@ -29,10 +29,10 @@ class APIAuthMixin:
     permission_classes: PermissionClassesType = (IsGuestPermission,)
 
 
-class ExtendedAPIAuthMixin:
+class APIAuthWithPetKindergardenAccessMixin:
     """
     이 클래스는 API의 인가 및 인증을 처리하는 Mixin입니다.
-    추가적인 권한 검사를 포함합니다.
+    기본 사용자와 관련된 인증과 더불어 반려동물 유치원 접근 권한 검사를 포함합니다.
     """
 
     authentication_classes: Sequence[Type[BaseAuthentication]] = [
@@ -40,5 +40,5 @@ class ExtendedAPIAuthMixin:
     ]
     permission_classes: PermissionClassesType = (
         IsGuestPermission,
-        PetKindergardenAccessPermission,
+        IsPetKindergardenMemberPermission,
     )

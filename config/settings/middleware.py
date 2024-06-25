@@ -3,7 +3,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpRequest
 
 
-class CustomJWTMiddleware(MiddlewareMixin):
+class CustomJWTAuthorizationMiddleware(MiddlewareMixin):
+    """
+    이 클래스는 JWT 토큰에서 반려동물 유치원 아이디를 검출합니다.
+    """
+
     def process_request(self, request: HttpRequest):
         auth_header = request.META.get("HTTP_AUTHORIZATION", None)
         if auth_header:

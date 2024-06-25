@@ -28,7 +28,7 @@ class IsGuestPermission(permissions.BasePermission):
             return False
 
 
-class PetKindergardenAccessPermission(permissions.BasePermission):
+class IsPetKindergardenMemberPermission(permissions.BasePermission):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
