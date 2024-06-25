@@ -14,6 +14,6 @@ urlpatterns = [
     path(
         "/select",
         PetKindergardenSelectionAPIManager.as_view(),
-        name="pet-kindergarden-selection"
+        name="pet-kindergarden-selection",
     ),
 ]
