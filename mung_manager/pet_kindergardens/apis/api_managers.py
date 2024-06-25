@@ -17,12 +17,13 @@ from mung_manager.schemas.errors.authentications import (
 )
 from mung_manager.schemas.errors.commons import (
     ErrorAuthenticationFailedSchema,
+    ErrorInvalidParameterFormatSchema,
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
-    ErrorNotFoundSchema,
     ErrorPermissionDeniedSchema,
     ErrorUnknownServerSchema,
 )
+from mung_manager.schemas.errors.pet_kindergardens import ErrorPetKindergardenNotFoundSchema
 
 
 class PetkindergardenListAPIManager(BaseAPIManager):
@@ -80,6 +81,10 @@ class PetKindergardenSelectionAPIManager(BaseAPIManager):
         request=VIEWS_BY_METHOD["POST"]().cls.InputSerializer,
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["POST"]().cls.OutputSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[ErrorInvalidParameterFormatSchema],
+            ),
             status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 examples=[
@@ -95,11 +100,16 @@ class PetKindergardenSelectionAPIManager(BaseAPIManager):
                 ],
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorPermissionDeniedSchema]
+                response=OpenApiTypes.OBJECT, 
+                examples=[ErrorPermissionDeniedSchema],
             ),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(response=OpenApiTypes.OBJECT, examples=[ErrorNotFoundSchema]),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, 
+                examples=[ErrorPetKindergardenNotFoundSchema],
+            ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+                response=OpenApiTypes.OBJECT, 
+                examples=[ErrorUnknownServerSchema],
             ),
         },
     )
