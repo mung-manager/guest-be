@@ -23,7 +23,9 @@ from mung_manager.schemas.errors.commons import (
     ErrorPermissionDeniedSchema,
     ErrorUnknownServerSchema,
 )
-from mung_manager.schemas.errors.pet_kindergardens import ErrorPetKindergardenNotFoundSchema
+from mung_manager.schemas.errors.pet_kindergardens import (
+    ErrorPetKindergardenNotFoundSchema,
+)
 
 
 class PetkindergardenListAPIManager(BaseAPIManager):
@@ -100,15 +102,15 @@ class PetKindergardenSelectionAPIManager(BaseAPIManager):
                 ],
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, 
+                response=OpenApiTypes.OBJECT,
                 examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, 
+                response=OpenApiTypes.OBJECT,
                 examples=[ErrorPetKindergardenNotFoundSchema],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, 
+                response=OpenApiTypes.OBJECT,
                 examples=[ErrorUnknownServerSchema],
             ),
         },
