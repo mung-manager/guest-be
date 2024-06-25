@@ -26,7 +26,7 @@ class IsGuestPermission(permissions.BasePermission):
         """
         try:
             if self._user_selector.exists_by_user_id_and_group_id_for_permission(
-                user=request.user.id, group_id=AuthGroup.GUEST.value
+                user_id=request.user.id, group_id=AuthGroup.GUEST.value
             ):
                 return True
 
