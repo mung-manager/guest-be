@@ -14,7 +14,6 @@ class PetKindergardenContainer(containers.DeclarativeContainer):
 
     Attributes:
         pet_kindergarden_selector: 반려동물 유치원 셀렉터
-        raw_pet_kindergarden_selector: 원시 반려동물 유치원 셀렉터
         pet_kindergarden_service: 반려동물 유치원 서비스
 
     """

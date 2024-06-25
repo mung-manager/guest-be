@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, Tuple
 
 from attrs import define
+from rest_framework_simplejwt.tokens import Token
 
 from mung_manager.authentications.models import User
 from mung_manager.errors.exceptions import NotImplementedException
@@ -25,6 +26,10 @@ class AbstractAuthService(ABC):
 
     @abstractmethod
     def authenticate_user(self, user: User) -> User:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def update_token_with_pet_kindergarden_id(self, user, pet_kindergarden_id: int) -> Token:
         raise NotImplementedException()
 
 

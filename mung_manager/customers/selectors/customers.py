@@ -39,3 +39,16 @@ class CustomerSelector(AbstractCustomerSelector):
         """
 
         return Customer.objects.filter(phone_number=phone_number, user_id__isnull=True)
+
+    def exists_by_user_and_pet_kindergarden_id(self, user, pet_kindergarden_id: int) -> bool:
+        """
+        특정 사용자가 특정 유치원에 등록되어 있는지 확인합니다.
+
+        Args:
+            user (User): 확인할 사용자 객체.
+            pet_kindergarden_id (int): 반려동물 유치원 아이디
+
+        Returns:
+            bool: 사용자가 해당 유치원에 등록되어 있으면 True, 그렇지 않으면 False.
+        """
+        return Customer.objects.filter(user=user, pet_kindergarden=pet_kindergarden_id).exists()
