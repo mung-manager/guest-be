@@ -1,5 +1,6 @@
 from django.db import transaction
 
+from mung_manager.authentications.enums import AuthGroup
 from mung_manager.authentications.models import User
 from mung_manager.authentications.selectors.users import UserSelector
 from mung_manager.authentications.services.abstracts import AbstractUserService
@@ -49,10 +50,17 @@ class UserService(AbstractUserService):
 
         user = self._user_selector.get_by_social_id(social_id)
 
-        # 전화번호가 변경되었을 경우 업데이트
-        if user is not None and user.phone_number != phone_number:
-            user.phone_number = phone_number
-            user.save(update_fields=["phone_number"])
+        if user is not None:
+            # 해당 유저가 파트너 그룹에 속하면서 게스트 그룹에 속하지 않을 때
+            if self._user_selector.exists_by_user_id_and_group_id_for_group(
+                user.id, AuthGroup.PARTNER.value, AuthGroup.GUEST.value
+            ):
+                user.groups.add(AuthGroup.GUEST.value)
+
+            # 전화번호가 변경되었을 경우 업데이트
+            if user.phone_number != phone_number:
+                user.phone_number = phone_number
+                user.save(update_fields=["phone_number"])
 
         if user is None:
             user = User.objects.create_kakao_user(
