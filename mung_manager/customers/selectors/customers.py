@@ -1,9 +1,12 @@
 from typing import Optional
 
+from django.db.models import Case, CharField, F, Value, When
+from django.db.models.functions import Cast, Concat
 from django.db.models.query import QuerySet
 
-from mung_manager.customers.models import Customer
+from mung_manager.customers.models import Customer, CustomerPet, CustomerTicket
 from mung_manager.customers.selectors.abstracts import AbstractCustomerSelector
+from mung_manager.tickets.enums import TicketType
 
 
 class CustomerSelector(AbstractCustomerSelector):
@@ -52,3 +55,58 @@ class CustomerSelector(AbstractCustomerSelector):
             bool: 사용자가 해당 유치원에 등록되어 있으면 True, 그렇지 않으면 False.
         """
         return Customer.objects.filter(user=user, pet_kindergarden=pet_kindergarden_id).exists()
+
+    def get_by_user_and_pet_kindergarden_id(self, user, pet_kindergarden_id: int) -> Optional[Customer]:
+        """
+        사용자 객체와 반려동물 유치원 아이디로 등록된 고객을 조회합니다.
+
+        Args:
+            user (User): 확인할 사용자 객체
+            pet_kindergarden_id (int): 반려동물 유치원 아이디
+
+        Returns:
+            Optional[Customer]: 등록된 고객이 존재하지 않으면 None을 반환
+        """
+        try:
+            return Customer.objects.filter(user=user, pet_kindergarden_id=pet_kindergarden_id, is_active=True).get()
+        except Customer.DoesNotExist:
+            return None
+
+    def get_queryset_by_customer_for_pet(self, customer) -> QuerySet[CustomerPet]:
+        """
+        고객 객체로 해당 반려동물 유치원에 속한 고객의 반려동물 목록을 조회합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+
+        Returns:
+            QuerySet[CustomerPet]: 등록된 반려동물 목록이 존재하지 않으면 빈 쿼리셋을 반환합니다.
+        """
+        return CustomerPet.objects.filter(customer=customer, is_deleted=False)
+
+    def get_queryset_by_customer_for_ticket(self, customer) -> QuerySet:
+        """
+        고객 객체로 해당 고객이 소유하고 있는 만료되지 않은 티켓의 목록을 조회합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+
+        Returns:
+            QuerySet: 소유하고 있는 티켓이 존재하지 않으면 빈 쿼리셋을 반환합니다.
+        """
+        return (
+            CustomerTicket.objects.filter(customer=customer)
+            .filter(unused_count__gt=0)
+            .select_related("ticket")
+            .annotate(
+                full_ticket_type=Case(
+                    When(
+                        ticket__ticket_type=TicketType.TIME.value,
+                        then=Concat(Cast(F("ticket__usage_time"), output_field=CharField()), Value("시간 이용권")),
+                    ),
+                    default=Concat(Cast(F("ticket__ticket_type"), output_field=CharField()), Value(" 이용권")),
+                    output_field=CharField(),
+                ),
+            )
+            .values("id", "full_ticket_type", "unused_count", "expired_at")
+        )

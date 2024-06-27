@@ -23,6 +23,15 @@ urlpatterns = [
             )
         ),
     ),
+    path(
+        "guest/api/v1/reservations",
+        include(
+            (
+                "mung_manager.reservations.apis.urls",
+                "api-reservations",
+            )
+        ),
+    ),
 ]
 
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
