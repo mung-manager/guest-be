@@ -11,3 +11,9 @@ class CustomerTicketSerializer(serializers.Serializer):
     full_ticket_type = serializers.CharField(label="티켓 타입")
     unused_count = serializers.IntegerField(label="남은 횟수")
     expired_at = serializers.DateTimeField(label="만료 날짜")
+
+
+class CustomerTicketOutputSerializer(serializers.Serializer):
+    id = serializers.IntegerField(label="티켓 아이디")
+    unused_count = serializers.IntegerField(label="남은 횟수")
+    expired_at = serializers.DateTimeField(label="만료 날짜")
