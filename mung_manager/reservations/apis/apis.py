@@ -22,6 +22,7 @@ class CustomerPetAndTicketListAPI(APIAuthWithPetKindergardenAccessMixin, APIView
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._customer_selector = CustomerContainer.customer_selector()
+        self._customer_pet_selector = CustomerContainer.customer_pet_selector()
         self._reservation_service = ReservationContainer.reservation_service()
 
     def get(self, request: Request) -> Response:
@@ -29,7 +30,7 @@ class CustomerPetAndTicketListAPI(APIAuthWithPetKindergardenAccessMixin, APIView
         pet_kindergarden_id = request.pet_kindergarden_id
         customer = self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden_id)
 
-        pets = self._customer_selector.get_queryset_by_customer_for_pet(customer)
+        pets = self._customer_pet_selector.get_queryset_by_customer_for_pet(customer)
         tickets = self._customer_selector.get_queryset_by_customer_for_ticket(customer)
         sorted_grouped_tickets = self._reservation_service.group_and_sort_tickets(tickets)
 

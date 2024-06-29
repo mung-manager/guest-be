@@ -29,9 +29,11 @@ class AbstractCustomerSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def get_queryset_by_customer_for_pet(self, customer) -> QuerySet[CustomerPet]:
+    def get_queryset_by_customer_for_ticket(self, customer) -> QuerySet:
         raise NotImplementedException()
 
+
+class AbstractCustomerPetSelector(ABC):
     @abstractmethod
-    def get_queryset_by_customer_for_ticket(self, customer) -> QuerySet:
+    def get_queryset_by_customer_for_pet(self, customer) -> QuerySet[CustomerPet]:
         raise NotImplementedException()

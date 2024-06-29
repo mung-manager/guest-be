@@ -1,5 +1,6 @@
 from dependency_injector import containers, providers
 
+from mung_manager.customers.selectors.customer_pets import CustomerPetSelector
 from mung_manager.customers.selectors.customers import CustomerSelector
 from mung_manager.customers.services.customers import CustomerService
 
@@ -18,3 +19,4 @@ class CustomerContainer(containers.DeclarativeContainer):
         CustomerService,
         customer_selector=customer_selector,
     )
+    customer_pet_selector = providers.Factory(CustomerPetSelector)
