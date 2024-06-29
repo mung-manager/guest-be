@@ -22,3 +22,5 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "dependencies"
+    ignore:
+      - "djangorestframework-simplejwt"
