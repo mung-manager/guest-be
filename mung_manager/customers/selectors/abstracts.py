@@ -31,11 +31,11 @@ class AbstractCustomerSelector(ABC):
 
 class AbstractCustomerPetSelector(ABC):
     @abstractmethod
-    def get_queryset_by_customer(self, customer) -> QuerySet[CustomerPet]:
+    def get_queryset_by_customer(self, customer: Customer) -> QuerySet[CustomerPet]:
         raise NotImplementedException()
 
 
 class AbstractCustomerTicketSelector(ABC):
     @abstractmethod
-    def get_queryset_by_customer(self, customer) -> dict[str, list]:
+    def get_queryset_by_customer(self, customer: Customer) -> dict[str, list]:
         raise NotImplementedException()

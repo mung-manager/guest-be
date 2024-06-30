@@ -1,7 +1,7 @@
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
-from mung_manager.customers.models import CustomerTicket
+from mung_manager.customers.models import CustomerTicket, Customer
 from mung_manager.customers.selectors.abstracts import AbstractCustomerTicketSelector
 from mung_manager.tickets.enums import TicketType
 
@@ -11,7 +11,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
     이 클래스는 고객 티켓을 DB에서 PULL하는 비즈니스 로직을 담당합니다.
     """
 
-    def get_queryset_by_customer(self, customer) -> dict[str, list]:
+    def get_queryset_by_customer(self, customer: Customer) -> dict[str, list]:
         """
         고객 객체로 해당 고객이 소유하고 있는 만료되지 않은 티켓의 목록을 조회합니다.
 
