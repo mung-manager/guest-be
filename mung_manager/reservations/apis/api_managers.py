@@ -22,7 +22,7 @@ from mung_manager.schemas.errors.commons import (
     ErrorPermissionDeniedSchema,
     ErrorUnknownServerSchema,
 )
-from mung_manager.schemas.errors.customers import ErrorCustomerNotFoundSchema
+from mung_manager.schemas.errors.customers import ErrorCustomerPermissionDeniedSchema
 
 
 class ReservationCustomerPetListAPIManager(BaseAPIManager):
@@ -54,10 +54,11 @@ class ReservationCustomerPetListAPIManager(BaseAPIManager):
                 ],
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorPermissionDeniedSchema]
-            ),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorCustomerNotFoundSchema]
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPermissionDeniedSchema,
+                    ErrorCustomerPermissionDeniedSchema,
+                ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
@@ -97,10 +98,11 @@ class ReservationCustomerTicketListAPIManager(BaseAPIManager):
                 ],
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorPermissionDeniedSchema]
-            ),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                response=OpenApiTypes.OBJECT, examples=[ErrorCustomerNotFoundSchema]
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPermissionDeniedSchema,
+                    ErrorCustomerPermissionDeniedSchema,
+                ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]

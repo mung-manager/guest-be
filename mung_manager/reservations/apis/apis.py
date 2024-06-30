@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from mung_manager.apis.mixins import APIAuthWithPetKindergardenAccessMixin
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import get_object_or_not_found
+from mung_manager.commons.selectors import get_object_or_permission_denied
 from mung_manager.commons.utils import inline_serializer
 from mung_manager.customers.containers import CustomerContainer
 
@@ -24,7 +24,7 @@ class ReservationCustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIVi
     def get(self, request: Request) -> Response:
         user = request.user
         pet_kindergarden_id = request.pet_kindergarden_id
-        customer = get_object_or_not_found(
+        customer = get_object_or_permission_denied(
             self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
             msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
             code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
@@ -73,7 +73,7 @@ class ReservationCustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, AP
     def get(self, request: Request) -> Response:
         user = request.user
         pet_kindergarden_id = request.pet_kindergarden_id
-        customer = get_object_or_not_found(
+        customer = get_object_or_permission_denied(
             self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
             msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
             code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
