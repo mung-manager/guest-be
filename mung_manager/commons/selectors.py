@@ -1,4 +1,15 @@
-from mung_manager.errors.exceptions import AlreadyExistsException, NotFoundException
+from mung_manager.errors.exceptions import (
+    AlreadyExistsException,
+    NotFoundException,
+    PermissionDeniedException,
+)
+
+
+def get_object_or_permission_denied(objects, msg, code):
+    if objects is None:
+        if msg:
+            raise PermissionDeniedException(msg, code)
+    return objects
 
 
 def get_object_or_not_found(objects, msg, code):
