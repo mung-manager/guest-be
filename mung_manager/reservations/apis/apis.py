@@ -27,8 +27,8 @@ class ReservationCustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIVi
         pet_kindergarden_id = request.pet_kindergarden_id
         customer = get_object_or_not_found(
             self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
-            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
-            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
+            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
+            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
         )
         pets = self._customer_pet_selector.get_queryset_by_customer(customer)
         customer_pets_data = self.OutputSerializer(pets, many=True).data
@@ -77,8 +77,8 @@ class ReservationCustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, AP
         pet_kindergarden_id = request.pet_kindergarden_id
         customer = get_object_or_not_found(
             self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
-            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
-            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
+            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
+            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
         )
         tickets = self._customer_ticket_selector.get_queryset_by_customer(customer)
         customer_tickets_data = self.OutputSerializer(tickets).data
