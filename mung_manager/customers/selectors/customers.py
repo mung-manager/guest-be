@@ -53,7 +53,9 @@ class CustomerSelector(AbstractCustomerSelector):
         """
         return Customer.objects.filter(user=user, pet_kindergarden=pet_kindergarden_id).exists()
 
-    def get_by_user_and_pet_kindergarden_id_for_active_customer(self, user, pet_kindergarden_id: int) -> Optional[Customer]:
+    def get_by_user_and_pet_kindergarden_id_for_active_customer(
+        self, user, pet_kindergarden_id: int
+    ) -> Optional[Customer]:
         """
         사용자 객체와 반려동물 유치원 아이디로 등록된 활성화 고객을 조회합니다.
 

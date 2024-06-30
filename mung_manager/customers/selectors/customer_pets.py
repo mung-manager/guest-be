@@ -1,6 +1,6 @@
 from django.db.models.query import QuerySet
 
-from mung_manager.customers.models import CustomerPet, Customer
+from mung_manager.customers.models import Customer, CustomerPet
 from mung_manager.customers.selectors.abstracts import AbstractCustomerPetSelector
 
 

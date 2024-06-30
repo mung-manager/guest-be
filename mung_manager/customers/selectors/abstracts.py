@@ -25,7 +25,9 @@ class AbstractCustomerSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def get_by_user_and_pet_kindergarden_id_for_active_customer(self, user, pet_kindergarden_id: int) -> Optional[Customer]:
+    def get_by_user_and_pet_kindergarden_id_for_active_customer(
+        self, user, pet_kindergarden_id: int
+    ) -> Optional[Customer]:
         raise NotImplementedException()
 
 

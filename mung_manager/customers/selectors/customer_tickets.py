@@ -1,7 +1,6 @@
-from django.db.models.query import QuerySet
 from django.utils import timezone
 
-from mung_manager.customers.models import CustomerTicket, Customer
+from mung_manager.customers.models import Customer, CustomerTicket
 from mung_manager.customers.selectors.abstracts import AbstractCustomerTicketSelector
 from mung_manager.tickets.enums import TicketType
 
