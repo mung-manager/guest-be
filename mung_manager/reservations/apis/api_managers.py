@@ -4,8 +4,8 @@ from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.reservations.apis.apis import (
-    CustomerPetListAPI,
-    CustomerTicketListAPI,
+    ReservationCustomerPetListAPI,
+    ReservationCustomerTicketListAPI,
 )
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
@@ -25,9 +25,9 @@ from mung_manager.schemas.errors.commons import (
 from mung_manager.schemas.errors.customers import ErrorCustomerNotFoundSchema
 
 
-class CustomerPetListAPIManager(BaseAPIManager):
+class ReservationCustomerPetListAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
-        "GET": CustomerPetListAPI.as_view,
+        "GET": ReservationCustomerPetListAPI.as_view,
     }
 
     @extend_schema(
@@ -68,14 +68,14 @@ class CustomerPetListAPIManager(BaseAPIManager):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
 
 
-class CustomerTicketListAPIManager(BaseAPIManager):
+class ReservationCustomerTicketListAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
-        "GET": CustomerTicketListAPI.as_view,
+        "GET": ReservationCustomerTicketListAPI.as_view,
     }
 
     @extend_schema(
         tags=["예약"],
-        summary="고객이 소유한 티켓 목록 조회",
+        summary="고객의 잔여 티켓 목록 조회",
         description="""
         Rogic
             - 반려동물 유치원에 등록된 고객의 잔여 티켓 목록을 조회합니다.

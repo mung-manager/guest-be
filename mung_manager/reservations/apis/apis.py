@@ -11,7 +11,7 @@ from mung_manager.commons.utils import inline_serializer
 from mung_manager.customers.containers import CustomerContainer
 
 
-class CustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
+class ReservationCustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="반려동물 아이디")
         name = serializers.CharField(label="반려동물 이름")
@@ -35,7 +35,7 @@ class CustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
         return Response(data=customer_pets_data, status=status.HTTP_200_OK)
 
 
-class CustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
+class ReservationCustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
     class OutputSerializer(BaseSerializer):
         time = inline_serializer(
             label="시간권 예약",
