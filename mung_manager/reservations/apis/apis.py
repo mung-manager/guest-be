@@ -68,7 +68,6 @@ class ReservationCustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, AP
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._customer_selector = CustomerContainer.customer_selector()
-        self._customer_pet_selector = CustomerContainer.customer_pet_selector()
         self._customer_ticket_selector = CustomerContainer.customer_ticket_selector()
 
     def get(self, request: Request) -> Response:
