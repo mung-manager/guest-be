@@ -97,6 +97,7 @@ class SYSTEM_CODE:
     # Customer code
     UNIQUE_PET_NAME = ("unique_pet_name", "Customer pet names must be unique.")
     NOT_FOUND_CUSTOMER = ("not_found_customer", "Customer does not exist.")
+    INACTIVE_CUSTOMER = ("inactive_customer", "Customer is inactive.")
     NOT_FOUND_CUSTOMER_PET = (
         "not_found_customer_pet",
         "Customer pet does not exist.",
