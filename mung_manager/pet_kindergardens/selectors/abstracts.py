@@ -14,3 +14,11 @@ class AbstractPetKindergardenSelector(ABC):
         user,
     ) -> QuerySet[Any]:
         raise NotImplementedException()
+
+    @abstractmethod
+    def get_by_pet_kindergarden_id_for_reservation_availability_option(self, pet_kindergarden_id: str) -> QuerySet[Any]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_by_pet_kindergarden_id_for_daily_pet_limit(self, pet_kindergarden_id: str) -> int:
+        raise NotImplementedException()

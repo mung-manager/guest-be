@@ -4,6 +4,7 @@ from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.reservations.apis.apis import (
+    ReservationCalendarDateListAPI,
     ReservationCustomerPetListAPI,
     ReservationCustomerTicketListAPI,
 )
@@ -109,5 +110,50 @@ class ReservationCustomerTicketListAPIManager(BaseAPIManager):
             ),
         },
     )
+    def get(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class ReservationCalendarDateListAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "GET": ReservationCalendarDateListAPI.as_view,
+    }
+
+    # @extend_schema(
+    #     tags=["예약"],
+    #     summary="예약 가능한 날짜 목록 조회",
+    #     description="""
+    #     Rogic
+    #         - 해당 반려동물 유치원의 예약 가능한 날짜 목록을 조회합니다.
+    #     """,
+    #     request=VIEWS_BY_METHOD["GET"]().cls.InputSerializer,
+    #     responses={
+    #         status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+    #         status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+    #             response=OpenApiTypes.OBJECT,
+    #             examples=[
+    #                 ErrorAuthenticationFailedSchema,
+    #                 ErrorNotAuthenticatedSchema,
+    #                 ErrorInvalidTokenSchema,
+    #                 ErrorAuthorizationHeaderSchema,
+    #                 ErrorAuthenticationPasswordChangedSchema,
+    #                 ErrorAuthenticationUserDeletedSchema,
+    #                 ErrorAuthenticationUserInactiveSchema,
+    #                 ErrorAuthenticationUserNotFoundSchema,
+    #                 ErrorTokenIdentificationSchema,
+    #             ],
+    #         ),
+    #         status.HTTP_403_FORBIDDEN: OpenApiResponse(
+    #             response=OpenApiTypes.OBJECT,
+    #             examples=[
+    #                 ErrorPermissionDeniedSchema,
+    #                 ErrorCustomerPermissionDeniedSchema,
+    #             ],
+    #         ),
+    #         status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+    #             response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+    #         ),
+    #     },
+    # )
     def get(self, request, *args, **kwargs):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
