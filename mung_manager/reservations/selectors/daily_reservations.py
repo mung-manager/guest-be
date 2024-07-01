@@ -15,7 +15,10 @@ class DailyReservationSelector(AbstractDailyReservationSelector):
     """
 
     def get_queryset_for_fully_booked(
-            self, pet_kindergarden_id: int, date_range: list[str], daily_pet_limit: int,
+        self,
+        pet_kindergarden_id: int,
+        date_range: list[str],
+        daily_pet_limit: int,
     ) -> list[Optional[str]]:
         """
         반려동물 유치원 아이디와 예약일로 일별 예약 리스트를 조회하여 정원을 초과한 날짜를 반환합니다.

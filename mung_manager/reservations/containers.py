@@ -1,5 +1,9 @@
 from dependency_injector import containers, providers
 
+from mung_manager.customers.selectors.customer_tickets import CustomerTicketSelector
+from mung_manager.pet_kindergardens.selectors.pet_kindergardens import (
+    PetKindergardenSelector,
+)
 from mung_manager.reservations.selectors.daily_reservations import (
     DailyReservationSelector,
 )
@@ -19,7 +23,15 @@ class ReservationContainer(containers.DeclarativeContainer):
         korea_special_day_selector: 한국 특별일 셀렉터
     """
 
-    reservation_selector = providers.Factory(ReservationSelector)
-    reservation_service = providers.Factory(ReservationService)
+    customer_ticket_selector = providers.Factory(CustomerTicketSelector)
     day_off_selector = providers.Factory(DayOffSelector)
+    pet_kindergarden_selector = providers.Factory(PetKindergardenSelector)
     daily_reservation_selector = providers.Factory(DailyReservationSelector)
+    reservation_service = providers.Factory(
+        ReservationService,
+        customer_ticket_selector=customer_ticket_selector,
+        day_off_selector=day_off_selector,
+        pet_kindergarden_selector=pet_kindergarden_selector,
+        daily_reservation_selector=daily_reservation_selector,
+    )
+    reservation_selector = providers.Factory(ReservationSelector)

@@ -31,7 +31,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             .values("id", "name", "full_address", "profile_thumbnail_url")
         )
 
-    def get_by_pet_kindergarden_id_for_reservation_availability_option(self, pet_kindergarden_id: str) -> QuerySet[Any]:
+    def get_by_pet_kindergarden_id_for_reservation_availability_option(self, pet_kindergarden_id: int) -> QuerySet[Any]:
         """
         이 함수는 반려동물 유치원 아이디로 해당 반려동물 유치원의 당일 예약 가능 설정을 조회합니다.
 
@@ -45,7 +45,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             "reservation_availability_option", flat=True
         )
 
-    def get_by_pet_kindergarden_id_for_daily_pet_limit(self, pet_kindergarden_id: str) -> int:
+    def get_by_pet_kindergarden_id_for_daily_pet_limit(self, pet_kindergarden_id: int) -> int:
         """
         이 함수는 반려동물 유치원 아이디로 해당 반려동물 유치원의 일일 최대 반려동물 수를 조회합니다.
 
