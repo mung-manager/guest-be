@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mung_manager.apis.mixins import APIAuthMixin
+from mung_manager.apis.mixins import APIAuthMixin, APIAuthWithPetKindergardenAccessMixin
 from mung_manager.authentications.containers import AuthenticationContainer
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.pet_kindergardens.containers import PetKindergardenContainer
@@ -56,3 +56,29 @@ class PetKindergardenSelectionAPI(APIAuthMixin, APIView):
             }
         ).data
         return Response(data=auth_data, status=status.HTTP_200_OK)
+
+
+class PetKindergardenSummaryInfoAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
+    class OutputSerializer(BaseSerializer):
+        id = serializers.IntegerField(label="유치원 아이디")
+        name = serializers.CharField(label="유치원 이름")
+        business_hour = serializers.CharField(label="유치원 영업 시간")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._pet_kindergarden_selector = PetKindergardenContainer.pet_kindergarden_selector()
+
+    def get(self, request: Request) -> Response:
+        pet_kindergarden_id = request.pet_kindergarden_id
+        pet_kindergarden = self._pet_kindergarden_selector.get_by_pet_kindergarden_id_for_summary_info(
+            pet_kindergarden_id
+        )
+        summary_info_data = {
+            "id": pet_kindergarden["id"],
+            "name": pet_kindergarden["name"],
+            "business_hour": pet_kindergarden["business_start_hour"].strftime("%H:%M")
+            + " - "
+            + pet_kindergarden["business_end_hour"].strftime("%H:%M"),
+        }
+        pet_kindergardens_data = self.OutputSerializer(summary_info_data).data
+        return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)

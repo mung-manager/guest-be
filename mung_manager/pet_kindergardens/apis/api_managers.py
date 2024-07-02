@@ -6,6 +6,7 @@ from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.pet_kindergardens.apis.apis import (
     PetKindergardenListAPI,
     PetKindergardenSelectionAPI,
+    PetKindergardenSummaryInfoAPI,
 )
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
@@ -117,3 +118,43 @@ class PetKindergardenSelectionAPIManager(BaseAPIManager):
     )
     def post(self, request, *args, **kwargs):
         return self.VIEWS_BY_METHOD["POST"]()(request, *args, **kwargs)
+
+
+class PetKindergardenSummaryInfoAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "GET": PetKindergardenSummaryInfoAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["반려동물 유치원"],
+        summary="반려동물 유치원 요약 정보 조회",
+        description="""
+        Rogic
+            - 유저 토큰 클레임에 포함된 반려동물 유치원 아이디로 해당 반려동물 유치원의 요약 정보를 조회합니다.
+        """,
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorPermissionDeniedSchema]
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
