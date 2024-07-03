@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from django.db.models.query import QuerySet
 
@@ -13,5 +13,5 @@ class AbstractPetKindergardenSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def get_by_pet_kindergarden_id_for_summary_info(self, pet_kindergarden_id: int) -> Optional[Any]:
+    def get_by_pet_kindergarden_id_for_summary_info(self, pet_kindergarden_id: int) -> QuerySet:
         raise NotImplementedException()

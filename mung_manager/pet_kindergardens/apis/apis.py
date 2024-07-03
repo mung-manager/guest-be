@@ -62,7 +62,8 @@ class PetKindergardenSummaryInfoAPI(APIAuthWithPetKindergardenAccessMixin, APIVi
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="유치원 아이디")
         name = serializers.CharField(label="유치원 이름")
-        business_hour = serializers.CharField(label="유치원 영업 시간")
+        business_start_hour = serializers.CharField(label="영업 시작 시간")
+        business_end_hour = serializers.CharField(label="영업 종료 시간")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,13 +73,12 @@ class PetKindergardenSummaryInfoAPI(APIAuthWithPetKindergardenAccessMixin, APIVi
         pet_kindergarden_id = request.pet_kindergarden_id
         pet_kindergarden = self._pet_kindergarden_selector.get_by_pet_kindergarden_id_for_summary_info(
             pet_kindergarden_id
-        )
+        ).get()
         summary_info_data = {
             "id": pet_kindergarden["id"],
             "name": pet_kindergarden["name"],
-            "business_hour": pet_kindergarden["business_start_hour"].strftime("%H:%M")
-            + " - "
-            + pet_kindergarden["business_end_hour"].strftime("%H:%M"),
+            "business_start_hour": pet_kindergarden["business_start_hour"].strftime("%H:%M"),
+            "business_end_hour": pet_kindergarden["business_end_hour"].strftime("%H:%M"),
         }
         pet_kindergardens_data = self.OutputSerializer(summary_info_data).data
         return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)

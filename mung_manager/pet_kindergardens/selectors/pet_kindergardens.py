@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from django.db.models import F, QuerySet, Value
 from django.db.models.functions import Concat
@@ -31,7 +31,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             .values("id", "name", "full_address", "profile_thumbnail_url")
         )
 
-    def get_by_pet_kindergarden_id_for_summary_info(self, pet_kindergarden_id: int) -> Optional[Any]:
+    def get_by_pet_kindergarden_id_for_summary_info(self, pet_kindergarden_id: int) -> QuerySet:
         """
         이 함수는 반려동물 유치원 아이디로 해당 반려동물 유치원의 요약 정보를 조회합니다.
 
@@ -42,8 +42,6 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             Optional[Any]: 반려동물 유치원이 존재하지 않으면 None을 반환
         """
 
-        return (
-            PetKindergarden.objects.filter(id=pet_kindergarden_id)
-            .values("id", "name", "business_start_hour", "business_end_hour")
-            .get()
+        return PetKindergarden.objects.filter(id=pet_kindergarden_id).values(
+            "id", "name", "business_start_hour", "business_end_hour"
         )
