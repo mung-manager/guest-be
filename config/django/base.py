@@ -103,6 +103,8 @@ APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
+APPEND_SLASH = False
+
 # ==================================================================== #
 #                   Internationalization                               #
 # ==================================================================== #
