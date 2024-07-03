@@ -1,18 +1,15 @@
-from datetime import time
-from typing import Any, TypedDict
+from typing import Any
 
 from django.db.models import F, QuerySet, Value
 from django.db.models.functions import Concat
+from django_stubs_ext import WithAnnotations
 from django_stubs_ext.aliases import ValuesQuerySet
 
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.pet_kindergardens.selectors.abstracts import (
     AbstractPetKindergardenSelector,
 )
-
-summery_info = TypedDict(
-    "summery_info", {"id": int, "name": str, "business_start_hour": time, "business_end_hour": time}
-)
+from mung_manager.pet_kindergardens.types import info_for_full_address, info_for_summary
 
 
 class PetKindergardenSelector(AbstractPetKindergardenSelector):
@@ -20,7 +17,9 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
     이 클래스는 반려동물 유치원을 DB에서 PULL하는 비즈니스 로직을 담당합니다.
     """
 
-    def get_queryset_by_user(self, user) -> QuerySet[Any]:
+    def get_queryset_by_user(
+        self, user
+    ) -> QuerySet[WithAnnotations[PetKindergarden, info_for_full_address], dict[str, Any]]:
         """
         이 함수는 사용자 정보로, 해당 사용자가 속한 유치원 목록을 조회합니다.
 
@@ -28,7 +27,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             user: User: 유저 객체
 
         Returns:
-            QuerySet[Any]: 존재하지 않으면 빈 쿼리셋을 반환
+            QuerySet[WithAnnotations[PetKindergarden, info_for_full_address], dict[str, Any]]: 정의된 응답 스키마
         """
 
         return (
@@ -39,7 +38,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
 
     def get_by_pet_kindergarden_id_for_summary_info(
         self, pet_kindergarden_id: int
-    ) -> ValuesQuerySet[PetKindergarden, summery_info]:
+    ) -> ValuesQuerySet[PetKindergarden, info_for_summary]:
         """
         이 함수는 반려동물 유치원 아이디로 해당 반려동물 유치원의 요약 정보를 조회합니다.
 
@@ -47,7 +46,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             pet_kindergarden_id (int): 반려동물 유치원 아이디
 
         Returns:
-            ValuesQuerySet[PetKindergarden, summery_info]: 정의된 응답 스키마
+            ValuesQuerySet[PetKindergarden, info_for_summary]: 정의된 응답 스키마
         """
 
         return PetKindergarden.objects.filter(id=pet_kindergarden_id).values(
