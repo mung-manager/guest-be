@@ -32,6 +32,15 @@ urlpatterns = [
             )
         ),
     ),
+    path(
+        "guest/api/v1/customers",
+        include(
+            (
+                "mung_manager.customers.apis.urls",
+                "api-customers",
+            )
+        ),
+    ),
 ]
 
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
