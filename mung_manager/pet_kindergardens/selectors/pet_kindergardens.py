@@ -16,9 +16,19 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
     이 클래스는 반려동물 유치원을 DB에서 PULL하는 비즈니스 로직을 담당합니다.
     """
 
-    def get_by_id(self, pet_kindergarden_id: int) -> Optional[PetKindergarden]:
+    def get_by_id_and_user_id(self, pet_kindergarden_id: int, user_id: int) -> Optional[PetKindergarden]:
+        """
+        이 함수는 유저 아이디와 반려동물 유치원 아이디로 유치원 객체를 조회합니다.
+
+        Args:
+            pet_kindergarden_id: int: 유치원 아이디
+            user_id: int: 유저 아이디
+
+        Returns:
+            Optional[PetKindergarden]: 유치원 객체 또는 None
+        """
         try:
-            return PetKindergarden.objects.filter(id=pet_kindergarden_id).get()
+            return PetKindergarden.objects.filter(id=pet_kindergarden_id, customers__user_id=user_id).get()
         except PetKindergarden.DoesNotExist:
             return None
 

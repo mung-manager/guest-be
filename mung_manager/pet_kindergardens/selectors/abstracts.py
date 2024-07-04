@@ -12,7 +12,7 @@ from mung_manager.pet_kindergardens.types import info_for_full_address
 class AbstractPetKindergardenSelector(ABC):
 
     @abstractmethod
-    def get_by_id(self, pet_kindergarden_id: int) -> Optional[PetKindergarden]:
+    def get_by_id_and_user_id(self, pet_kindergarden_id: int, user_id: int) -> Optional[PetKindergarden]:
         raise NotImplementedException()
 
     @abstractmethod

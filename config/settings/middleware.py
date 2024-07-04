@@ -18,8 +18,10 @@ class CustomJWTAuthorizationMiddleware(MiddlewareMixin):
         super().__init__(get_response)
         self._pet_kindergarden_selector = PetKindergardenContainer.pet_kindergarden_selector()
 
-    def validate_pet_kindergarden(self, pet_kindergarden_id: int) -> PetKindergarden:
-        pet_kindergarden = self._pet_kindergarden_selector.get_by_id(pet_kindergarden_id=pet_kindergarden_id)
+    def validate_pet_kindergarden(self, pet_kindergarden_id: int, user_id: int) -> PetKindergarden:
+        pet_kindergarden = self._pet_kindergarden_selector.get_by_id_and_user_id(
+            pet_kindergarden_id=pet_kindergarden_id, user_id=user_id
+        )
         if pet_kindergarden is None:
             raise NotFoundException(
                 detail=SYSTEM_CODE.message("NOT_FOUND_PET_KINDERGARDEN"),
@@ -35,7 +37,8 @@ class CustomJWTAuthorizationMiddleware(MiddlewareMixin):
                 validated_token = JWTAuthentication().get_validated_token(token)
                 if validated_token.get("pet_kindergarden_id") is not None:
                     request.pet_kindergarden = self.validate_pet_kindergarden(
-                        pet_kindergarden_id=validated_token.get("pet_kindergarden_id")
+                        pet_kindergarden_id=validated_token.get("pet_kindergarden_id"),
+                        user_id=validated_token.get("user_id"),
                     )
             except Exception:
                 request.pet_kindergarden = None
