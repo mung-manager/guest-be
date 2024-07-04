@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 
 from mung_manager.authentications.containers import AuthenticationContainer
 from mung_manager.authentications.enums import AuthGroup
-from mung_manager.customers.containers import CustomerContainer
 
 
 class IsGuestPermission(permissions.BasePermission):
@@ -27,38 +26,6 @@ class IsGuestPermission(permissions.BasePermission):
         try:
             if self._user_selector.exists_by_user_id_and_group_id_for_permission(
                 user_id=request.user.id, group_id=AuthGroup.GUEST.value
-            ):
-                return True
-
-            return False
-
-        except Exception:
-            return False
-
-
-class IsPetKindergardenMemberPermission(permissions.BasePermission):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._customer_selector = CustomerContainer.customer_selector()
-
-    def has_permission(self, request: Request, view: APIView) -> bool:
-        """
-        이 함수는 기본적으로 게스트 API에 적용되며, 유저가 반려동물 유치원에 속해 있는지 확인합니다.
-
-        Args:
-            request (Request): Request 객체
-            view (APIView): APIView 객체
-
-        Returns:
-            bool: 반려동물 유치원에 속해 있으면 True, 아니면 False를 반환
-        """
-        try:
-            if not request.user.is_authenticated:
-                return False
-
-            if self._customer_selector.exists_by_user_and_pet_kindergarden_id(
-                user=request.user, pet_kindergarden_id=request.pet_kindergarden_id
             ):
                 return True
 
