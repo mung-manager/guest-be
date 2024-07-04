@@ -12,9 +12,9 @@ from mung_manager.customers.containers import CustomerContainer
 
 class CustomerTicketCountAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
-        time = serializers.IntegerField(label="시간권 예약")
-        all_day = serializers.IntegerField(label="종일권 예약")
-        hotel = serializers.IntegerField(label="호텔권 예약")
+        time_count = serializers.IntegerField(label="시간권 예약")
+        all_day_count = serializers.IntegerField(label="종일권 예약")
+        hotel_count = serializers.IntegerField(label="호텔권 예약")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

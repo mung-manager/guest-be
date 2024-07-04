@@ -1,3 +1,4 @@
+from django.db.models import Case, IntegerField, Sum, When
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer, CustomerTicket
@@ -54,24 +55,30 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
         Returns:
             dict[str, int]: 정의된 반환값
         """
-        customer_tickets = CustomerTicket.objects.filter(
+        return CustomerTicket.objects.filter(
             customer=customer,
             expired_at__gte=timezone.now(),
             unused_count__gt=0,
-        ).select_related("ticket")
-
-        time_count = all_day_count = hotel_count = 0
-        for customer_ticket in customer_tickets:
-            ticket_type = customer_ticket.ticket.ticket_type
-            if ticket_type == TicketType.TIME.value:
-                time_count += 1
-            elif ticket_type == TicketType.ALL_DAY.value:
-                all_day_count += 1
-            elif ticket_type == TicketType.HOTEL.value:
-                hotel_count += 1
-
-        return {
-            "time": time_count,
-            "all_day": all_day_count,
-            "hotel": hotel_count,
-        }
+        ).aggregate(
+            time_count=Sum(
+                Case(
+                    When(ticket__ticket_type=TicketType.TIME.value, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            all_day_count=Sum(
+                Case(
+                    When(ticket__ticket_type=TicketType.ALL_DAY.value, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            hotel_count=Sum(
+                Case(
+                    When(ticket__ticket_type=TicketType.HOTEL.value, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+        )
