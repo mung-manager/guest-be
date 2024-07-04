@@ -18,7 +18,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
             customer (Customer): 고객 객체
 
         Returns:
-            QuerySet: 소유하고 있는 티켓이 존재하지 않으면 빈 쿼리셋을 반환합니다.
+            dict[str, list]: 정의된 반환값
         """
         customer_tickets = CustomerTicket.objects.filter(
             customer=customer,
@@ -42,4 +42,36 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
             "time": time_customer_tickets,
             "all_day": all_day_customer_tickets,
             "hotel": hotel_customer_tickets,
+        }
+
+    def get_by_customer_for_count(self, customer: Customer) -> dict[str, int]:
+        """
+        고객 객체로 해당 고객이 소유하고 있는 만료되지 않은 티켓 타입별 개수를 조회합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+
+        Returns:
+            dict[str, int]: 정의된 반환값
+        """
+        customer_tickets = CustomerTicket.objects.filter(
+            customer=customer,
+            expired_at__gte=timezone.now(),
+            unused_count__gt=0,
+        ).select_related("ticket")
+
+        time_count = all_day_count = hotel_count = 0
+        for customer_ticket in customer_tickets:
+            ticket_type = customer_ticket.ticket.ticket_type
+            if ticket_type == TicketType.TIME.value:
+                time_count += 1
+            elif ticket_type == TicketType.ALL_DAY.value:
+                all_day_count += 1
+            elif ticket_type == TicketType.HOTEL.value:
+                hotel_count += 1
+
+        return {
+            "time": time_count,
+            "all_day": all_day_count,
+            "hotel": hotel_count,
         }
