@@ -23,6 +23,9 @@ from mung_manager.schemas.errors.commons import (
     ErrorUnknownServerSchema,
 )
 from mung_manager.schemas.errors.customers import ErrorCustomerPermissionDeniedSchema
+from mung_manager.schemas.errors.pet_kindergardens import (
+    ErrorPetKindergardenNotFoundSchema,
+)
 
 
 class ReservationCustomerPetListAPIManager(BaseAPIManager):
@@ -58,6 +61,12 @@ class ReservationCustomerPetListAPIManager(BaseAPIManager):
                 examples=[
                     ErrorPermissionDeniedSchema,
                     ErrorCustomerPermissionDeniedSchema,
+                ],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPetKindergardenNotFoundSchema,
                 ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
@@ -102,6 +111,12 @@ class ReservationCustomerTicketListAPIManager(BaseAPIManager):
                 examples=[
                     ErrorPermissionDeniedSchema,
                     ErrorCustomerPermissionDeniedSchema,
+                ],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPetKindergardenNotFoundSchema,
                 ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(

@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mung_manager.apis.mixins import APIAuthWithPetKindergardenAccessMixin
+from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import get_object_or_permission_denied
@@ -11,7 +11,7 @@ from mung_manager.commons.utils import inline_serializer
 from mung_manager.customers.containers import CustomerContainer
 
 
-class ReservationCustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
+class ReservationCustomerPetListAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="반려동물 아이디")
         name = serializers.CharField(label="반려동물 이름")
@@ -23,7 +23,7 @@ class ReservationCustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIVi
 
     def get(self, request: Request) -> Response:
         user = request.user
-        pet_kindergarden_id = request.pet_kindergarden_id
+        pet_kindergarden_id = request.pet_kindergarden.id
         customer = get_object_or_permission_denied(
             self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
             msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
@@ -34,7 +34,7 @@ class ReservationCustomerPetListAPI(APIAuthWithPetKindergardenAccessMixin, APIVi
         return Response(data=customer_pets_data, status=status.HTTP_200_OK)
 
 
-class ReservationCustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, APIView):
+class ReservationCustomerTicketListAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         time = inline_serializer(
             label="시간권 예약",
@@ -72,7 +72,7 @@ class ReservationCustomerTicketListAPI(APIAuthWithPetKindergardenAccessMixin, AP
 
     def get(self, request: Request) -> Response:
         user = request.user
-        pet_kindergarden_id = request.pet_kindergarden_id
+        pet_kindergarden_id = request.pet_kindergarden.id
         customer = get_object_or_permission_denied(
             self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
             msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
