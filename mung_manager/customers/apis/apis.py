@@ -41,7 +41,7 @@ class CustomerTicketCountAPI(APIAuthMixin, APIView):
 
 class ReservationListAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
-        active_customer = serializers.BooleanField(label="고객의 활성화 여부")
+        is_active_customer = serializers.BooleanField(label="고객의 활성화 여부")
         reservation = inline_serializer(
             label="예약 목록",
             many=True,
@@ -71,7 +71,7 @@ class ReservationListAPI(APIAuthMixin, APIView):
         )
         data = self.OutputSerializer(
             {
-                "active_customer": customer.is_active,
+                "is_active_customer": customer.is_active,
                 "reservation": reservation,
             }
         ).data
