@@ -8,4 +8,3 @@ class ReservationStatus(Enum):
 
     COMPLETED = "완료"
     CANCELED = "취소"
-    MODIFIED = "변경"

@@ -2,6 +2,7 @@ from typing import Optional
 
 from django.db.models.query import QuerySet
 
+from mung_manager.authentications.models import User
 from mung_manager.customers.models import Customer
 from mung_manager.customers.selectors.abstracts import AbstractCustomerSelector
 
@@ -68,5 +69,21 @@ class CustomerSelector(AbstractCustomerSelector):
         """
         try:
             return Customer.objects.filter(user=user, pet_kindergarden_id=pet_kindergarden_id, is_active=True).get()
+        except Customer.DoesNotExist:
+            return None
+
+    def get_by_user_and_pet_kindergarden_id(self, user: User, pet_kindergarden_id: int) -> Optional[Customer]:
+        """
+        사용자 객체와 반려동물 유치원 아이디로 활성화 여부와 상관 없이 등록된 고객을 조회합니다.
+
+        Args:
+            user (User): 확인할 사용자 객체
+            pet_kindergarden_id (int): 반려동물 유치원 아이디
+
+        Returns:
+            Optional[Customer]: 등록된 활성화 고객이 존재하지 않으면 None을 반환
+        """
+        try:
+            return Customer.objects.filter(user=user, pet_kindergarden_id=pet_kindergarden_id).get()
         except Customer.DoesNotExist:
             return None
