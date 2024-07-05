@@ -59,7 +59,9 @@ class ReservationSelector(AbstractReservationSelector):
             if len(group) == 1 and group[0].customer_ticket.ticket.ticket_type != TicketType.HOTEL.value:
                 reservation = group[0]
                 ticket_type_value = reservation.customer_ticket.ticket.ticket_type
-                ticket_type = TicketType.TIME.value if ticket_type_value == TicketType.TIME.value else TicketType.ALL_DAY.value
+                ticket_type = (
+                    TicketType.TIME.value if ticket_type_value == TicketType.TIME.value else TicketType.ALL_DAY.value
+                )
                 reservation_data = {
                     "ticket_type": ticket_type,
                     "start_at": reservation.reserved_at,
@@ -68,8 +70,8 @@ class ReservationSelector(AbstractReservationSelector):
                 }
             else:
                 ticket_type = TicketType.HOTEL.value
-                start_time = min(res.reserved_at for res in group)
-                end_time = max(res.end_at for res in group)
+                start_time = min(res.reserved_at for res in group)  # type: ignore
+                end_time = max(res.end_at for res in group)  # type: ignore
                 reservation_data = {
                     "ticket_type": ticket_type,
                     "start_at": start_time,
