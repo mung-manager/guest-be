@@ -1,3 +1,4 @@
+from django.db.models import Case, IntegerField, Sum, When
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer, CustomerTicket
@@ -18,7 +19,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
             customer (Customer): 고객 객체
 
         Returns:
-            QuerySet: 소유하고 있는 티켓이 존재하지 않으면 빈 쿼리셋을 반환합니다.
+            dict[str, list]: 정의된 반환값
         """
         customer_tickets = CustomerTicket.objects.filter(
             customer=customer,
@@ -43,3 +44,41 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
             "all_day": all_day_customer_tickets,
             "hotel": hotel_customer_tickets,
         }
+
+    def get_by_customer_for_count(self, customer: Customer) -> dict[str, int]:
+        """
+        고객 객체로 해당 고객이 소유하고 있는 만료되지 않은 티켓 타입별 개수를 조회합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+
+        Returns:
+            dict[str, int]: 정의된 반환값
+        """
+        return CustomerTicket.objects.filter(
+            customer=customer,
+            expired_at__gte=timezone.now(),
+            unused_count__gt=0,
+        ).aggregate(
+            time_count=Sum(
+                Case(
+                    When(ticket__ticket_type=TicketType.TIME.value, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            all_day_count=Sum(
+                Case(
+                    When(ticket__ticket_type=TicketType.ALL_DAY.value, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+            hotel_count=Sum(
+                Case(
+                    When(ticket__ticket_type=TicketType.HOTEL.value, then=1),
+                    default=0,
+                    output_field=IntegerField(),
+                )
+            ),
+        )

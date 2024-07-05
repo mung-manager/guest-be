@@ -41,3 +41,7 @@ class AbstractCustomerTicketSelector(ABC):
     @abstractmethod
     def get_queryset_by_customer(self, customer: Customer) -> dict[str, list]:
         raise NotImplementedException()
+
+    @abstractmethod
+    def get_by_customer_for_count(self, customer: Customer) -> dict[str, int]:
+        raise NotImplementedException()
