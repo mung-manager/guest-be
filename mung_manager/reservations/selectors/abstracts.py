@@ -13,3 +13,9 @@ class AbstractReservationSelector(ABC):
         self, customer: Customer, pet_kindergarden: PetKindergarden
     ) -> list[dict[str, Any]]:
         raise NotImplementedException()
+
+    @abstractmethod
+    def get_queryset_by_customer_and_pet_kindergarden_for_detail(
+        self, customer: Customer, pet_kindergarden: PetKindergarden
+    ) -> list[dict[str, Any]]:
+        raise NotImplementedException()
