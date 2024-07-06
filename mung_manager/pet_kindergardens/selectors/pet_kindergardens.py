@@ -8,7 +8,7 @@ from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.pet_kindergardens.selectors.abstracts import (
     AbstractPetKindergardenSelector,
 )
-from mung_manager.pet_kindergardens.types import info_for_full_address
+from mung_manager.pet_kindergardens.types import full_address_type
 
 
 class PetKindergardenSelector(AbstractPetKindergardenSelector):
@@ -32,7 +32,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
         except PetKindergarden.DoesNotExist:
             return None
 
-    def get_queryset_by_user(self, user) -> QuerySet[Annotated[PetKindergarden, info_for_full_address], dict[str, Any]]:
+    def get_queryset_by_user(self, user) -> QuerySet[Annotated[PetKindergarden, full_address_type], dict[str, Any]]:
         """
         이 함수는 사용자 정보로, 해당 사용자가 속한 유치원 목록을 조회합니다.
 
@@ -40,7 +40,7 @@ class PetKindergardenSelector(AbstractPetKindergardenSelector):
             user: User: 유저 객체
 
         Returns:
-            QuerySet[QuerySet[Annotated[PetKindergarden, info_for_full_address], dict[str, Any]]: 정의된 반환값
+            QuerySet[QuerySet[Annotated[PetKindergarden, full_address_type], dict[str, Any]]: 정의된 반환값
         """
 
         return (
