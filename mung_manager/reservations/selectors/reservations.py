@@ -34,7 +34,7 @@ class ReservationSelector(AbstractReservationSelector):
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
 
         Returns:
-            QuerySet[Reservation]: 예약이 존재하지 않으면 빈 쿼리셋을 반환
+            list[dict[str, Any]]: 예약 리스트 반환
         """
         reservations = Reservation.objects.filter(
             customer=customer,
