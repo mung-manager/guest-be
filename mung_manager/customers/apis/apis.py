@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mung_manager.apis.mixins import APIAuthMixin
+from mung_manager.apis.pagination import LimitOffsetPagination, get_paginated_data
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import (
@@ -79,6 +80,18 @@ class ReservationListAPI(APIAuthMixin, APIView):
 
 
 class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 10
+
+    class FilterSerializer(BaseSerializer):
+        limit = serializers.IntegerField(
+            default=10,
+            min_value=1,
+            max_value=50,
+            help_text="페이지당 조회 개수",
+        )
+        offset = serializers.IntegerField(default=0, min_value=0, help_text="페이지 오프셋")
+
     class OutputSerializer(serializers.Serializer):
         ticket_type = serializers.CharField(source="ticket__ticket_type", label="티켓 타입")
         usage_time = serializers.IntegerField(source="ticket__usage_time", label="사용 가능한 시간")
@@ -102,5 +115,11 @@ class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
             code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
         )
         tickets = self._customer_ticket_selector.get_queryset_by_customer_for_parchase_list(customer)
-        ticket_data = self.OutputSerializer(tickets, many=True).data
-        return Response(data=ticket_data, status=status.HTTP_200_OK)
+        tickets_data = get_paginated_data(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSerializer,
+            queryset=tickets,
+            request=request,
+            view=self,
+        )
+        return Response(data=tickets_data, status=status.HTTP_200_OK)
