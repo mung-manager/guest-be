@@ -128,7 +128,7 @@ class ReservationSelector(AbstractReservationSelector):
             reservation_data = {
                 "reservation_id": reservation_id,
                 "ticket_type": ticket_type,
-                "register_at": reservation.created_at,
+                "created_at": reservation.created_at,
                 "reserved_at": reservation.reserved_at,
                 "customer_pet_name": reservation.customer_pet.name,
                 "is_attended": reservation.is_attended,
@@ -139,7 +139,7 @@ class ReservationSelector(AbstractReservationSelector):
                 reservation_data["usage_time"] = reservation.customer_ticket.ticket.usage_time
             elif ticket_type == TicketType.HOTEL.value:
                 reservation_data["used_ticket_count"] = accumulate_count[reservation_id]
-                reservation_data["register_at"] = min(res.created_at for res in group)
+                reservation_data["created_at"] = min(res.created_at for res in group)
                 reservation_data["reserved_at"] = min(res.reserved_at for res in group)
 
             reservation_list.append(reservation_data)

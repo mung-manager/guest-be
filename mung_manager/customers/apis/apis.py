@@ -95,7 +95,7 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         reservation_id = serializers.IntegerField(label="예약 ID")
         ticket_type = serializers.CharField(label="티켓 타입")
-        register_at = serializers.DateTimeField(label="등록 시간", format="%Y-%m-%d %H:%M")
+        created_at = serializers.DateTimeField(label="등록 시간", format="%Y-%m-%d %H:%M")
         reserved_at = serializers.DateTimeField(label="예약 시간", format="%Y-%m-%d %H:%M")
         customer_pet_name = serializers.CharField(label="반려동물 이름")
         is_attended = serializers.BooleanField(label="참석 여부")
