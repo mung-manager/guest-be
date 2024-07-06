@@ -76,3 +76,31 @@ class ReservationListAPI(APIAuthMixin, APIView):
             }
         ).data
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
+    class OutputSerializer(serializers.Serializer):
+        ticket_type = serializers.CharField(source="ticket__ticket_type", label="티켓 타입")
+        usage_time = serializers.IntegerField(source="ticket__usage_time", label="사용 가능한 시간")
+        usage_count = serializers.IntegerField(source="ticket__usage_count", label="사용 가능한 횟수")
+        price = serializers.IntegerField(source="ticket__price", label="금액")
+        created_at = serializers.DateTimeField(label="생성 시간")
+        expired_at = serializers.DateTimeField(label="만료 시간")
+        is_expired = serializers.BooleanField(label="만료 여부")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._customer_ticket_selector = CustomerContainer.customer_ticket_selector()
+
+    def get(self, request: Request) -> Response:
+        user = request.user
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
+        )
+        tickets = self._customer_ticket_selector.get_queryset_by_customer_for_parchase_list(customer)
+        ticket_data = self.OutputSerializer(tickets, many=True).data
+        return Response(data=ticket_data, status=status.HTTP_200_OK)
