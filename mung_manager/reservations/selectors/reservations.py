@@ -1,6 +1,7 @@
 from collections import defaultdict
 from typing import Any
 
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer
@@ -86,7 +87,7 @@ class ReservationSelector(AbstractReservationSelector):
 
     def get_queryset_by_customer_and_pet_kindergarden_for_detail(
         self, customer: Customer, pet_kindergarden: PetKindergarden
-    ) -> list[dict[str, Any]]:
+    ) -> QuerySet | list[dict[str, Any]]:
         """
         고객 객체와 반려동물 유치원 객체로 등원 예정인 예약 상세 목록을 조회합니다.
 
@@ -104,9 +105,23 @@ class ReservationSelector(AbstractReservationSelector):
             reservation_status=ReservationStatus.COMPLETED.value,
         ).select_related("customer_pet")
 
+        if not reservations.filter(is_extented=True).exists():
+            return reservations.values(
+                "id",
+                "customer_ticket__ticket__ticket_type",
+                "created_at",
+                "reserved_at",
+                "customer_pet__name",
+                "is_attended",
+                "customer_ticket__ticket__usage_time",
+                "customer_ticket__ticket__usage_count",
+                "customer_ticket__ticket__price",
+                "pet_kindergarden__reservation_change_option",
+            )
+
         # 각 예약을 그룹화
         grouped_reservations = defaultdict(list)
-        accumulate_count: dict = defaultdict(int)
+        accumulate_count = defaultdict(int)  # type: ignore
         for reservation in reservations:
             reservation_id = reservation.id
             if reservation.customer_ticket.ticket.ticket_type == TicketType.HOTEL.value and reservation.is_extented:
