@@ -3,6 +3,7 @@ from typing import Optional
 
 from django.db.models.query import QuerySet
 
+from mung_manager.authentications.models import User
 from mung_manager.customers.models import Customer, CustomerPet
 from mung_manager.errors.exceptions import NotImplementedException
 
@@ -28,6 +29,10 @@ class AbstractCustomerSelector(ABC):
     def get_by_user_and_pet_kindergarden_id_for_active_customer(
         self, user, pet_kindergarden_id: int
     ) -> Optional[Customer]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_by_user_and_pet_kindergarden_id(self, user: User, pet_kindergarden_id: int) -> Optional[Customer]:
         raise NotImplementedException()
 
 
