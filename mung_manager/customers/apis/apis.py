@@ -109,6 +109,8 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         self._reservation_selector = ReservationContainer.reservation_selector()
 
     def get(self, request: Request) -> Response:
+        filter_serializer = self.FilterSerializer(data=request.query_params)
+        filter_serializer.is_valid(raise_exception=True)
         user = request.user
         pet_kindergarden = request.pet_kindergarden
         customer = get_object_or_not_found(
