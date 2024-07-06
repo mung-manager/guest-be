@@ -65,10 +65,6 @@ class PetKindergardenSummaryInfoAPI(APIAuthMixin, APIView):
         business_start_hour = serializers.TimeField(label="영업 시작 시간", format="%H:%M")
         business_end_hour = serializers.TimeField(label="영업 종료 시간", format="%H:%M")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._pet_kindergarden_selector = PetKindergardenContainer.pet_kindergarden_selector()
-
     def get(self, request: Request) -> Response:
         pet_kindergardens_data = self.OutputSerializer(request.pet_kindergarden).data
         return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)
