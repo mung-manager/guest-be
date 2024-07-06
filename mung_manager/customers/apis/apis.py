@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mung_manager.apis.mixins import APIAuthMixin
+from mung_manager.apis.pagination import LimitOffsetPagination, get_paginated_data
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import (
@@ -79,6 +80,18 @@ class CustomerReservationListAPI(APIAuthMixin, APIView):
 
 
 class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 10
+
+    class FilterSerializer(BaseSerializer):
+        limit = serializers.IntegerField(
+            default=10,
+            min_value=1,
+            max_value=50,
+            help_text="페이지당 조회 개수",
+        )
+        offset = serializers.IntegerField(default=0, min_value=0, help_text="페이지 오프셋")
+
     class OutputSerializer(BaseSerializer):
         reservation_id = serializers.IntegerField(label="예약 ID")
         ticket_type = serializers.CharField(label="티켓 타입")
@@ -106,5 +119,11 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         reservation = self._reservation_selector.get_queryset_by_customer_and_pet_kindergarden_for_detail(
             customer, pet_kindergarden
         )
-        data = self.OutputSerializer(reservation, many=True).data
-        return Response(data=data, status=status.HTTP_200_OK)
+        pagination_reservation_data = get_paginated_data(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSerializer,
+            queryset=reservation,
+            request=request,
+            view=self,
+        )
+        return Response(data=pagination_reservation_data, status=status.HTTP_200_OK)
