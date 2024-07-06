@@ -2,7 +2,7 @@ from django.urls import path
 
 from mung_manager.customers.apis.api_managers import (
     CustomerTicketCountAPIManager,
-    ReservationListAPIManager,
+    CustomerReservationListAPIManager,
 )
 
 urlpatterns = [
@@ -13,7 +13,7 @@ urlpatterns = [
     ),
     path(
         "/reservations",
-        ReservationListAPIManager.as_view(),
+        CustomerReservationListAPIManager.as_view(),
         name="customer-reservation-list",
     ),
 ]

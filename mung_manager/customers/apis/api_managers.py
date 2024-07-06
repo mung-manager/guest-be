@@ -3,7 +3,7 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
-from mung_manager.customers.apis.apis import CustomerTicketCountAPI, ReservationListAPI
+from mung_manager.customers.apis.apis import CustomerTicketCountAPI, CustomerReservationListAPI
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
     ErrorAuthenticationUserDeletedSchema,
@@ -75,9 +75,9 @@ class CustomerTicketCountAPIManager(BaseAPIManager):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
 
 
-class ReservationListAPIManager(BaseAPIManager):
+class CustomerReservationListAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
-        "GET": ReservationListAPI.as_view,
+        "GET": CustomerReservationListAPI.as_view,
     }
 
     @extend_schema(

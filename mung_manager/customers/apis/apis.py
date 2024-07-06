@@ -39,7 +39,7 @@ class CustomerTicketCountAPI(APIAuthMixin, APIView):
         return Response(data=customer_ticket_count_data, status=status.HTTP_200_OK)
 
 
-class ReservationListAPI(APIAuthMixin, APIView):
+class CustomerReservationListAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         is_active_customer = serializers.BooleanField(label="고객의 활성화 여부")
         reservation = inline_serializer(
