@@ -4,6 +4,7 @@ from mung_manager.customers.apis.api_managers import (
     CustomerReservationDetailListAPIManager,
     CustomerReservationListAPIManager,
     CustomerTicketCountAPIManager,
+    CustomerTicketPurchaseListAPIManager,
 )
 
 urlpatterns = [
@@ -21,5 +22,10 @@ urlpatterns = [
         "/reservations/detail",
         CustomerReservationDetailListAPIManager.as_view(),
         name="customer-reservation-detail-list",
+    ),
+    path(
+        "/tickets/purchases",
+        CustomerTicketPurchaseListAPIManager.as_view(),
+        name="customer-ticket-purchase-list",
     ),
 ]

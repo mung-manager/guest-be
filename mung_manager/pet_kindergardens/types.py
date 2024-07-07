@@ -1,3 +1,3 @@
 from typing import TypedDict
 
-info_for_full_address = TypedDict("info_for_full_address", {"full_address": str})
+full_address_type = TypedDict("full_address_type", {"full_address": str})

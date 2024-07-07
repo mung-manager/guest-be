@@ -1,8 +1,20 @@
-from django.db.models import Case, IntegerField, Sum, When
+from typing import Annotated, Any
+
+from django.db.models import (
+    BooleanField,
+    Case,
+    IntegerField,
+    Q,
+    QuerySet,
+    Sum,
+    Value,
+    When,
+)
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer, CustomerTicket
 from mung_manager.customers.selectors.abstracts import AbstractCustomerTicketSelector
+from mung_manager.customers.types import is_expired_type
 from mung_manager.tickets.enums import TicketType
 
 
@@ -81,4 +93,38 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
                     output_field=IntegerField(),
                 )
             ),
+        )
+
+    def get_queryset_by_customer_for_parchase_list(
+        self, customer: Customer
+    ) -> QuerySet[Annotated[CustomerTicket, is_expired_type], dict[str, Any]]:
+        """
+        고객의 아이디로 해당 고객이 구매한 티켓 목록과 상태를 조회합니다.
+
+        Args:
+            customer (Customer): 고객 아이디
+
+        Returns:
+            QuerySet[Annotated[CustomerTicket, is_expired_type], dict[str, Any]]: 정의된 반환값
+        """
+
+        return (
+            CustomerTicket.objects.filter(customer=customer)
+            .select_related("ticket")
+            .annotate(
+                is_expired=Case(
+                    When(Q(expired_at__lt=timezone.now()) | Q(unused_count=0), then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                )
+            )
+            .values(
+                "ticket__ticket_type",
+                "ticket__usage_time",
+                "ticket__usage_count",
+                "is_expired",
+                "ticket__price",
+                "created_at",
+                "expired_at",
+            )
         )
