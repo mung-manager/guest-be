@@ -72,17 +72,22 @@ class PetKindergardenSummaryInfoAPI(APIAuthMixin, APIView):
 
 class PetKindergardenDetailInfoAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
-        name = serializers.CharField(label="반려동물 유치원 이름")
-        profile_thumbnail_url = serializers.URLField(label="프로필 이미지 URL")
-        visible_phone_number = serializers.ListField(child=serializers.CharField(), label="노출 전화번호")
-        business_start_hour = serializers.TimeField(label="영업 시작 시간", format="%H:%M")
-        business_end_hour = serializers.TimeField(label="영업 종료 시간", format="%H:%M")
-        road_address = serializers.CharField(label="도로명 주소")
-        abbr_address = serializers.CharField(label="지번 주소")
-        detail_address = serializers.CharField(label="상세 주소")
-        guide_message = serializers.CharField(label="안내 메시지")
-        reservation_availability_option = serializers.CharField(label="예약 가능 설정")
-        reservation_change_option = serializers.CharField(label="예약 변경 옵션")
+        pet_kindergarden = inline_serializer(
+            fields={
+                "name": serializers.CharField(label="반려동물 유치원 이름"),
+                "profile_thumbnail_url": serializers.URLField(label="프로필 이미지 URL"),
+                "visible_phone_number": serializers.ListField(child=serializers.CharField(), label="노출 전화번호"),
+                "business_start_hour": serializers.TimeField(label="영업 시작 시간", format="%H:%M"),
+                "business_end_hour": serializers.TimeField(label="영업 종료 시간", format="%H:%M"),
+                "road_address": serializers.CharField(label="도로명 주소"),
+                "abbr_address": serializers.CharField(label="지번 주소"),
+                "detail_address": serializers.CharField(label="상세 주소"),
+                "guide_message": serializers.CharField(label="안내 메시지"),
+                "reservation_availability_option": serializers.CharField(label="예약 가능 설정"),
+                "reservation_change_option": serializers.CharField(label="예약 변경 옵션"),
+            },
+            label="반려동물 유치원",
+        )
         tickets = inline_serializer(
             many=True,
             fields={
@@ -102,19 +107,5 @@ class PetKindergardenDetailInfoAPI(APIAuthMixin, APIView):
     def get(self, request: Request) -> Response:
         pet_kindergarden = request.pet_kindergarden
         tickets = self._ticket_selector.get_querset_by_pet_kindergarden_id_for_undeleted_ticket(pet_kindergarden.id)
-        pet_kindergarden_data = {
-            "name": pet_kindergarden.name,
-            "profile_thumbnail_url": pet_kindergarden.profile_thumbnail_url,
-            "visible_phone_number": pet_kindergarden.visible_phone_number,
-            "business_start_hour": pet_kindergarden.business_start_hour,
-            "business_end_hour": pet_kindergarden.business_end_hour,
-            "road_address": pet_kindergarden.road_address,
-            "abbr_address": pet_kindergarden.abbr_address,
-            "detail_address": pet_kindergarden.detail_address,
-            "guide_message": pet_kindergarden.guide_message,
-            "reservation_availability_option": pet_kindergarden.reservation_availability_option,
-            "reservation_change_option": pet_kindergarden.reservation_change_option,
-            "tickets": tickets,
-        }
-        data = self.OutputSerializer(pet_kindergarden_data).data
+        data = self.OutputSerializer({"pet_kindergarden": request.pet_kindergarden, "tickets": tickets}).data
         return Response(data=data, status=status.HTTP_200_OK)
