@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import Any
 
-from django.db.models import QuerySet
+from django.db.models import Case, When, Value, CharField, QuerySet
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer
@@ -10,7 +10,7 @@ from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.enums import ReservationStatus
 from mung_manager.reservations.models import Reservation
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
-from mung_manager.tickets.enums import TicketType
+from mung_manager.tickets.enums import TicketStatus, TicketType
 
 
 class ReservationSelector(AbstractReservationSelector):
@@ -86,7 +86,7 @@ class ReservationSelector(AbstractReservationSelector):
         return reservation_list
 
     def get_queryset_by_customer_and_pet_kindergarden_for_detail(
-        self, customer: Customer, pet_kindergarden: PetKindergarden
+        self, customer: Customer, pet_kindergarden: PetKindergarden, ticket_status: str
     ) -> QuerySet | list[dict[str, Any]]:
         """
         고객 객체와 반려동물 유치원 객체로 등원 예정인 예약 상세 목록을 조회합니다.
@@ -94,17 +94,41 @@ class ReservationSelector(AbstractReservationSelector):
         Args:
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            ticket_status (str): 티켓 상태
 
         Returns:
-            list[dict[str, Any]]: 예약 리스트 반환
+            QuerySet | list[dict[str, Any]]: 쿼리셋 및 예약 리스트 반환
         """
-        reservations = Reservation.objects.filter(
-            customer=customer,
-            pet_kindergarden=pet_kindergarden,
-            reserved_at__gt=timezone.now(),
-            reservation_status=ReservationStatus.COMPLETED.value,
-        ).select_related("customer_pet")
+        # 티켓 상태에 따른 쿼리셋 호출
+        reservations = Reservation.objects.none()
+        if ticket_status == TicketStatus.PENDING.value:
+            reservations = Reservation.objects.filter(
+                customer=customer,
+                pet_kindergarden=pet_kindergarden,
+                reserved_at__gt=timezone.now(),
+                reservation_status=ReservationStatus.COMPLETED.value,
+            ).select_related("customer_pet")
 
+        if ticket_status == TicketStatus.COMPLETED.value:
+            reservations = Reservation.objects.filter(
+                customer=customer,
+                pet_kindergarden=pet_kindergarden,
+                reserved_at__lt=timezone.now(),
+                reservation_status=ReservationStatus.COMPLETED.value,
+            ).select_related("customer_pet")
+
+        # 등원 여부 계산
+        reservations = reservations.annotate(
+            attendance_status=Case(
+                When(reserved_at__gt=timezone.now(), then=Value('등원 전')),
+                When(is_attended=True, then=Value('등원 완료')),
+                When(reserved_at__lt=timezone.now(), is_attended=False, then=Value('결석')),
+                default=Value(''),
+                output_field=CharField(),
+            )
+        )
+
+        # 연박이 없는 경우
         if not reservations.filter(is_extented=True).exists():
             return reservations.values(
                 "id",
@@ -117,6 +141,7 @@ class ReservationSelector(AbstractReservationSelector):
                 "customer_ticket__ticket__usage_count",
                 "customer_ticket__ticket__price",
                 "pet_kindergarden__reservation_change_option",
+                "attendance_status",
             )
 
         # 각 예약을 그룹화
@@ -148,6 +173,7 @@ class ReservationSelector(AbstractReservationSelector):
                 "customer_pet_name": reservation.customer_pet.name,
                 "is_attended": reservation.is_attended,
                 "is_cancellable": is_cancellable,
+                "attendance_status": reservation.attendance_status,
             }
 
             if ticket_type == TicketType.TIME.value:

@@ -14,6 +14,7 @@ from mung_manager.commons.selectors import (
 from mung_manager.commons.utils import inline_serializer
 from mung_manager.customers.containers import CustomerContainer
 from mung_manager.reservations.containers import ReservationContainer
+from mung_manager.tickets.enums import TicketStatus
 
 
 class CustomerTicketCountAPI(APIAuthMixin, APIView):
@@ -92,6 +93,13 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         )
         offset = serializers.IntegerField(default=0, min_value=0, help_text="페이지 오프셋")
 
+    class InputSerializer(BaseSerializer):
+        ticket_status = serializers.ChoiceField(
+            required=True,
+            choices=[status.value for status in TicketStatus],
+            label="티켓 상태",
+        )
+
     class OutputSerializer(BaseSerializer):
         reservation_id = serializers.IntegerField(label="예약 ID")
         ticket_type = serializers.CharField(label="티켓 타입")
@@ -102,6 +110,7 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         is_cancellable = serializers.BooleanField(label="당일 취소 가능 여부")
         usage_time = serializers.IntegerField(label="사용 시간", required=False, allow_null=True)
         used_ticket_count = serializers.IntegerField(label="사용한 티켓 횟수", required=False, allow_null=True)
+        attendance_status = serializers.CharField(label="등원 여부")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -109,6 +118,8 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         self._reservation_selector = ReservationContainer.reservation_selector()
 
     def get(self, request: Request) -> Response:
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
         filter_serializer = self.FilterSerializer(data=request.query_params)
         filter_serializer.is_valid(raise_exception=True)
         user = request.user
@@ -119,7 +130,9 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
             code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
         )
         reservation = self._reservation_selector.get_queryset_by_customer_and_pet_kindergarden_for_detail(
-            customer, pet_kindergarden
+            customer=customer,
+            pet_kindergarden=pet_kindergarden,
+            ticket_status=input_serializer.validated_data["ticket_status"],
         )
         pagination_reservation_data = get_paginated_data(
             pagination_class=self.Pagination,
