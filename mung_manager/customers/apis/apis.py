@@ -105,10 +105,11 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         reserved_at = serializers.DateTimeField(label="예약 시간", format="%Y-%m-%d %H:%M")
         customer_pet_name = serializers.CharField(label="반려동물 이름")
         is_attended = serializers.BooleanField(label="참석 여부")
-        is_cancellable = serializers.BooleanField(label="당일 취소 가능 여부")
-        usage_time = serializers.IntegerField(label="사용 시간", required=False, allow_null=True)
-        used_ticket_count = serializers.IntegerField(label="사용한 티켓 횟수", required=False, allow_null=True)
+        reservation_change_option = serializers.CharField(label="예약 변경 설정")
+        usage_time = serializers.IntegerField(label="사용 가능한 시간", allow_null=True)
+        used_ticket_count = serializers.IntegerField(label="사용한 티켓 횟수")
         attendance_status = serializers.CharField(label="등원 여부")
+        price = serializers.IntegerField(label="티켓 금액")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

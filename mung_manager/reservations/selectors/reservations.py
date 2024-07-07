@@ -1,15 +1,15 @@
 from collections import defaultdict
-from typing import Any
+from typing import Annotated, Any
 
-from django.db.models import Case, CharField, QuerySet, Value, When
+from django.db.models import Case, CharField, F, QuerySet, Value, When
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer
-from mung_manager.pet_kindergardens.enums import ReservationChangeOption
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.enums import ReservationStatus
 from mung_manager.reservations.models import Reservation
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
+from mung_manager.reservations.types import attendance_type
 from mung_manager.tickets.enums import TicketStatus, TicketType
 
 
@@ -87,7 +87,7 @@ class ReservationSelector(AbstractReservationSelector):
 
     def get_queryset_by_customer_and_pet_kindergarden_for_detail(
         self, customer: Customer, pet_kindergarden: PetKindergarden, ticket_status: str
-    ) -> QuerySet | list[dict[str, Any]]:
+    ) -> QuerySet[Annotated[Reservation, attendance_type]] | list[dict[str, Any]]:
         """
         고객 객체와 반려동물 유치원 객체로 등원 예정인 예약 상세 목록을 조회합니다.
 
@@ -97,23 +97,31 @@ class ReservationSelector(AbstractReservationSelector):
             ticket_status (str): 티켓 상태
 
         Returns:
-            QuerySet | list[dict[str, Any]]: 쿼리셋 및 예약 리스트 반환
+            QuerySet[Annotated[Reservation, attendance_type]] | list[dict[str, Any]]: 정의된 응답 스키마 및 예약 리스트 반환
         """
         reservations = self.generate_reservation_queryset(customer, pet_kindergarden, ticket_status)
 
         # 연박이 없는 경우
         if not reservations.filter(is_extented=True).exists():
-            return reservations.values(
-                "id",
-                "customer_ticket__ticket__ticket_type",
+            return reservations.annotate(
+                reservation_id=F("id"),
+                ticket_type=F("customer_ticket__ticket__ticket_type"),
+                customer_pet_name=F("customer_pet__name"),
+                reservation_change_option=F("pet_kindergarden__reservation_change_option"),
+                price=F("customer_ticket__ticket__price"),
+                usage_time=F("customer_ticket__ticket__usage_time"),
+                used_ticket_count=F("customer_ticket__ticket__usage_count"),
+            ).values(
+                "reservation_id",
+                "ticket_type",
                 "created_at",
                 "reserved_at",
-                "customer_pet__name",
+                "customer_pet_name",
                 "is_attended",
-                "customer_ticket__ticket__usage_time",
-                "customer_ticket__ticket__usage_count",
-                "customer_ticket__ticket__price",
-                "pet_kindergarden__reservation_change_option",
+                "usage_time",
+                "used_ticket_count",
+                "price",
+                "reservation_change_option",
                 "attendance_status",
             )
 
@@ -146,9 +154,6 @@ class ReservationSelector(AbstractReservationSelector):
         for reservation_id, group in grouped_reservations.items():
             reservation = group[0]
             ticket_type = reservation.customer_ticket.ticket.ticket_type
-            is_cancellable = (
-                reservation.pet_kindergarden.reservation_change_option == ReservationChangeOption.SAME_DAY_CHANGE.value
-            )
 
             reservation_data = {
                 "reservation_id": reservation_id,
@@ -157,13 +162,16 @@ class ReservationSelector(AbstractReservationSelector):
                 "reserved_at": reservation.reserved_at,
                 "customer_pet_name": reservation.customer_pet.name,
                 "is_attended": reservation.is_attended,
-                "is_cancellable": is_cancellable,
+                "reservation_change_option": reservation.pet_kindergarden.reservation_change_option,
                 "attendance_status": reservation.attendance_status,
+                "price": reservation.customer_ticket.ticket.price,
+                "used_ticket_count": 1,
             }
 
             if ticket_type == TicketType.TIME.value:
                 reservation_data["usage_time"] = reservation.customer_ticket.ticket.usage_time
             elif ticket_type == TicketType.HOTEL.value:
+                reservation_data["usage_time"] = None
                 reservation_data["used_ticket_count"] = accumulate_count[reservation_id]
                 reservation_data["created_at"] = min(res.created_at for res in group)
                 reservation_data["reserved_at"] = min(res.reserved_at for res in group)
@@ -208,6 +216,6 @@ class ReservationSelector(AbstractReservationSelector):
                 When(reserved_at__lt=timezone.now(), is_attended=False, then=Value("결석")),
                 default=Value(""),
                 output_field=CharField(),
-            )
+            ),
         )
         return reservations
