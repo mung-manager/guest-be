@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mung_manager.apis.mixins import APIAuthMixin
+from mung_manager.apis.pagination import LimitOffsetPagination, get_paginated_data
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import (
@@ -76,3 +77,49 @@ class ReservationListAPI(APIAuthMixin, APIView):
             }
         ).data
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
+    class Pagination(LimitOffsetPagination):
+        default_limit = 10
+
+    class FilterSerializer(BaseSerializer):
+        limit = serializers.IntegerField(
+            default=10,
+            min_value=1,
+            max_value=50,
+            help_text="페이지당 조회 개수",
+        )
+        offset = serializers.IntegerField(default=0, min_value=0, help_text="페이지 오프셋")
+
+    class OutputSerializer(serializers.Serializer):
+        ticket_type = serializers.CharField(source="ticket__ticket_type", label="티켓 타입")
+        usage_time = serializers.IntegerField(source="ticket__usage_time", label="사용 가능한 시간")
+        usage_count = serializers.IntegerField(source="ticket__usage_count", label="사용 가능한 횟수")
+        price = serializers.IntegerField(source="ticket__price", label="금액")
+        created_at = serializers.DateTimeField(label="생성 시간")
+        expired_at = serializers.DateTimeField(label="만료 시간")
+        is_expired = serializers.BooleanField(label="만료 여부")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._customer_ticket_selector = CustomerContainer.customer_ticket_selector()
+
+    def get(self, request: Request) -> Response:
+        user = request.user
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
+        )
+        tickets = self._customer_ticket_selector.get_queryset_by_customer_for_parchase_list(customer)
+        tickets_data = get_paginated_data(
+            pagination_class=self.Pagination,
+            serializer_class=self.OutputSerializer,
+            queryset=tickets,
+            request=request,
+            view=self,
+        )
+        return Response(data=tickets_data, status=status.HTTP_200_OK)

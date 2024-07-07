@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Annotated, Any, Optional
 
 from django.db.models.query import QuerySet
 
 from mung_manager.authentications.models import User
-from mung_manager.customers.models import Customer, CustomerPet
+from mung_manager.customers.models import Customer, CustomerPet, CustomerTicket
+from mung_manager.customers.types import is_expired_type
 from mung_manager.errors.exceptions import NotImplementedException
 
 
@@ -49,4 +50,10 @@ class AbstractCustomerTicketSelector(ABC):
 
     @abstractmethod
     def get_by_customer_for_count(self, customer: Customer) -> dict[str, int]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_queryset_by_customer_for_parchase_list(
+        self, customer: Customer
+    ) -> QuerySet[Annotated[CustomerTicket, is_expired_type], dict[str, Any]]:
         raise NotImplementedException()
