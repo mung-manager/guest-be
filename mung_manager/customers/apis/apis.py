@@ -85,6 +85,11 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         default_limit = 10
 
     class FilterSerializer(BaseSerializer):
+        ticket_status = serializers.ChoiceField(
+            required=True,
+            choices=[status.value for status in TicketStatus],
+            label="티켓 상태",
+        )
         limit = serializers.IntegerField(
             default=10,
             min_value=1,
@@ -92,13 +97,6 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
             help_text="페이지당 조회 개수",
         )
         offset = serializers.IntegerField(default=0, min_value=0, help_text="페이지 오프셋")
-
-    class InputSerializer(BaseSerializer):
-        ticket_status = serializers.ChoiceField(
-            required=True,
-            choices=[status.value for status in TicketStatus],
-            label="티켓 상태",
-        )
 
     class OutputSerializer(BaseSerializer):
         reservation_id = serializers.IntegerField(label="예약 ID")
@@ -118,8 +116,6 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         self._reservation_selector = ReservationContainer.reservation_selector()
 
     def get(self, request: Request) -> Response:
-        input_serializer = self.InputSerializer(data=request.data)
-        input_serializer.is_valid(raise_exception=True)
         filter_serializer = self.FilterSerializer(data=request.query_params)
         filter_serializer.is_valid(raise_exception=True)
         user = request.user
@@ -132,7 +128,7 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         reservation = self._reservation_selector.get_queryset_by_customer_and_pet_kindergarden_for_detail(
             customer=customer,
             pet_kindergarden=pet_kindergarden,
-            ticket_status=input_serializer.validated_data["ticket_status"],
+            ticket_status=filter_serializer.validated_data["ticket_status"],
         )
         pagination_reservation_data = get_paginated_data(
             pagination_class=self.Pagination,
