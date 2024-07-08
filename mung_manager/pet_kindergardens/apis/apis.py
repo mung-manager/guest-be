@@ -6,11 +6,12 @@ from rest_framework.views import APIView
 from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.authentications.containers import AuthenticationContainer
 from mung_manager.commons.base.serializers import BaseSerializer
+from mung_manager.commons.utils import inline_serializer
 from mung_manager.pet_kindergardens.containers import PetKindergardenContainer
+from mung_manager.tickets.containers import TicketContainer
 
 
 class PetKindergardenListAPI(APIAuthMixin, APIView):
-
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="유치원 아이디")
         name = serializers.CharField(label="유치원 이름")
@@ -28,7 +29,6 @@ class PetKindergardenListAPI(APIAuthMixin, APIView):
 
 
 class PetKindergardenSelectionAPI(APIAuthMixin, APIView):
-
     class InputSerializer(BaseSerializer):
         pet_kindergarden_id = serializers.IntegerField(label="유치원 id")
 
@@ -65,10 +65,47 @@ class PetKindergardenSummaryInfoAPI(APIAuthMixin, APIView):
         business_start_hour = serializers.TimeField(label="영업 시작 시간", format="%H:%M")
         business_end_hour = serializers.TimeField(label="영업 종료 시간", format="%H:%M")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._pet_kindergarden_selector = PetKindergardenContainer.pet_kindergarden_selector()
-
     def get(self, request: Request) -> Response:
         pet_kindergardens_data = self.OutputSerializer(request.pet_kindergarden).data
         return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)
+
+
+class PetKindergardenDetailInfoAPI(APIAuthMixin, APIView):
+    class OutputSerializer(BaseSerializer):
+        pet_kindergarden = inline_serializer(
+            fields={
+                "name": serializers.CharField(label="반려동물 유치원 이름"),
+                "profile_thumbnail_url": serializers.URLField(label="프로필 이미지 URL"),
+                "visible_phone_number": serializers.ListField(child=serializers.CharField(), label="노출 전화번호"),
+                "business_start_hour": serializers.TimeField(label="영업 시작 시간", format="%H:%M"),
+                "business_end_hour": serializers.TimeField(label="영업 종료 시간", format="%H:%M"),
+                "road_address": serializers.CharField(label="도로명 주소"),
+                "abbr_address": serializers.CharField(label="지번 주소"),
+                "detail_address": serializers.CharField(label="상세 주소"),
+                "guide_message": serializers.CharField(label="안내 메시지"),
+                "reservation_availability_option": serializers.CharField(label="예약 가능 설정"),
+                "reservation_change_option": serializers.CharField(label="예약 변경 옵션"),
+            },
+            label="반려동물 유치원",
+        )
+        tickets = inline_serializer(
+            many=True,
+            fields={
+                "ticket_type": serializers.CharField(label="티켓 타입"),
+                "usage_time": serializers.IntegerField(label="사용 가능한 시간"),
+                "usage_count": serializers.IntegerField(label="사용 가능한 횟수"),
+                "usage_period_in_days_count": serializers.IntegerField(label="사용 기간(일) 횟수"),
+                "price": serializers.IntegerField(label="금액"),
+            },
+            label="티켓",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._ticket_selector = TicketContainer.ticket_selector()
+
+    def get(self, request: Request) -> Response:
+        pet_kindergarden = request.pet_kindergarden
+        tickets = self._ticket_selector.get_querset_by_pet_kindergarden_id_for_undeleted_ticket(pet_kindergarden.id)
+        data = self.OutputSerializer({"pet_kindergarden": request.pet_kindergarden, "tickets": tickets}).data
+        return Response(data=data, status=status.HTTP_200_OK)
