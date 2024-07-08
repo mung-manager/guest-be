@@ -1,6 +1,6 @@
 from concurrency.exceptions import RecordModifiedError
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, QuerySet
 from django.utils import timezone
 
 from mung_manager.commons.constants import SYSTEM_CODE
@@ -59,9 +59,14 @@ class ReservationService(AbstractReservationService):
             reservation (Reservation): 예약 객체
 
         Returns:
-            Customer: 고객 객체
+            None
         """
-        # if 호텔권이면 extend true면 자식까지 조회 후 변수에 담음 else 해당 예약만 변수에 담음
+        reservation_ids, reservations = self.update_reservation_status_to_canceled(reservation)
+        self.update_ticket_usage_logs(reservation_ids)
+        self.update_daily_reservations(reservation, reservations)
+        self.restore_ticket_counts(reservations)
+
+    def update_reservation_status_to_canceled(self, reservation) -> tuple[list[int], QuerySet[Reservation]]:
         reservation_ids = [reservation.id]
         if reservation.customer_ticket.ticket.ticket_type == TicketType.HOTEL.value and reservation.is_extented:
             root_id = reservation.id
@@ -75,14 +80,15 @@ class ReservationService(AbstractReservationService):
                 reservation_ids=reservation_ids
             )
         reservations.update(reservation_status=ReservationStatus.CANCELED.value)
+        return reservation_ids, reservations
 
-        # 티켓 사용 내역 로그 업데이트
+    def update_ticket_usage_logs(self, reservation_ids) -> None:
         customer_ticket_usage_logs = self._customer_ticket_usage_log_selector.get_queryset_by_reservation_ids(
             reservation_ids=reservation_ids,
         )
         customer_ticket_usage_logs.update(used_count=0)
 
-        # 변수에 있는 예약들을 확인하여 일간 예약에서 해당 예약에 대한 펫 수를 감소
+    def update_daily_reservations(self, reservation, reservations):
         reserved_at = min(res.reserved_at for res in reservations)
         end_at = max(res.end_at for res in reservations if res.end_at is not None)
         daily_reservations = self._daily_reservation_selector.get_by_pet_kindergarden_id_and_reserved_at_and_end_at(
@@ -101,7 +107,7 @@ class ReservationService(AbstractReservationService):
                 total_pet_count=F("total_pet_count") - 1, all_day_pet_count=F("all_day_pet_count") - 1
             )
 
-        # 만료날짜가 오늘 포함 이전이면 변수의 예약들의 티켓 확인후 기존 횟수권 다시 채워주기
+    def restore_ticket_counts(self, reservations):
         for reservation in reservations:
             if reservation.customer_ticket.expired_at.date() >= timezone.now().date():
                 try:
