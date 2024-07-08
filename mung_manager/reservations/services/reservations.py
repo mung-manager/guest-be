@@ -47,7 +47,10 @@ class ReservationService(AbstractReservationService):
         Returns:
             None
         """
-        if request.pet_kindergarden.reservation_change_option == ReservationChangeOption.SAME_DAY_UNCHANGE.value:
+        if (
+            request.pet_kindergarden.reservation_change_option  # type: ignore
+            == ReservationChangeOption.SAME_DAY_UNCHANGE.value
+        ):
             if reservation.reserved_at.date() == timezone.now().date():
                 raise ValidationException(
                     detail=SYSTEM_CODE.message("CANNOT_CANCEL_RESERVATION"),
@@ -101,7 +104,7 @@ class ReservationService(AbstractReservationService):
         Returns:
             None
         """
-        reservation_ids = list(reservations.values_list('id', flat=True))
+        reservation_ids = list(reservations.values_list("id", flat=True))
         customer_ticket_usage_logs = self._customer_ticket_usage_log_selector.get_queryset_by_reservation_ids(
             reservation_ids=reservation_ids,
         )
