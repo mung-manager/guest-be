@@ -229,7 +229,7 @@ class CustomerTicketPurchaseListAPIManager(BaseAPIManager):
 
 class CustomerReservationCancelAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
-        "PUT": CustomerReservationCancelAPI.as_view,
+        "DELETE": CustomerReservationCancelAPI.as_view,
     }
 
     @extend_schema(
@@ -240,7 +240,7 @@ class CustomerReservationCancelAPIManager(BaseAPIManager):
             - 고객의 반려동물 유치원 예약 취소 API 입니다.
         """,
         responses={
-            status.HTTP_200_OK: OpenApiTypes.NONE,
+            status.HTTP_204_NO_CONTENT: OpenApiTypes.NONE,
             status.HTTP_400_BAD_REQUEST: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 examples=[
@@ -277,5 +277,5 @@ class CustomerReservationCancelAPIManager(BaseAPIManager):
             ),
         },
     )
-    def put(self, request, *args, **kwargs):
-        return self.VIEWS_BY_METHOD["PUT"]()(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["DELETE"]()(request, *args, **kwargs)

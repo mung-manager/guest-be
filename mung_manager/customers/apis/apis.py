@@ -193,7 +193,7 @@ class CustomerReservationCancelAPI(APIAuthMixin, APIView):
         self._reservation_selector = ReservationContainer.reservation_selector()
         self._reservation_service = ReservationContainer.reservation_service()
 
-    def put(self, request: Request, reservation_id: int) -> Response:
+    def delete(self, request: Request, reservation_id: int) -> Response:
         reservation = get_object_or_not_found(
             self._reservation_selector.get_by_id_for_uncanceled_reservation(reservation_id=reservation_id),
             msg=SYSTEM_CODE.message("NOT_FOUND_RESERVATION"),
@@ -201,4 +201,4 @@ class CustomerReservationCancelAPI(APIAuthMixin, APIView):
         )
         self._reservation_service.validate_reservation_cancellation(request, reservation)
         self._reservation_service.cancel_reservation(reservation)
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)
