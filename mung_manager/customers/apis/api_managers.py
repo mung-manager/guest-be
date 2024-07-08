@@ -4,6 +4,7 @@ from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.customers.apis.apis import (
+    CustomerReservationCancelAPI,
     CustomerTicketCountAPI,
     CustomerTicketPurchaseListAPI,
     ReservationListAPI,
@@ -18,6 +19,7 @@ from mung_manager.schemas.errors.authentications import (
 )
 from mung_manager.schemas.errors.commons import (
     ErrorAuthenticationFailedSchema,
+    ErrorInvalidParameterFormatSchema,
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
     ErrorPermissionDeniedSchema,
@@ -26,10 +28,12 @@ from mung_manager.schemas.errors.commons import (
 from mung_manager.schemas.errors.customers import (
     ErrorCustomerNotFoundSchema,
     ErrorCustomerPermissionDeniedSchema,
+    ErrorCustomerTicketConflictSchema,
 )
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
 )
+from mung_manager.schemas.errors.reservations import ErrorReservationNotFoundSchema
 
 
 class CustomerTicketCountAPIManager(BaseAPIManager):
@@ -173,3 +177,57 @@ class CustomerTicketPurchaseListAPIManager(BaseAPIManager):
     )
     def get(self, request, *args, **kwargs):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class CustomerReservationCancelAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "PUT": CustomerReservationCancelAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["고객"],
+        summary="고객의 반려동물 유치원 예약 취소",
+        description="""
+        Rogic
+            - 고객의 반려동물 유치원 예약 취소 API 입니다.
+        """,
+        responses={
+            status.HTTP_200_OK: OpenApiTypes.NONE,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorCustomerTicketConflictSchema,
+                ],
+            ),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[ErrorPermissionDeniedSchema],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorReservationNotFoundSchema,
+                    ErrorPetKindergardenNotFoundSchema,
+                ],
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def put(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["PUT"]()(request, *args, **kwargs)

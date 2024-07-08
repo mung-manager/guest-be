@@ -33,3 +33,20 @@ ErrorCustomerNotFoundSchema = OpenApiExample(
     status_codes=["404"],
     response_only=True,
 )
+
+ErrorCustomerTicketConflictSchema = OpenApiExample(
+    name="409(conflict_ticket)",
+    summary="[Conflict]: Conflict Ticket",
+    description="""
+    예약 등록에 실패했을 때 반환되는 응답입니다.
+    """,
+    value={
+        "success": False,
+        "statusCode": 409,
+        "code": "conflict_customer_ticket",
+        "message": "Reservation failed to register, please try again.",
+        "data": {},
+    },
+    status_codes=["409"],
+    response_only=True,
+)

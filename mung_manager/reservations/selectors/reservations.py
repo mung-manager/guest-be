@@ -1,6 +1,8 @@
 from collections import defaultdict
-from typing import Any
+from typing import Any, Optional
 
+from django.db import connection
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer
@@ -82,3 +84,65 @@ class ReservationSelector(AbstractReservationSelector):
             reservation_list.append(reservation_data)
 
         return reservation_list
+
+    def get_by_id_for_uncanceled_reservation(self, reservation_id: int) -> Optional[Reservation]:
+        """
+        예약 아이디로 취소되지 않은 예약을 조회합니다.
+
+        Args:
+            reservation_id (int): 예약 아이디
+
+        Returns:
+            Optional[Reservation]: 예약이 존재하면 예약 객체를 반환하고, 존재하지 않으면 None을 반환
+        """
+        try:
+            return Reservation.objects.get(id=reservation_id, reservation_status=ReservationStatus.COMPLETED.value)
+
+        except Reservation.DoesNotExist:
+            return None
+
+    def get_child_ids_by_parent_id(self, parent_id: int) -> list[tuple[int, None]]:
+        """
+        부모 예약 아이디로 모든 자식 예약 아이디를 조회합니다.
+
+        Args:
+            parent_id (int): 부모 예약 아이디
+
+        Returns:
+            list[tuple[int, int]]: 부모 예약 아이디와 모든 자식 예약 아이디를 튜플로 반환
+        """
+        with connection.cursor() as cursor:
+            query = """
+            WITH RECURSIVE CTE AS (
+                -- Anchor member: This selects the initial parent_id
+                SELECT reservation_id,parent_id
+                FROM reservation
+                WHERE parent_id = %s
+
+                UNION ALL
+
+                -- Recursive member: This joins the table to itself
+                SELECT r.reservation_id, r.parent_id
+                FROM reservation r
+                INNER JOIN CTE c ON r.parent_id = c.reservation_id
+            )
+            SELECT reservation_id
+            FROM CTE;
+            """
+            cursor.execute(query, [parent_id])
+            result = cursor.fetchall()
+        return result
+
+    def get_queryset_with_customer_ticket_and_ticket_by_ids(self, reservation_ids: list[int]) -> QuerySet[Reservation]:
+        """
+        예약 아이디 리스트로 고객 티켓과 티켓을 포함한 예약 쿼리셋을 조회합니다.
+
+        Args:
+            reservation_ids (list[int]): 예약 아이디 리스트
+
+        Returns:
+            QuerySet[Reservation]: 예약 쿼리셋을 반환이며 존재하지 않으면 빈 쿼리셋을 반환
+        """
+        return Reservation.objects.filter(id__in=reservation_ids).select_related(
+            "customer_ticket", "customer_ticket__ticket"
+        )
