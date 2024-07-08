@@ -4,9 +4,10 @@ from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.customers.apis.apis import (
+    CustomerReservationDetailListAPI,
+    CustomerReservationListAPI,
     CustomerTicketCountAPI,
     CustomerTicketPurchaseListAPI,
-    ReservationListAPI,
 )
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
@@ -79,9 +80,9 @@ class CustomerTicketCountAPIManager(BaseAPIManager):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
 
 
-class ReservationListAPIManager(BaseAPIManager):
+class CustomerReservationListAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
-        "GET": ReservationListAPI.as_view,
+        "GET": CustomerReservationListAPI.as_view,
     }
 
     @extend_schema(
@@ -90,6 +91,54 @@ class ReservationListAPIManager(BaseAPIManager):
         description="""
         Rogic
             - 고객의 예약 목록 조회 API 입니다.
+        """,
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[ErrorPermissionDeniedSchema],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPetKindergardenNotFoundSchema,
+                    ErrorCustomerNotFoundSchema,
+                ],
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class CustomerReservationDetailListAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "GET": CustomerReservationDetailListAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["고객"],
+        summary="고객의 상세 예약 목록 조회",
+        description="""
+        Rogic
+            - 고객의 상세 예약 목록 조회 API 입니다.
         """,
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
