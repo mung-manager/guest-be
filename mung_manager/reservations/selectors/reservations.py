@@ -1,10 +1,8 @@
 from collections import defaultdict
-from typing import Annotated, Any
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
-from django.db.models import Case, CharField, F, QuerySet, Value, When
 from django.db import connection
-from django.db.models import QuerySet
+from django.db.models import Case, CharField, F, QuerySet, Value, When
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer

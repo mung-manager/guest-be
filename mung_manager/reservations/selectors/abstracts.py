@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Optional, Annotated
+from typing import Annotated, Any, Optional
 
 from django.db.models import QuerySet
 
@@ -8,7 +8,6 @@ from mung_manager.customers.models import Customer
 from mung_manager.errors.exceptions import NotImplementedException
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.models import DailyReservation, Reservation
-from mung_manager.reservations.models import Reservation
 from mung_manager.reservations.types import attendance_type
 
 
