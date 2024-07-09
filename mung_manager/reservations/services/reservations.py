@@ -2,14 +2,15 @@ from concurrency.exceptions import RecordModifiedError
 from django.db import transaction
 from django.db.models import F, QuerySet
 from django.utils import timezone
-from requests import Request
 
 from mung_manager.commons.constants import SYSTEM_CODE
+from mung_manager.commons.selectors import get_object_or_not_found
 from mung_manager.customers.selectors.customer_ticket_usage_logs import (
     CustomerTicketUsageLogSelector,
 )
 from mung_manager.errors.exceptions import ValidationException
 from mung_manager.pet_kindergardens.enums import ReservationChangeOption
+from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.enums import ReservationStatus
 from mung_manager.reservations.models import Reservation
 from mung_manager.reservations.selectors.daily_reservations import (
@@ -36,21 +37,18 @@ class ReservationService(AbstractReservationService):
         self._customer_ticket_usage_log_selector = customer_ticket_usage_log_selector
 
     @staticmethod
-    def validate_reservation_cancellation(request: Request, reservation: Reservation) -> None:
+    def validate_reservation_cancellation(pet_kindergarden: PetKindergarden, reservation: Reservation) -> None:
         """
         이 함수는 당일 취소 불가능 옵션이면서 취소하려는 예약 날짜가 오늘일 때를 검증합니다.
 
         Args:
-            request (Request): request 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
             reservation (Reservation): 예약 객체
 
         Returns:
             None
         """
-        if (
-            request.pet_kindergarden.reservation_change_option  # type: ignore
-            == ReservationChangeOption.SAME_DAY_UNCHANGE.value
-        ):
+        if pet_kindergarden.reservation_change_option == ReservationChangeOption.SAME_DAY_UNCHANGE.value:
             if reservation.reserved_at.date() == timezone.now().date():
                 raise ValidationException(
                     detail=SYSTEM_CODE.message("CANNOT_CANCEL_RESERVATION"),
@@ -58,16 +56,24 @@ class ReservationService(AbstractReservationService):
                 )
 
     @transaction.atomic
-    def cancel_reservation(self, reservation: Reservation) -> None:
+    def cancel_reservation(self, pet_kindergarden: PetKindergarden, reservation_id: int) -> None:
         """
-        이 함수는 reservation 객체에 해당하는 예약을 취소하고 필요 시 티켓의 횟수를 복구합니다.
+        이 함수는 예약 아이디에 대한 검증을 하고 reservation 객체에 해당하는 예약을 취소합니다. 또한 필요 시 티켓의 횟수를 복구합니다.
 
         Args:
-            reservation (Reservation): 예약 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_id (int): 예약 아이디
 
         Returns:
             None
         """
+        reservation = get_object_or_not_found(
+            self._reservation_selector.get_by_id_for_uncanceled_reservation(reservation_id=reservation_id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_RESERVATION"),
+            code=SYSTEM_CODE.code("NOT_FOUND_RESERVATION"),
+        )
+        self.validate_reservation_cancellation(pet_kindergarden, reservation)
+
         reservations = self.update_reservation_status_to_canceled(reservation)
         self.update_ticket_usage_logs(reservations)
         self.update_daily_reservations(reservations)
