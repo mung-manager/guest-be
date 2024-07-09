@@ -4,7 +4,12 @@ from typing import Annotated, Any, Optional
 from django.db.models.query import QuerySet
 
 from mung_manager.authentications.models import User
-from mung_manager.customers.models import Customer, CustomerPet, CustomerTicket
+from mung_manager.customers.models import (
+    Customer,
+    CustomerPet,
+    CustomerTicket,
+    CustomerTicketUsageLog,
+)
 from mung_manager.customers.types import is_expired_type
 from mung_manager.errors.exceptions import NotImplementedException
 
@@ -56,4 +61,11 @@ class AbstractCustomerTicketSelector(ABC):
     def get_queryset_by_customer_for_parchase_list(
         self, customer: Customer
     ) -> QuerySet[Annotated[CustomerTicket, is_expired_type], dict[str, Any]]:
+        raise NotImplementedException()
+
+
+class AbstractCustomerTicketUsageLogSelector(ABC):
+
+    @abstractmethod
+    def get_queryset_by_reservation_ids(self, reservation_ids: list[int]) -> QuerySet[CustomerTicketUsageLog]:
         raise NotImplementedException()

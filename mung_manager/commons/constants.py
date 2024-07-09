@@ -82,6 +82,7 @@ class SYSTEM_CODE:
         "The reservation can only be scheduled for dates after the current time.",
     )
     INVALID_END_AT = ("validation_failed", "The reservation end time must be later than the start time.")
+    CANNOT_CANCEL_RESERVATION = ("cannot_cancel_reservation", "The reservation cannot be canceled.")
 
     # Ticket code
     NOT_FOUND_TICKET = ("not_found_ticket", "Ticket does not exist.")

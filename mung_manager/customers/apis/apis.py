@@ -185,3 +185,14 @@ class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
             view=self,
         )
         return Response(data=tickets_data, status=status.HTTP_200_OK)
+
+
+class CustomerReservationCancelAPI(APIAuthMixin, APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._reservation_selector = ReservationContainer.reservation_selector()
+        self._reservation_service = ReservationContainer.reservation_service()
+
+    def delete(self, request: Request, reservation_id: int) -> Response:
+        self._reservation_service.cancel_reservation(request.pet_kindergarden, reservation_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
