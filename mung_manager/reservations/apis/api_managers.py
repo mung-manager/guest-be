@@ -6,6 +6,7 @@ from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.reservations.apis.apis import (
     ReservationCustomerPetListAPI,
     ReservationCustomerTicketListAPI,
+    ReservationTicketCheckExpirationAPI,
 )
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationPasswordChangedSchema,
@@ -26,6 +27,7 @@ from mung_manager.schemas.errors.customers import ErrorCustomerPermissionDeniedS
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
 )
+from mung_manager.schemas.errors.reservations import ErrorReservationNotFoundSchema
 
 
 class ReservationCustomerPetListAPIManager(BaseAPIManager):
@@ -118,6 +120,53 @@ class ReservationCustomerTicketListAPIManager(BaseAPIManager):
                 examples=[
                     ErrorPetKindergardenNotFoundSchema,
                 ],
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class ReservationTicketCheckExpirationAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "GET": ReservationTicketCheckExpirationAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["예약"],
+        summary="예약에 사용된 티켓들의 만료일과 만료 여부 조회",
+        description="""
+        Rogic
+            - 예약 취소를 위해 예약에 사용된 티켓들의 만료일과 만료 여부를 조회합니다.
+        """,
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPermissionDeniedSchema,
+                ],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[ErrorPetKindergardenNotFoundSchema, ErrorReservationNotFoundSchema],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]

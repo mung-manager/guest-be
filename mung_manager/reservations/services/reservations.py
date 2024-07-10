@@ -167,3 +167,24 @@ class ReservationService(AbstractReservationService):
                         detail=SYSTEM_CODE.message("CONFILCT_CUSTOMER_TICKET"),
                         code=SYSTEM_CODE.code("CONFILCT_CUSTOMER_TICKET"),
                     )
+
+    def get_associated_reservation_ids_by_reservation_id(self, reservation_id: int) -> list[int]:
+        """
+        이 함수는 예약 아이디를 통해 해당 예약을 이루고 있는 예약 아이디를 반환합니다.
+
+        Args:
+            reservation_id (int): 예약 아이디
+
+        Returns:
+            list[int]: 예약 아이디 리스트 반환
+        """
+        get_object_or_not_found(
+            self._reservation_selector.get_by_id_for_uncanceled_reservation(reservation_id=reservation_id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_RESERVATION"),
+            code=SYSTEM_CODE.code("NOT_FOUND_RESERVATION"),
+        )
+
+        reservation_ids = [reservation_id]
+        child_ids = self._reservation_selector.get_child_ids_by_parent_id(parent_id=reservation_id)
+        reservation_ids.extend(map(lambda x: x[0], child_ids))
+        return reservation_ids

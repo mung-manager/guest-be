@@ -2,10 +2,11 @@ from collections import defaultdict
 from typing import Annotated, Any, Optional
 
 from django.db import connection
-from django.db.models import Case, CharField, F, QuerySet, Value, When
+from django.db.models import BooleanField, Case, CharField, F, Q, QuerySet, Value, When
 from django.utils import timezone
 
 from mung_manager.customers.models import Customer
+from mung_manager.customers.types import is_expired_type
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.enums import ReservationStatus
 from mung_manager.reservations.models import Reservation
@@ -281,4 +282,33 @@ class ReservationSelector(AbstractReservationSelector):
         """
         return Reservation.objects.filter(id__in=reservation_ids).select_related(
             "customer_ticket", "customer_ticket__ticket"
+        )
+
+    def get_queryset_with_customer_ticket_by_ids(
+        self, reservation_ids: list[int]
+    ) -> QuerySet[Annotated[Reservation, is_expired_type], dict[str, Any]]:
+        """
+        예약 아이디 리스트로 예약과 연관된 고객 티켓 쿼리셋을 조회합니다.
+
+        Args:
+            reservation_ids (list[int]): 예약 아이디 리스트
+
+        Returns:
+            QuerySet[Annotated[Reservation, is_expired_type], dict[str, Any]]: 존재하지 않을 경우 빈 쿼리셋을 반환
+        """
+        return (
+            Reservation.objects.filter(id__in=reservation_ids)
+            .select_related("customer_ticket")
+            .annotate(
+                is_expired=Case(
+                    When(Q(customer_ticket__expired_at__lt=timezone.now()), then=Value(True)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                )
+            )
+            .values(
+                "customer_ticket__id",
+                "customer_ticket__expired_at",
+                "is_expired",
+            )
         )
