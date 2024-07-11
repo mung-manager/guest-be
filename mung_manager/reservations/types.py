@@ -17,3 +17,10 @@ attendance_type = TypedDict(
         "price": int,
     },
 )
+
+is_expired_type = TypedDict(
+    "is_expired_type",
+    {
+        "is_expired": bool,
+    },
+)

@@ -9,3 +9,7 @@ class AbstractReservationService(ABC):
     @abstractmethod
     def cancel_reservation(self, pet_kindergarden: PetKindergarden, reservation_id: int) -> None:
         raise NotImplementedException()
+
+    @abstractmethod
+    def get_associated_reservation_ids_by_reservation_id(self, reservation_id: int) -> list[int]:
+        raise NotImplementedException()

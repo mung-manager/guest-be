@@ -9,6 +9,7 @@ from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import get_object_or_permission_denied
 from mung_manager.commons.utils import inline_serializer
 from mung_manager.customers.containers import CustomerContainer
+from mung_manager.reservations.containers import ReservationContainer
 
 
 class ReservationCustomerPetListAPI(APIAuthMixin, APIView):
@@ -80,4 +81,28 @@ class ReservationCustomerTicketListAPI(APIAuthMixin, APIView):
         )
         tickets = self._customer_ticket_selector.get_queryset_by_customer(customer)
         customer_tickets_data = self.OutputSerializer(tickets).data
+        return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
+
+
+class ReservationTicketCheckExpirationAPI(APIAuthMixin, APIView):
+    class OutputSerializer(BaseSerializer):
+        customer_ticket_id = serializers.IntegerField(label="티켓 아이디", source="customer_ticket__id")
+        expired_at = serializers.DateTimeField(
+            label="만료 일자", format="%Y-%m-%d", source="customer_ticket__expired_at"
+        )
+        is_expired = serializers.BooleanField(label="만료 여부")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._reservation_selector = ReservationContainer.reservation_selector()
+        self._reservation_service = ReservationContainer.reservation_service()
+
+    def get(self, request: Request, reservation_id: int) -> Response:
+        reservation_ids = self._reservation_service.get_associated_reservation_ids_by_reservation_id(
+            reservation_id=reservation_id
+        )
+        customer_tickets = self._reservation_selector.get_queryset_with_customer_ticket_by_ids(
+            reservation_ids=reservation_ids
+        )
+        customer_tickets_data = self.OutputSerializer(customer_tickets, many=True).data
         return Response(data=customer_tickets_data, status=status.HTTP_200_OK)

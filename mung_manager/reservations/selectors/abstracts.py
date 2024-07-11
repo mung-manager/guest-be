@@ -8,7 +8,7 @@ from mung_manager.customers.models import Customer
 from mung_manager.errors.exceptions import NotImplementedException
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.models import DailyReservation, Reservation
-from mung_manager.reservations.types import attendance_type
+from mung_manager.reservations.types import attendance_type, is_expired_type
 
 
 class AbstractReservationSelector(ABC):
@@ -35,6 +35,12 @@ class AbstractReservationSelector(ABC):
 
     @abstractmethod
     def get_queryset_with_customer_ticket_and_ticket_by_ids(self, reservation_ids: list[int]) -> QuerySet[Reservation]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_queryset_with_customer_ticket_by_ids(
+        self, reservation_ids: list[int]
+    ) -> QuerySet[Annotated[Reservation, is_expired_type], dict[str, Any]]:
         raise NotImplementedException()
 
 
