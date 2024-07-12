@@ -36,36 +36,9 @@ class ReservationCustomerPetListAPI(APIAuthMixin, APIView):
         return Response(data=customer_pets_data, status=status.HTTP_200_OK)
 
 
-class ReservationCustomerTicketListAPI(APIAuthMixin, APIView):
+class ReservationCustomerTicketTypesAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
-        time = inline_serializer(
-            label="시간권 예약",
-            many=True,
-            fields={
-                "id": serializers.IntegerField(label="고객 티켓 아이디"),
-                "expired_at": serializers.DateTimeField(label="만료 시간"),
-                "unused_count": serializers.IntegerField(label="잔여 횟수"),
-                "usage_time": serializers.IntegerField(label="사용 가능한 시간", source="ticket.usage_time"),
-            },
-        )
-        all_day = inline_serializer(
-            label="종일권 예약",
-            many=True,
-            fields={
-                "id": serializers.IntegerField(label="고객 티켓 아이디"),
-                "expired_at": serializers.DateTimeField(label="만료 시간"),
-                "unused_count": serializers.IntegerField(label="잔여 횟수"),
-            },
-        )
-        hotel = inline_serializer(
-            label="호텔권 예약",
-            many=True,
-            fields={
-                "id": serializers.IntegerField(label="고객 티켓 아이디"),
-                "expired_at": serializers.DateTimeField(label="만료 시간"),
-                "unused_count": serializers.IntegerField(label="잔여 횟수"),
-            },
-        )
+        ticket_types = serializers.ListField(label="티켓 타입 목록")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,9 +53,9 @@ class ReservationCustomerTicketListAPI(APIAuthMixin, APIView):
             msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
             code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
         )
-        tickets = self._customer_ticket_selector.get_queryset_by_customer(customer)
-        customer_tickets_data = self.OutputSerializer(tickets).data
-        return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
+        ticket_types = self._customer_ticket_selector.get_queryset_by_customer(customer)
+        ticket_types_data = self.OutputSerializer(ticket_types).data
+        return Response(data=ticket_types_data, status=status.HTTP_200_OK)
 
 
 class ReservationCustomerTicketTypeDetailAPI(APIAuthMixin, APIView):

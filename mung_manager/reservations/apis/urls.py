@@ -5,6 +5,7 @@ from mung_manager.reservations.apis.api_managers import (
     ReservationCustomerTicketListAPIManager,
     ReservationCustomerTicketTypeDetailAPIManager,
     ReservationPetKindergardenAvailableDatesAPIManager,
+    ReservationCustomerTicketTypesAPIManager,
     ReservationTicketCheckExpirationAPIManager,
 )
 
@@ -15,9 +16,9 @@ urlpatterns = [
         name="customer-pet-list",
     ),
     path(
-        "/customers/tickets",
-        ReservationCustomerTicketListAPIManager.as_view(),
-        name="customer-ticket-list",
+        "/customers/ticket-types",
+        ReservationCustomerTicketTypesAPIManager.as_view(),
+        name="customer-ticket-types",
     ),
     path(
         "/customers/ticket-types/details",

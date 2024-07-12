@@ -50,7 +50,7 @@ class AbstractCustomerPetSelector(ABC):
 
 class AbstractCustomerTicketSelector(ABC):
     @abstractmethod
-    def get_queryset_by_customer(self, customer: Customer) -> dict[str, list]:
+    def get_queryset_by_customer(self, customer: Customer) -> dict[str, QuerySet]:
         raise NotImplementedException()
 
     @abstractmethod

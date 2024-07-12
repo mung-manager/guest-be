@@ -8,6 +8,7 @@ from mung_manager.reservations.apis.apis import (
     ReservationCustomerTicketListAPI,
     ReservationCustomerTicketTypeDetailAPI,
     ReservationPetKindergardenAvailableDatesAPI,
+    ReservationCustomerTicketTypesAPI,
     ReservationTicketCheckExpirationAPI,
 )
 from mung_manager.schemas.errors.authentications import (
@@ -76,6 +77,7 @@ class ReservationCustomerPetListAPIManager(BaseAPIManager):
                 response=OpenApiTypes.OBJECT,
                 examples=[
                     ErrorPetKindergardenNotFoundSchema,
+                    ErrorCustomerNotFoundSchema,
                 ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
@@ -87,17 +89,17 @@ class ReservationCustomerPetListAPIManager(BaseAPIManager):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
 
 
-class ReservationCustomerTicketListAPIManager(BaseAPIManager):
+class ReservationCustomerTicketTypesAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
-        "GET": ReservationCustomerTicketListAPI.as_view,
+        "GET": ReservationCustomerTicketTypesAPI.as_view,
     }
 
     @extend_schema(
         tags=["예약"],
-        summary="고객의 잔여 티켓 목록 조회",
+        summary="고객의 잔여 티켓 타입 목록 조회",
         description="""
         Rogic
-            - 반려동물 유치원에 등록된 고객의 잔여 티켓 목록을 조회합니다.
+            - 반려동물 유치원에 등록된 고객의 잔여 티켓 타입 목록을 조회합니다.
         """,
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
@@ -126,6 +128,7 @@ class ReservationCustomerTicketListAPIManager(BaseAPIManager):
                 response=OpenApiTypes.OBJECT,
                 examples=[
                     ErrorPetKindergardenNotFoundSchema,
+                    ErrorCustomerNotFoundSchema,
                 ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
