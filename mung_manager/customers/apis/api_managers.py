@@ -143,6 +143,7 @@ class CustomerReservationDetailListAPIManager(BaseAPIManager):
         Rogic
             - 고객의 상세 예약 목록 조회 API 입니다.
         """,
+        parameters=[VIEWS_BY_METHOD["GET"]().cls.FilterSerializer],
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
             status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
