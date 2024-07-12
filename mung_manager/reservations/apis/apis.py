@@ -141,3 +141,26 @@ class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
         )
         available_dates_per_ticket_data = self.OutputSerializer({"available_dates": available_dates_data}).data
         return Response(data=available_dates_per_ticket_data, status=status.HTTP_200_OK)
+
+
+class ReservationPetKindergardenAttendanceTimesAPI(APIAuthMixin, APIView):
+    class InputSerializer(BaseSerializer):
+        usage_time = serializers.IntegerField(label="사용 가능한 시간")
+
+    class OutputSerializer(BaseSerializer):
+        attendance_times = serializers.ListField(child=serializers.CharField(), label="등원 가능 시간")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._reservation_service = ReservationContainer.reservation_service()
+
+    def get(self, request: Request) -> Response:
+        input_serializer = self.InputSerializer(data=request.query_params)
+        input_serializer.is_valid(raise_exception=True)
+        attendance_times = self._reservation_service.get_available_timeslots(
+            business_start_hour=request.pet_kindergarden.business_start_hour,
+            business_end_hour=request.pet_kindergarden.business_end_hour,
+            usage_time=input_serializer.validated_data["usage_time"],
+        )
+        attendance_times_data = self.OutputSerializer({"attendance_times": attendance_times}).data
+        return Response(data=attendance_times_data, status=status.HTTP_200_OK)

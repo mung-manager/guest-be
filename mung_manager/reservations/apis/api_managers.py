@@ -7,6 +7,7 @@ from mung_manager.reservations.apis.apis import (
     ReservationCustomerPetListAPI,
     ReservationCustomerTicketTypeDetailAPI,
     ReservationCustomerTicketTypesAPI,
+    ReservationPetKindergardenAttendanceTimesAPI,
     ReservationPetKindergardenAvailableDatesAPI,
     ReservationTicketCheckExpirationAPI,
 )
@@ -286,6 +287,55 @@ class ReservationPetKindergardenAvailableDatesAPIManager(BaseAPIManager):
                     ErrorTicketNotFoundSchema,
                     ErrorPetKindergardenNotFoundSchema,
                 ],
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class ReservationPetKindergardenAttendanceTimesAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "GET": ReservationPetKindergardenAttendanceTimesAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["예약"],
+        summary="해당 반려동물 유치원의 가능한 등원 시간 조회",
+        description="""
+        Rogic
+            - 해당 반려동물 유치원의 가능한 등원 시간을 조회합니다.
+        """,
+        parameters=[VIEWS_BY_METHOD["GET"]().cls.InputSerializer],
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPermissionDeniedSchema,
+                    ErrorCustomerPermissionDeniedSchema,
+                ],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[ErrorPetKindergardenNotFoundSchema],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
