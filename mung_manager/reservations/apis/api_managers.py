@@ -25,7 +25,7 @@ from mung_manager.schemas.errors.commons import (
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
     ErrorPermissionDeniedSchema,
-    ErrorUnknownServerSchema,
+    ErrorUnknownServerSchema, ErrorInvalidParameterFormatSchema,
 )
 from mung_manager.schemas.errors.customers import (
     ErrorCustomerNotFoundSchema,
@@ -312,6 +312,9 @@ class ReservationPetKindergardenAttendanceTimesAPIManager(BaseAPIManager):
         parameters=[VIEWS_BY_METHOD["GET"]().cls.InputSerializer],
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorInvalidParameterFormatSchema]
+            ),
             status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 examples=[
