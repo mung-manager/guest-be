@@ -128,3 +128,31 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
                 "expired_at",
             )
         )
+
+    def get_queryset_by_customer_and_ticket_type(
+        self, customer: Customer, ticket_type: str
+    ) -> QuerySet[CustomerTicket]:
+        """
+        고객 객체와 티켓 타입으로 해당 고객이 소유하고 있는 티켓 타입 중 만료되지 않은 티켓의 목록을 조회합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            ticket_type (str): 티켓 타입
+
+        Returns:
+            QuerySet[CustomerTicket]: 소유하고 있는 티켓이 존재하지 않으면 빈 쿼리셋을 반환합니다.
+        """
+        if ticket_type.endswith(TicketType.TIME.value):
+            time_value = int(ticket_type[:-2])
+            type_value = ticket_type[-2:]
+        else:
+            time_value = 0
+            type_value = ticket_type
+
+        return CustomerTicket.objects.filter(
+            customer=customer,
+            expired_at__gte=timezone.now(),
+            unused_count__gt=0,
+            ticket__ticket_type=type_value,
+            ticket__usage_time=time_value,
+        ).select_related("ticket")

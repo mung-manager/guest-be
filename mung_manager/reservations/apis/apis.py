@@ -8,6 +8,7 @@ from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import get_object_or_permission_denied
 from mung_manager.commons.utils import inline_serializer
+from mung_manager.commons.validators import InvalidTicketTypeValidator
 from mung_manager.customers.containers import CustomerContainer
 from mung_manager.reservations.containers import ReservationContainer
 
@@ -106,3 +107,34 @@ class ReservationTicketCheckExpirationAPI(APIAuthMixin, APIView):
         )
         customer_tickets_data = self.OutputSerializer(customer_tickets, many=True).data
         return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
+
+
+class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
+    class InputSerializer(BaseSerializer):
+        ticket_type = serializers.CharField(label="티켓 타입", validators=[InvalidTicketTypeValidator()])
+
+    class OutputSerializer(BaseSerializer):
+        available_dates = serializers.ListField(child=serializers.CharField(), label="예약 가능한 날짜 목록")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._reservation_service = ReservationContainer.reservation_service()
+
+    def get(self, request: Request) -> Response:
+        input_serializer = self.InputSerializer(data=request.query_params)
+        input_serializer.is_valid(raise_exception=True)
+        user = request.user
+        pet_kindergarden_id = request.pet_kindergarden.id
+        customer = get_object_or_permission_denied(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
+            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
+            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        )
+        available_dates_data = self._reservation_service.get_available_reservation_dates(
+            pet_kindergarden_id=pet_kindergarden_id,
+            customer=customer,
+            ticket_type=input_serializer.validated_data.get("ticket_type"),
+        )
+        available_dates_per_ticket_data = self.OutputSerializer({"available_dates": available_dates_data}).data
+        return Response(data=available_dates_per_ticket_data, status=status.HTTP_200_OK)

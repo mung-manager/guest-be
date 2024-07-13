@@ -86,6 +86,7 @@ class SYSTEM_CODE:
 
     # Ticket code
     NOT_FOUND_TICKET = ("not_found_ticket", "Ticket does not exist.")
+    INVALID_TICKET_TYPE = ("validation_failed", "Invalid ticket type")
 
     # File code
     MAX_FILE_SIZE = ("validation_failed", "File is too large. Max File Size")

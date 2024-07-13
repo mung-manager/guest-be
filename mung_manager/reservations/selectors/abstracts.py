@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Any, Optional
 
 from django.db.models import QuerySet
+from django_stubs_ext import ValuesQuerySet
 
 from mung_manager.customers.models import Customer
 from mung_manager.errors.exceptions import NotImplementedException
 from mung_manager.pet_kindergardens.models import PetKindergarden
-from mung_manager.reservations.models import DailyReservation, Reservation
+from mung_manager.reservations.models import DailyReservation, DayOff, Reservation
 from mung_manager.reservations.types import attendance_type, is_expired_type
 
 
@@ -49,4 +50,23 @@ class AbstractDailyReservationSelector(ABC):
     def get_by_pet_kindergarden_id_and_reserved_at_and_end_at(
         self, pet_kindergarden_id: int, reserved_at: datetime, end_at: datetime | None
     ) -> QuerySet[DailyReservation]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_queryset_for_fully_booked(
+        self,
+        pet_kindergarden_id: int,
+        date_range: list[datetime],
+        daily_pet_limit: int,
+    ) -> ValuesQuerySet[DailyReservation, date] | None:
+        raise NotImplementedException()
+
+
+class AbstractDayOffSelector(ABC):
+    @abstractmethod
+    def get_queryset_by_pet_kindergarden_id_and_date_range_for_day_off(
+        self,
+        pet_kindergarden_id: int,
+        date_range: list[datetime],
+    ) -> ValuesQuerySet[DayOff, date]:
         raise NotImplementedException()

@@ -6,6 +6,7 @@ from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.reservations.apis.apis import (
     ReservationCustomerPetListAPI,
     ReservationCustomerTicketListAPI,
+    ReservationPetKindergardenAvailableDatesAPI,
     ReservationTicketCheckExpirationAPI,
 )
 from mung_manager.schemas.errors.authentications import (
@@ -21,13 +22,14 @@ from mung_manager.schemas.errors.commons import (
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
     ErrorPermissionDeniedSchema,
-    ErrorUnknownServerSchema,
+    ErrorUnknownServerSchema, ErrorInvalidParameterFormatSchema,
 )
 from mung_manager.schemas.errors.customers import ErrorCustomerPermissionDeniedSchema
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
 )
 from mung_manager.schemas.errors.reservations import ErrorReservationNotFoundSchema
+from mung_manager.schemas.errors.tickets import ErrorTicketNotFoundSchema
 
 
 class ReservationCustomerPetListAPIManager(BaseAPIManager):
@@ -167,6 +169,61 @@ class ReservationTicketCheckExpirationAPIManager(BaseAPIManager):
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 examples=[ErrorPetKindergardenNotFoundSchema, ErrorReservationNotFoundSchema],
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+
+class ReservationPetKindergardenAvailableDatesAPIManager(BaseAPIManager):
+    VIEWS_BY_METHOD = {
+        "GET": ReservationPetKindergardenAvailableDatesAPI.as_view,
+    }
+
+    @extend_schema(
+        tags=["예약"],
+        summary="예약 가능한 날짜 목록 조회",
+        description="""
+        Rogic
+            - 선택한 티켓 타입으로 해당 반려동물 유치원의 예약 가능한 날짜 목록을 조회합니다.
+        """,
+        parameters=[VIEWS_BY_METHOD["GET"]().cls.InputSerializer],
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorInvalidParameterFormatSchema]
+            ),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPermissionDeniedSchema,
+                    ErrorCustomerPermissionDeniedSchema,
+                ],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorTicketNotFoundSchema,
+                    ErrorPetKindergardenNotFoundSchema,
+                ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
