@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 
 from django_stubs_ext import ValuesQuerySet
 
@@ -27,7 +27,6 @@ class DayOffSelector(AbstractDayOffSelector):
             ValuesQuerySet[DayOff, date]: 존재하지 않으면 빈 쿼리셋 반환
         """
 
-        return DayOff.objects.filter(
-            pet_kindergarden_id=pet_kindergarden_id,
-            day_off_at__range=date_range
-            ).values_list("day_off_at", flat=True)
+        return DayOff.objects.filter(pet_kindergarden_id=pet_kindergarden_id, day_off_at__range=date_range).values_list(
+            "day_off_at", flat=True
+        )
