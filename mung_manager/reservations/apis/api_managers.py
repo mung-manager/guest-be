@@ -19,10 +19,11 @@ from mung_manager.schemas.errors.authentications import (
 )
 from mung_manager.schemas.errors.commons import (
     ErrorAuthenticationFailedSchema,
+    ErrorInvalidParameterFormatSchema,
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
     ErrorPermissionDeniedSchema,
-    ErrorUnknownServerSchema, ErrorInvalidParameterFormatSchema,
+    ErrorUnknownServerSchema,
 )
 from mung_manager.schemas.errors.customers import (
     ErrorCustomerNotFoundSchema,
