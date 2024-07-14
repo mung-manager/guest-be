@@ -5,10 +5,12 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 
 from mung_manager.commons.constants import SYSTEM_CODE
+from mung_manager.tickets.enums import TicketType
 
 
 class InvalidPhoneNumberValidator(RegexValidator):
-    """이 클래스는 전화번호의 유효성을 검사합니다.
+    """
+    이 클래스는 전화번호의 유효성을 검사합니다.
 
     Attributes:
         regex: 전화번호 정규식
@@ -26,7 +28,8 @@ class InvalidPhoneNumberValidator(RegexValidator):
 
 
 class UniquePetNameValidator:
-    """이 클래스는 반려동물 이름의 중복을 검사합니다.
+    """
+    이 클래스는 반려동물 이름의 중복을 검사합니다.
 
     Attributes:
         message: 반려동물 이름 중복시 반환 메시지
@@ -42,7 +45,8 @@ class UniquePetNameValidator:
 
 
 class InvalidReservedAtValidator:
-    """이 클래스는 예약 가능 시간을 검사합니다.
+    """
+    이 클래스는 예약 가능 시간을 검사합니다.
 
     Attributes:
         message: 예약 가능 시간 유효성 검사 실패시 반환 메시지
@@ -58,7 +62,8 @@ class InvalidReservedAtValidator:
 
 
 class InvalidEndAtValidator:
-    """이 클래스는 종료 시간을 검사합니다.
+    """
+    이 클래스는 종료 시간을 검사합니다.
 
     Attributes:
         message: 종료 시간 유효성 검사 실패시 반환 메시지
@@ -75,3 +80,24 @@ class InvalidEndAtValidator:
             reserved_at = datetime.fromisoformat(reserved_at)
             if value <= reserved_at:
                 raise ValidationError(message=self.message, code=self.code)
+
+
+class InvalidTicketTypeValidator:
+    """
+    이 클래스는 티켓 타입을 검사합니다.
+
+    Attributes:
+        message: 티켓 타입 유효성 검사 실패시 반환 메시지
+        code: 티켓 타입 유효성 검사 실패시 반환 코드
+    """
+
+    message = SYSTEM_CODE.message("INVALID_TICKET_TYPE")
+    code = SYSTEM_CODE.code("INVALID_TICKET_TYPE")
+
+    def __call__(self, value):
+        if value.endswith(TicketType.TIME.value):
+            time_value = value[:-2]
+            if not time_value.isdigit() or int(time_value) <= 0:
+                raise ValidationError(message=self.message, code=self.code)
+        elif value not in [item.value for item in TicketType]:
+            raise ValidationError(message=self.message, code=self.code)
