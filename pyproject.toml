@@ -29,6 +29,7 @@ django-celery-results = "^2.5.1"
 pytz = "^2024.1"
 django-concurrency = "^2.5"
 typing-extensions = "^4.12.2"
+django-stubs-ext = "^5.0.2"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.2"
