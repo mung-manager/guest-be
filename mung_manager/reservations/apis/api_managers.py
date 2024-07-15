@@ -6,6 +6,7 @@ from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.reservations.apis.apis import (
     ReservationCustomerPetListAPI,
     ReservationCustomerTicketListAPI,
+    ReservationCustomerTicketTypeDetailAPI,
     ReservationPetKindergardenAvailableDatesAPI,
     ReservationTicketCheckExpirationAPI,
 )
