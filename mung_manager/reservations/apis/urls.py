@@ -2,8 +2,8 @@ from django.urls import path
 
 from mung_manager.reservations.apis.api_managers import (
     ReservationCustomerPetListAPIManager,
-    ReservationCustomerTicketListAPIManager,
     ReservationCustomerTicketTypeDetailAPIManager,
+    ReservationCustomerTicketTypesAPIManager,
     ReservationPetKindergardenAvailableDatesAPIManager,
     ReservationTicketCheckExpirationAPIManager,
 )
@@ -15,9 +15,9 @@ urlpatterns = [
         name="customer-pet-list",
     ),
     path(
-        "/customers/tickets",
-        ReservationCustomerTicketListAPIManager.as_view(),
-        name="customer-ticket-list",
+        "/customers/ticket-types",
+        ReservationCustomerTicketTypesAPIManager.as_view(),
+        name="customer-ticket-types",
     ),
     path(
         "/customers/ticket-types/details",
