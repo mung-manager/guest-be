@@ -1,21 +1,36 @@
+from datetime import date, datetime, timedelta
+
 from concurrency.exceptions import RecordModifiedError
 from django.db import transaction
 from django.db.models import F, QuerySet
 from django.utils import timezone
+from django_stubs_ext import ValuesQuerySet
 
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import get_object_or_not_found
+from mung_manager.commons.selectors import (
+    check_object_or_not_found,
+    get_object_or_not_found,
+)
+from mung_manager.customers.models import Customer
 from mung_manager.customers.selectors.customer_ticket_usage_logs import (
     CustomerTicketUsageLogSelector,
 )
+from mung_manager.customers.selectors.customer_tickets import CustomerTicketSelector
 from mung_manager.errors.exceptions import ValidationException
-from mung_manager.pet_kindergardens.enums import ReservationChangeOption
+from mung_manager.pet_kindergardens.enums import (
+    ReservationAvailabilityOption,
+    ReservationChangeOption,
+)
 from mung_manager.pet_kindergardens.models import PetKindergarden
+from mung_manager.pet_kindergardens.selectors.pet_kindergardens import (
+    PetKindergardenSelector,
+)
 from mung_manager.reservations.enums import ReservationStatus
-from mung_manager.reservations.models import Reservation
+from mung_manager.reservations.models import DailyReservation, DayOff, Reservation
 from mung_manager.reservations.selectors.daily_reservations import (
     DailyReservationSelector,
 )
+from mung_manager.reservations.selectors.days_off import DayOffSelector
 from mung_manager.reservations.selectors.reservations import ReservationSelector
 from mung_manager.reservations.services.abstracts import AbstractReservationService
 from mung_manager.tickets.enums import TicketType
@@ -31,10 +46,16 @@ class ReservationService(AbstractReservationService):
         reservation_selector: ReservationSelector,
         customer_ticket_usage_log_selector: CustomerTicketUsageLogSelector,
         daily_reservation_selector: DailyReservationSelector,
+        customer_ticket_selector: CustomerTicketSelector,
+        day_off_selector: DayOffSelector,
+        pet_kindergarden_selector: PetKindergardenSelector,
     ):
         self._reservation_selector = reservation_selector
         self._daily_reservation_selector = daily_reservation_selector
         self._customer_ticket_usage_log_selector = customer_ticket_usage_log_selector
+        self._customer_ticket_selector = customer_ticket_selector
+        self._day_off_selector = day_off_selector
+        self._pet_kindergarden_selector = pet_kindergarden_selector
 
     @staticmethod
     def validate_reservation_cancellation(pet_kindergarden: PetKindergarden, reservation: Reservation) -> None:
@@ -188,3 +209,106 @@ class ReservationService(AbstractReservationService):
         child_ids = self._reservation_selector.get_child_ids_by_parent_id(parent_id=reservation_id)
         reservation_ids.extend(map(lambda x: x[0], child_ids))
         return reservation_ids
+
+    def filter_available_reservation_dates(
+        self,
+        start_date: datetime,
+        end_date: datetime,
+        day_off_dates_queryset: ValuesQuerySet[DayOff, date],
+        fully_booked_dates_queryset: ValuesQuerySet[DailyReservation, date] | None,
+    ) -> list[str]:
+        """
+        휴무일 날짜 범위와 반려동물 유치원 아이디로 티켓별 예약 가능한 날짜 목록을 조회합니다.
+
+        Args:
+            start_date (str): 시작 날짜
+            end_date (str): 종료 날짜
+            day_off_dates_queryset (ValuesQuerySet[DayOff, date]): 휴무일 쿼리셋
+            fully_booked_dates_queryset (ValuesQuerySet[DailyReservation, date] | None): 정원을 초과한 날짜 쿼리셋
+
+        Returns:
+            list[str]: 티켓 정보와 예약 가능한 날짜 목록
+        """
+        day_off_dates = [day_off.strftime("%Y-%m-%d") for day_off in day_off_dates_queryset]
+        fully_booked_dates = (
+            [fully_booked.strftime("%Y-%m-%d") for fully_booked in fully_booked_dates_queryset]
+            if fully_booked_dates_queryset
+            else []
+        )
+
+        available_dates = []
+
+        current_date = start_date
+        while current_date <= end_date:
+            date_str = current_date.strftime("%Y-%m-%d")
+            if date_str not in day_off_dates and date_str not in fully_booked_dates:
+                available_dates.append(date_str)
+            current_date += timedelta(days=1)
+
+        return available_dates
+
+    def get_available_reservation_dates(
+        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str
+    ) -> list[str]:
+        """
+        반려동물 유치원 아이디, 고객 객체, 티켓 타입으로  예약 가능한 날짜 목록을 조회합니다.
+
+        Args:
+            pet_kindergarden_id (int): 반려동물 유치원 아이디
+            customer (Customer): 고객 객체
+            ticket_type (str): 티켓 타입
+
+        Returns:
+            list[str]: 예약 가능한 날짜 리스트
+        """
+        # 당일 예약 여부 조회
+        reservation_availability_option_queryset = (
+            self._pet_kindergarden_selector.get_by_pet_kindergarden_id_for_reservation_availability_option(
+                pet_kindergarden_id=pet_kindergarden_id
+            )
+        )
+
+        # 선택한 타입의 티켓 중 만료되지 않은 티켓의 목록
+        tickets_queryset = check_object_or_not_found(
+            self._customer_ticket_selector.get_queryset_by_customer_and_ticket_type(
+                customer=customer, ticket_type=ticket_type
+            ),
+            msg=SYSTEM_CODE.message("NOT_FOUND_TICKET"),
+            code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
+        )
+
+        # 검색할 시작 날짜와 종료 날짜
+        start_date = (
+            datetime.now()
+            if reservation_availability_option_queryset.first()
+            == ReservationAvailabilityOption.SAME_DAY_AVAILABILITY.value
+            else (datetime.now() + timedelta(days=1))
+        )
+        end_date = tickets_queryset.order_by("-expired_at").first().expired_at
+
+        # 휴무일 목록 조회
+        day_off_dates_queryset = self._day_off_selector.get_queryset_by_pet_kindergarden_id_and_date_range_for_day_off(
+            pet_kindergarden_id=pet_kindergarden_id, date_range=[start_date, end_date]
+        )
+
+        # 해당 유치원의 최대 정원
+        daily_pet_limit = self._pet_kindergarden_selector.get_by_pet_kindergarden_id_for_daily_pet_limit(
+            pet_kindergarden_id=pet_kindergarden_id
+        )
+
+        # 정원이 초과된 날짜 목록 조회
+        fully_booked_dates_queryset = self._daily_reservation_selector.get_queryset_for_fully_booked(
+            pet_kindergarden_id=pet_kindergarden_id,
+            date_range=[start_date, end_date],
+            daily_pet_limit=daily_pet_limit,
+        )
+
+        # 예약 가능한 날짜 추출
+        available_dates = self.filter_available_reservation_dates(
+            start_date=start_date,
+            end_date=end_date,
+            day_off_dates_queryset=day_off_dates_queryset,
+            fully_booked_dates_queryset=fully_booked_dates_queryset,
+        )
+
+        return available_dates

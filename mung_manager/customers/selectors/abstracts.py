@@ -69,6 +69,12 @@ class AbstractCustomerTicketSelector(ABC):
     ) -> QuerySet[Annotated[CustomerTicket, is_expired_type], dict[str, Any]]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_queryset_by_customer_and_ticket_type(
+        self, customer: Customer, ticket_type: str
+    ) -> QuerySet[CustomerTicket]:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketUsageLogSelector(ABC):
 

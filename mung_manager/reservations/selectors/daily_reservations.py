@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from django.db.models.query import QuerySet
+from django_stubs_ext import ValuesQuerySet
 
 from mung_manager.reservations.models import DailyReservation
 from mung_manager.reservations.selectors.abstracts import (
@@ -33,3 +34,29 @@ class DailyReservationSelector(AbstractDailyReservationSelector):
         return DailyReservation.objects.filter(
             pet_kindergarden_id=pet_kindergarden_id, reserved_at__range=[reserved_at_str, end_at_str]
         )
+
+    def get_queryset_for_fully_booked(
+        self,
+        pet_kindergarden_id: int,
+        date_range: list[datetime],
+        daily_pet_limit: int,
+    ) -> ValuesQuerySet[DailyReservation, date] | None:
+        """
+        반려동물 유치원 아이디와 예약일로 일별 예약 리스트를 조회하여 정원을 초과한 날짜를 반환합니다.
+
+        Args:
+            pet_kindergarden_id (int): 반려동물 유치원 아이디
+            date_range (list[str]): 검색할 날짜 범위 (시작일, 종료일)
+            daily_pet_limit (int): 하루 정원
+
+        Returns:
+            ValuesQuerySet[DailyReservation, date] | None: 정원이 초과한 날짜 목록 쿼리셋
+        """
+        if daily_pet_limit == -1:
+            return None
+
+        return DailyReservation.objects.filter(
+            pet_kindergarden_id=pet_kindergarden_id,
+            reserved_at__range=date_range,
+            total_pet_count__gte=daily_pet_limit,
+        ).values_list("reserved_at", flat=True)
