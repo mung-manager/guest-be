@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
 from concurrency.exceptions import RecordModifiedError
 from django.db import transaction
@@ -312,3 +312,27 @@ class ReservationService(AbstractReservationService):
         )
 
         return available_dates
+
+    def get_available_timeslots(self, business_start_hour: time, business_end_hour: time, usage_time: int) -> list[str]:
+        """
+        이 함수는 운영 시간과 사용 가능한 시간을 통해 선택 가능한 등원 시간을 반환합니다.
+
+        Args:
+            business_start_hour (time): 영업 시작 시간
+            business_end_hour (time): 영업 종료 시간
+            usage_time (int): 사용 가능한 시간
+
+        Returns:
+            list[str]: 선택 가능한 등원 시간 리스트
+        """
+        today = date.today()
+        start_datetime = datetime.combine(today, business_start_hour)
+        end_datetime = datetime.combine(today, business_end_hour) - timedelta(hours=usage_time)
+
+        available_times = []
+        current_time = start_datetime
+        while current_time <= end_datetime:
+            available_times.append(current_time.strftime("%H:%M"))
+            current_time += timedelta(minutes=30)
+
+        return available_times

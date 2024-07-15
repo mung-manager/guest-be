@@ -4,6 +4,7 @@ from mung_manager.reservations.apis.api_managers import (
     ReservationCustomerPetListAPIManager,
     ReservationCustomerTicketTypeDetailAPIManager,
     ReservationCustomerTicketTypesAPIManager,
+    ReservationPetKindergardenAttendanceTimesAPIManager,
     ReservationPetKindergardenAvailableDatesAPIManager,
     ReservationTicketCheckExpirationAPIManager,
 )
@@ -33,5 +34,10 @@ urlpatterns = [
         "/pet-kindergardens/available-dates",
         ReservationPetKindergardenAvailableDatesAPIManager.as_view(),
         name="pet-kindergarden-available-dates",
+    ),
+    path(
+        "/pet-kindergardens/attendance-times",
+        ReservationPetKindergardenAttendanceTimesAPIManager.as_view(),
+        name="pet-kindergarden-attendance-times",
     ),
 ]

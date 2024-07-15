@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, time
 
 from django.db.models import QuerySet
 
@@ -16,6 +16,10 @@ class AbstractReservationService(ABC):
 
     @abstractmethod
     def get_associated_reservation_ids_by_reservation_id(self, reservation_id: int) -> list[int]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_available_timeslots(self, business_start_hour: time, business_end_hour: time, usage_time: int) -> list[str]:
         raise NotImplementedException()
 
     @abstractmethod
