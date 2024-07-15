@@ -5,10 +5,9 @@ from rest_framework import status
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.reservations.apis.apis import (
     ReservationCustomerPetListAPI,
-    ReservationCustomerTicketListAPI,
     ReservationCustomerTicketTypeDetailAPI,
-    ReservationPetKindergardenAvailableDatesAPI,
     ReservationCustomerTicketTypesAPI,
+    ReservationPetKindergardenAvailableDatesAPI,
     ReservationTicketCheckExpirationAPI,
 )
 from mung_manager.schemas.errors.authentications import (

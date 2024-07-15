@@ -2,10 +2,9 @@ from django.urls import path
 
 from mung_manager.reservations.apis.api_managers import (
     ReservationCustomerPetListAPIManager,
-    ReservationCustomerTicketListAPIManager,
     ReservationCustomerTicketTypeDetailAPIManager,
-    ReservationPetKindergardenAvailableDatesAPIManager,
     ReservationCustomerTicketTypesAPIManager,
+    ReservationPetKindergardenAvailableDatesAPIManager,
     ReservationTicketCheckExpirationAPIManager,
 )
 
