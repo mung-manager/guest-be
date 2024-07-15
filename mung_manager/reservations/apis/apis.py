@@ -85,6 +85,37 @@ class ReservationCustomerTicketListAPI(APIAuthMixin, APIView):
         return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
 
 
+class ReservationCustomerTicketTypeDetailAPI(APIAuthMixin, APIView):
+    class InputSerializer(BaseSerializer):
+        ticket_type = serializers.CharField(label="티켓 타입", validators=[InvalidTicketTypeValidator()])
+
+    class OutputSerializer(BaseSerializer):
+        id = serializers.IntegerField(label="고객 티켓 아이디")
+        expired_at = serializers.DateTimeField(label="만료 시간")
+        unused_count = serializers.IntegerField(label="잔여 횟수")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._customer_ticket_selector = CustomerContainer.customer_ticket_selector()
+
+    def get(self, request: Request) -> Response:
+        input_serializer = self.InputSerializer(data=request.query_params)
+        input_serializer.is_valid(raise_exception=True)
+        user = request.user
+        pet_kindergarden_id = request.pet_kindergarden.id
+        customer = get_object_or_permission_denied(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
+            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
+            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        )
+        tickets = self._customer_ticket_selector.get_queryset_by_customer_and_ticket_type_for_ticket_detail(
+            customer, input_serializer.validated_data["ticket_type"]
+        )
+        customer_tickets_data = self.OutputSerializer(tickets, many=True).data
+        return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
+
+
 class ReservationTicketCheckExpirationAPI(APIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         customer_ticket_id = serializers.IntegerField(label="티켓 아이디", source="customer_ticket__id")

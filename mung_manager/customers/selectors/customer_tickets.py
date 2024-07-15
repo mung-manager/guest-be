@@ -57,6 +57,32 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
             "hotel": hotel_customer_tickets,
         }
 
+    def get_queryset_by_customer_and_ticket_type_for_ticket_detail(
+        self, customer: Customer, ticket_type: str
+    ) -> QuerySet[CustomerTicket]:
+        """
+        고객 객체와 티켓 타입으로 해당 고객이 소유하고 있는 만료되지 않은 티켓의 상세 정보를 조회합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            ticket_type (str): 티켓 타입
+
+        Returns:
+            QuerySet[CustomerTicket]: 존재하지 않으면 빈 쿼리셋 반환
+        """
+        if ticket_type in [TicketType.ALL_DAY.value, TicketType.HOTEL.value]:
+            usage_time, ticket_type = "0", ticket_type
+        else:
+            usage_time, ticket_type = ticket_type[:-2], ticket_type[-2:]
+
+        return CustomerTicket.objects.filter(
+            customer=customer,
+            expired_at__gte=timezone.now(),
+            unused_count__gt=0,
+            ticket__usage_time=usage_time,
+            ticket__ticket_type=ticket_type,
+        ).select_related("ticket")
+
     def get_by_customer_for_count(self, customer: Customer) -> dict[str, int]:
         """
         고객 객체로 해당 고객이 소유하고 있는 만료되지 않은 티켓 타입별 개수를 조회합니다.

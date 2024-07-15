@@ -19,6 +19,11 @@ urlpatterns = [
         name="customer-ticket-list",
     ),
     path(
+        "/customers/ticket-types/details",
+        ReservationCustomerTicketTypeDetailAPIManager.as_view(),
+        name="customer-ticket-type-detail",
+    ),
+    path(
         "/<int:reservation_id>/tickets/check-expiration",
         ReservationTicketCheckExpirationAPIManager.as_view(),
         name="ticket-check-expiration",
