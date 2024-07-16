@@ -116,8 +116,8 @@ class AvailableDatesAPIParameterValidator:
     code = SYSTEM_CODE.code("INVALID_PARAMETER_FORMAT")
 
     def __call__(self, attrs):
-        ticket_type = attrs.get('ticket_type')
-        ticket_id = attrs.get('ticket_id')
+        ticket_type = attrs.get("ticket_type")
+        ticket_id = attrs.get("ticket_id")
 
         if ticket_type == TicketType.HOTEL.value:
             if ticket_id is not None:
