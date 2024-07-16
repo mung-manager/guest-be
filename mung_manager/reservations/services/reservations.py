@@ -248,7 +248,7 @@ class ReservationService(AbstractReservationService):
         return available_dates
 
     def get_available_reservation_dates(
-        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str
+        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: int
     ) -> list[str]:
         """
         반려동물 유치원 아이디, 고객 객체, 티켓 타입으로  예약 가능한 날짜 목록을 조회합니다.
@@ -257,6 +257,7 @@ class ReservationService(AbstractReservationService):
             pet_kindergarden_id (int): 반려동물 유치원 아이디
             customer (Customer): 고객 객체
             ticket_type (str): 티켓 타입
+            ticket_id (int): 티켓 아이디
 
         Returns:
             list[str]: 예약 가능한 날짜 리스트
@@ -268,14 +269,23 @@ class ReservationService(AbstractReservationService):
             )
         )
 
-        # 선택한 타입의 티켓 중 만료되지 않은 티켓의 목록
-        tickets_queryset = check_object_or_not_found(
-            self._customer_ticket_selector.get_queryset_by_customer_and_ticket_type(
-                customer=customer, ticket_type=ticket_type
-            ),
-            msg=SYSTEM_CODE.message("NOT_FOUND_TICKET"),
-            code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
-        )
+        # 티켓 조회(호텔권 -> 목록 조회, 시간/종일권 -> 단일 조회)
+        if ticket_type == TicketType.HOTEL.value:
+            tickets_queryset = check_object_or_not_found(
+                self._customer_ticket_selector.get_queryset_by_customer_for_hotel_ticket_type(customer=customer),
+                msg=SYSTEM_CODE.message("NOT_FOUND_TICKET"),
+                code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
+            )
+        else:
+            tickets_queryset = get_object_or_not_found(
+                self._customer_ticket_selector.get_by_ticket_id(
+                    customer=customer,
+                    ticket_type=ticket_type,
+                    ticket_id=ticket_id,
+                ),
+                msg=SYSTEM_CODE.message("NOT_FOUND_TICKET"),
+                code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
+            )
 
         # 검색할 시작 날짜와 종료 날짜
         start_date = (
@@ -284,7 +294,11 @@ class ReservationService(AbstractReservationService):
             == ReservationAvailabilityOption.SAME_DAY_AVAILABILITY.value
             else (datetime.now() + timedelta(days=1))
         )
-        end_date = tickets_queryset.order_by("-expired_at").first().expired_at
+        end_date = (
+            tickets_queryset.order_by("-expired_at").first().expired_at
+            if ticket_type == TicketType.HOTEL.value
+            else tickets_queryset.expired_at
+        )
 
         # 휴무일 목록 조회
         day_off_dates_queryset = self._day_off_selector.get_queryset_by_pet_kindergarden_id_and_date_range_for_day_off(

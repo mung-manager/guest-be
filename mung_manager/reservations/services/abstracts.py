@@ -34,6 +34,6 @@ class AbstractReservationService(ABC):
 
     @abstractmethod
     def get_available_reservation_dates(
-        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str
+        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: int
     ) -> list[str]:
         raise NotImplementedException()

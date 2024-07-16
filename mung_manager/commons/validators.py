@@ -101,3 +101,26 @@ class InvalidTicketTypeValidator:
                 raise ValidationError(message=self.message, code=self.code)
         elif value not in [item.value for item in TicketType]:
             raise ValidationError(message=self.message, code=self.code)
+
+
+class AvailableDatesAPIParameterValidator:
+    """
+    이 클래스는 예약 가능한 날짜 조회 기능에서의 파라미터를 검사합니다.
+
+    Attributes:
+        message: 파라미터 유효성 검사 실패시 반환 메시지
+        code: 파라미터 유효성 검사 실패시 반환 코드
+    """
+
+    message = SYSTEM_CODE.message("INVALID_PARAMETER_FORMAT")
+    code = SYSTEM_CODE.code("INVALID_PARAMETER_FORMAT")
+
+    def __call__(self, attrs):
+        ticket_type = attrs.get('ticket_type')
+        ticket_id = attrs.get('ticket_id')
+
+        if ticket_type == TicketType.HOTEL.value:
+            if ticket_id is not None:
+                raise ValidationError(message=self.message, code=self.code)
+        elif ticket_id is None:
+            raise ValidationError(message=self.message, code=self.code)

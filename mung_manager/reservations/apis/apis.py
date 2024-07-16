@@ -7,7 +7,7 @@ from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import get_object_or_permission_denied
-from mung_manager.commons.validators import InvalidTicketTypeValidator
+from mung_manager.commons.validators import InvalidTicketTypeValidator, AvailableDatesAPIParameterValidator
 from mung_manager.customers.containers import CustomerContainer
 from mung_manager.reservations.containers import ReservationContainer
 
@@ -115,6 +115,10 @@ class ReservationTicketCheckExpirationAPI(APIAuthMixin, APIView):
 class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
     class InputSerializer(BaseSerializer):
         ticket_type = serializers.CharField(label="티켓 타입", validators=[InvalidTicketTypeValidator()])
+        ticket_id = serializers.IntegerField(label="티켓 아이디", required=False)
+
+        class Meta:
+            validators = [AvailableDatesAPIParameterValidator()]
 
     class OutputSerializer(BaseSerializer):
         available_dates = serializers.ListField(child=serializers.CharField(), label="예약 가능한 날짜 목록")
@@ -138,6 +142,7 @@ class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
             pet_kindergarden_id=pet_kindergarden_id,
             customer=customer,
             ticket_type=input_serializer.validated_data.get("ticket_type"),
+            ticket_id=input_serializer.validated_data.get("ticket_id"),
         )
         available_dates_per_ticket_data = self.OutputSerializer({"available_dates": available_dates_data}).data
         return Response(data=available_dates_per_ticket_data, status=status.HTTP_200_OK)
