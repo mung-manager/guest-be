@@ -70,9 +70,13 @@ class AbstractCustomerTicketSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def get_queryset_by_customer_and_ticket_type(
-        self, customer: Customer, ticket_type: str
-    ) -> QuerySet[CustomerTicket]:
+    def get_queryset_by_customer_for_hotel_ticket_type(self, customer: Customer) -> QuerySet[CustomerTicket]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_for_all_day_or_time_ticket_type(
+        self, customer: Customer, ticket_type: str, ticket_id: int
+    ) -> Optional[CustomerTicket]:
         raise NotImplementedException()
 
 
