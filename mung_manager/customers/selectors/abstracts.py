@@ -74,7 +74,9 @@ class AbstractCustomerTicketSelector(ABC):
         raise NotImplementedException()
 
     @abstractmethod
-    def get_by_ticket_id(self, customer: Customer, ticket_type: str, ticket_id: int) -> Optional[CustomerTicket]:
+    def get_for_all_day_or_time_ticket_type(
+        self, customer: Customer, ticket_type: str, ticket_id: int
+    ) -> Optional[CustomerTicket]:
         raise NotImplementedException()
 
 

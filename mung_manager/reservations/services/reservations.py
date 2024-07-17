@@ -278,7 +278,7 @@ class ReservationService(AbstractReservationService):
             )
         else:
             tickets_queryset = get_object_or_not_found(
-                self._customer_ticket_selector.get_by_ticket_id(
+                self._customer_ticket_selector.get_for_all_day_or_time_ticket_type(
                     customer=customer,
                     ticket_type=ticket_type,
                     ticket_id=ticket_id,
