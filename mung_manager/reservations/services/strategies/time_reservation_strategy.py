@@ -18,10 +18,7 @@ from mung_manager.errors.exceptions import ValidationException
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.enums import ReservationStatus
 from mung_manager.reservations.models import DailyReservation, Reservation
-from mung_manager.reservations.selectors.abstracts import (
-    AbstractDailyReservationSelector,
-    AbstractReservationSelector,
-)
+from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
 from mung_manager.reservations.services.abstracts import AbstractReservationService
 from mung_manager.reservations.services.strategies.abstract_strategy import (
     AbstractReservationStrategy,
@@ -35,12 +32,10 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         customer_pet_selector: AbstractCustomerPetSelector,
         reservation_service: AbstractReservationService,
         customer_ticket_selector: AbstractCustomerTicketSelector,
-        daily_reservation_selector: AbstractDailyReservationSelector,
         reservation_selector: AbstractReservationSelector,
     ):
         super().__init__(customer_pet_selector, reservation_service)
         self._customer_ticket_selector = customer_ticket_selector
-        self._daily_reservation_selector = daily_reservation_selector
         self._reservation_selector = reservation_selector
 
     def specific_validation(
@@ -112,7 +107,7 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         try:
             customer_ticket.used_count += 1
             customer_ticket.unused_count -= 1
-            customer_ticket.save(update_fields=["used_count", "unused_count", "version"])
+            customer_ticket.save(update_fields=["used_count", "unused_count", "updated_at", "version"])
         except RecordModifiedError:
             raise ValidationException(
                 detail=SYSTEM_CODE.message("CONFILCT_CUSTOMER_TICKET"),

@@ -46,7 +46,6 @@ class ReservationStrategyFactory:
                 customer_pet_selector=self._customer_pet_selector,
                 reservation_service=reservation_service,
                 customer_ticket_selector=self._customer_ticket_selector,
-                daily_reservation_selector=self._daily_reservation_selector,
                 reservation_selector=self._reservation_selector,
             )
         elif ticket_type == TicketType.ALL_DAY.value:
@@ -54,6 +53,7 @@ class ReservationStrategyFactory:
                 customer_pet_selector=self._customer_pet_selector,
                 reservation_service=reservation_service,
                 customer_ticket_selector=self._customer_ticket_selector,
+                reservation_selector=self._reservation_selector,
             )
         elif ticket_type == TicketType.HOTEL.value:
             return HotelReservationStrategy(
