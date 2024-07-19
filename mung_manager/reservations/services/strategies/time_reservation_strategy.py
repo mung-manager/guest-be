@@ -5,7 +5,11 @@ from django.db.models import F
 
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import check_object_or_not_found
-from mung_manager.customers.models import Customer, CustomerTicketUsageLog
+from mung_manager.customers.models import (
+    Customer,
+    CustomerTicket,
+    CustomerTicketUsageLog,
+)
 from mung_manager.customers.selectors.abstracts import (
     AbstractCustomerPetSelector,
     AbstractCustomerTicketSelector,
@@ -81,10 +85,20 @@ class TimeReservationStrategy(AbstractReservationStrategy):
                 code=SYSTEM_CODE.code("ALREADY_EXISTS_RESERVATION"),
             )
 
-    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+    def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> CustomerTicket:
+        """
+        이 함수는 주어진 정보를 바탕으로 티켓(들)을 반환합니다.
+        티켓 횟수 증감 처리를 낙관적 락을 통해 구현했습니다.
+        유저의 혼란을 방지하고자 재시도 로직은 구현하지 않았습니다.
 
-        # 티켓 횟수 증감 처리(낙관적 락 구현)
-        # 재시도 로직 필요 x -> 유저 혼란 방지
+        Args:
+            customer (Customer): 영업 시작 시간
+            reservation_data (dict): 사용자 입력
+
+        Returns:
+            CustomerTicket: 고객 티켓 객체
+        """
+
         customer_ticket = self._customer_ticket_selector.get_with_ticket_by_id_and_customer_id(
             customer_ticket_id=reservation_data["ticket_id"],
             customer_id=customer.id,
@@ -105,7 +119,26 @@ class TimeReservationStrategy(AbstractReservationStrategy):
                 code=SYSTEM_CODE.code("CONFILCT_CUSTOMER_TICKET"),
             )
 
-        # 예약 생성
+        return customer_ticket
+
+    def create_reservations(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
+    ) -> Reservation:
+        """
+        이 함수는 주어진 정보를 활용하여 예약을 생성합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict): 사용자 입력
+
+        Returns:
+            Reservation: 예약 객체
+        """
+
         reserved_at = datetime.combine(reservation_data["reserved_date"].date(), reservation_data["attendance_time"])
         end_at = reserved_at + timedelta(hours=int(reservation_data["ticket_type"][:-2]))
         reservation = Reservation.objects.create(
@@ -119,7 +152,21 @@ class TimeReservationStrategy(AbstractReservationStrategy):
             customer_ticket_id=reservation_data["ticket_id"],
         )
 
-        # 일간 예약 생성 및 증가 처리
+        return reservation
+
+    def handle_daily_reservations(self, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+        """
+        이 함수는 일간 예약과 관련된 정보를 처리합니다.
+
+        Args:
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict): 사용자 입력
+
+        Returns:
+            None
+        """
+
+        reserved_at = datetime.combine(reservation_data["reserved_date"].date(), reservation_data["attendance_time"])
         daily_reservation, created = DailyReservation.objects.get_or_create(
             pet_kindergarden_id=pet_kindergarden.id,
             reserved_at=reserved_at,
@@ -130,7 +177,18 @@ class TimeReservationStrategy(AbstractReservationStrategy):
                 time_pet_count=F("time_pet_count") + 1, total_pet_count=F("total_pet_count") + 1
             )
 
-        # 고객 티켓 사용 로그 생성
+    def handle_tickets_usage(self, customer_ticket: CustomerTicket, reservation: Reservation) -> None:
+        """
+        이 함수는 고객 티켓 사용 로그를 생성합니다.
+
+        Args:
+            customer_ticket (CustomerTicket): 고객 티켓 객체
+            reservation (Reservation): 예약 객체
+
+        Returns:
+            None
+        """
+
         CustomerTicketUsageLog.objects.create(
             customer_ticket_id=customer_ticket.id,
             reservation_id=reservation.id,

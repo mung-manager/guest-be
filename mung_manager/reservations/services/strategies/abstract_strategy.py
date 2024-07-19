@@ -2,10 +2,11 @@ from abc import ABC, abstractmethod
 
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import check_object_or_not_found
-from mung_manager.customers.models import Customer
+from mung_manager.customers.models import Customer, CustomerTicket
 from mung_manager.customers.selectors.abstracts import AbstractCustomerPetSelector
 from mung_manager.errors.exceptions import NotImplementedException, ValidationException
 from mung_manager.pet_kindergardens.models import PetKindergarden
+from mung_manager.reservations.models import Reservation
 from mung_manager.reservations.services.abstracts import AbstractReservationService
 
 
@@ -55,6 +56,29 @@ class AbstractReservationStrategy(ABC):
     ) -> None:
         raise NotImplementedException()
 
-    @abstractmethod
     def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+        customer_tickets = self.get_customer_tickets(customer, reservation_data)
+        reservation = self.create_reservations(customer, pet_kindergarden, reservation_data)
+        self.handle_daily_reservations(pet_kindergarden, reservation_data)
+        self.handle_tickets_usage(customer_tickets, reservation)
+
+    @abstractmethod
+    def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> CustomerTicket:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def create_reservations(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
+    ) -> Reservation:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def handle_daily_reservations(self, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def handle_tickets_usage(self, ticket: CustomerTicket, reservation: Reservation) -> None:
         raise NotImplementedException()
