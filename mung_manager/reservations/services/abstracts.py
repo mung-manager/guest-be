@@ -37,3 +37,9 @@ class AbstractReservationService(ABC):
         self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: int
     ) -> list[str]:
         raise NotImplementedException()
+
+    @abstractmethod
+    def register_reservation(
+        self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
+    ) -> None:
+        raise NotImplementedException()

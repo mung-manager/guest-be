@@ -4,6 +4,7 @@ from rest_framework import status
 
 from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.customers.apis.apis import (
+    CustomerCreateReservationAPI,
     CustomerReservationCancelAPI,
     CustomerReservationDetailListAPI,
     CustomerReservationListAPI,
@@ -23,17 +24,19 @@ from mung_manager.schemas.errors.commons import (
     ErrorInvalidTokenSchema,
     ErrorNotAuthenticatedSchema,
     ErrorPermissionDeniedSchema,
-    ErrorUnknownServerSchema,
+    ErrorUnknownServerSchema, ErrorInvalidParameterFormatSchema,
 )
 from mung_manager.schemas.errors.customers import (
     ErrorCustomerNotFoundSchema,
     ErrorCustomerPermissionDeniedSchema,
-    ErrorCustomerTicketConflictSchema,
+    ErrorCustomerTicketConflictSchema, ErrorCustomerPetNotFoundSchema,
 )
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
 )
-from mung_manager.schemas.errors.reservations import ErrorReservationNotFoundSchema
+from mung_manager.schemas.errors.reservations import ErrorReservationNotFoundSchema, ErrorInvalidReservedAtSchema, \
+    ErrorInvalidEndAtSchema, ErrorInvalidAttendanceTimeSchema
+from mung_manager.schemas.errors.tickets import ErrorTicketNotFoundSchema
 
 
 class CustomerTicketCountAPIManager(BaseAPIManager):
@@ -83,9 +86,10 @@ class CustomerTicketCountAPIManager(BaseAPIManager):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
 
 
-class CustomerReservationListAPIManager(BaseAPIManager):
+class CustomerReservationAPIManager(BaseAPIManager):
     VIEWS_BY_METHOD = {
         "GET": CustomerReservationListAPI.as_view,
+        "POST": CustomerCreateReservationAPI.as_view,
     }
 
     @extend_schema(
@@ -97,6 +101,10 @@ class CustomerReservationListAPIManager(BaseAPIManager):
         """,
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["GET"]().cls.OutputSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[ErrorInvalidParameterFormatSchema],
+            ),
             status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
                 examples=[
@@ -129,6 +137,63 @@ class CustomerReservationListAPIManager(BaseAPIManager):
     )
     def get(self, request, *args, **kwargs):
         return self.VIEWS_BY_METHOD["GET"]()(request, *args, **kwargs)
+
+    @extend_schema(
+        tags=["고객"],
+        summary="고객의 반려동물 유치원 예약하기",
+        description="""
+        Rogic
+            - 고객의 반려동물 유치원 예약하기 API 입니다.
+        """,
+        responses={
+            status.HTTP_200_OK: VIEWS_BY_METHOD["POST"]().cls.OutputSerializer,
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorInvalidParameterFormatSchema,
+                    ErrorInvalidReservedAtSchema,
+                    ErrorInvalidEndAtSchema,
+                    ErrorInvalidAttendanceTimeSchema,
+                    ErrorCustomerTicketConflictSchema,
+                ],
+            ),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorAuthenticationFailedSchema,
+                    ErrorNotAuthenticatedSchema,
+                    ErrorInvalidTokenSchema,
+                    ErrorAuthorizationHeaderSchema,
+                    ErrorAuthenticationPasswordChangedSchema,
+                    ErrorAuthenticationUserDeletedSchema,
+                    ErrorAuthenticationUserInactiveSchema,
+                    ErrorAuthenticationUserNotFoundSchema,
+                    ErrorTokenIdentificationSchema,
+                ],
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPermissionDeniedSchema,
+                    ErrorCustomerPermissionDeniedSchema,
+                ],
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorPetKindergardenNotFoundSchema,
+                    ErrorCustomerPetNotFoundSchema,
+                    ErrorCustomerNotFoundSchema,
+                    ErrorTicketNotFoundSchema,
+                ],
+            ),
+            status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(
+                response=OpenApiTypes.OBJECT, examples=[ErrorUnknownServerSchema]
+            ),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        return self.VIEWS_BY_METHOD["POST"]()(request, *args, **kwargs)
 
 
 class CustomerReservationDetailListAPIManager(BaseAPIManager):

@@ -12,6 +12,10 @@ from mung_manager.commons.selectors import (
     get_object_or_permission_denied,
 )
 from mung_manager.commons.utils import inline_serializer
+from mung_manager.commons.validators import (
+    CreateReservationAPIParameterValidator,
+    InvalidTicketTypeValidator,
+)
 from mung_manager.customers.containers import CustomerContainer
 from mung_manager.reservations.containers import ReservationContainer
 from mung_manager.tickets.enums import TicketStatus
@@ -196,3 +200,38 @@ class CustomerReservationCancelAPI(APIAuthMixin, APIView):
     def delete(self, request: Request, reservation_id: int) -> Response:
         self._reservation_service.cancel_reservation(request.pet_kindergarden, reservation_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CustomerCreateReservationAPI(APIAuthMixin, APIView):
+
+    class InputSerializer(BaseSerializer):
+        pet_id = serializers.IntegerField(label="반려동물 아이디")
+        ticket_type = serializers.CharField(label="티켓 타입", validators=[InvalidTicketTypeValidator()])
+        ticket_id = serializers.IntegerField(label="티켓 아이디", required=False)
+        reserved_date = serializers.DateTimeField(label="예약 날짜", format="%Y-%m-%d")
+        end_date = serializers.DateTimeField(label="퇴실 날짜", format="%Y-%m-%d", required=False)
+        attendance_time = serializers.TimeField(label="등원 시간", format="%H:%M", required=False)
+
+        class Meta:
+            validators = [CreateReservationAPIParameterValidator()]
+
+    class OutputSerializer(BaseSerializer):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+        self._reservation_service = ReservationContainer.reservation_service()
+
+    def post(self, request: Request) -> Response:
+        input_serializer = self.InputSerializer(data=request.data)
+        input_serializer.is_valid(raise_exception=True)
+        user = request.user
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_permission_denied(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
+            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        )
+        self._reservation_service.register_reservation(customer, pet_kindergarden, input_serializer.validated_data)
+        return Response(data="", status=status.HTTP_200_OK)

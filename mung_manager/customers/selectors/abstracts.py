@@ -47,6 +47,10 @@ class AbstractCustomerPetSelector(ABC):
     def get_queryset_by_customer(self, customer: Customer) -> QuerySet[CustomerPet]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def exists_by_customer_and_pet_id(self, customer: Customer, pet_id: int) -> bool:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketSelector(ABC):
     @abstractmethod
