@@ -142,7 +142,7 @@ class CreateReservationAPIParameterValidator:
         required_fields = {
             TicketType.TIME.value: ["pet_id", "ticket_type", "ticket_id", "reserved_date", "attendance_time"],
             TicketType.ALL_DAY.value: ["pet_id", "ticket_type", "ticket_id", "reserved_date"],
-            TicketType.HOTEL.value: ["pet_id", "ticket_type", "reserved_date", "end_date"]
+            TicketType.HOTEL.value: ["pet_id", "ticket_type", "reserved_date", "end_date"],
         }
 
         ticket_type = attrs.get("ticket_type")[-2:]

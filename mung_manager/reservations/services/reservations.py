@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+from typing import Optional
 
 from concurrency.exceptions import RecordModifiedError
 from django.db import transaction
@@ -259,7 +260,7 @@ class ReservationService(AbstractReservationService):
         return available_dates
 
     def get_available_reservation_dates(
-        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: int
+        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: Optional[int]
     ) -> list[str]:
         """
         반려동물 유치원 아이디, 고객 객체, 티켓 타입으로  예약 가능한 날짜 목록을 조회합니다.
@@ -306,7 +307,7 @@ class ReservationService(AbstractReservationService):
             else (datetime.now() + timedelta(days=1))
         )
         end_date = (
-            tickets_queryset.order_by("-expired_at").first().expired_at
+            tickets_queryset.order_by("-expired_at").first().expired_at + timedelta(days=1)
             if ticket_type == TicketType.HOTEL.value
             else tickets_queryset.expired_at
         )

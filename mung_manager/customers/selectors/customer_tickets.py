@@ -177,7 +177,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
         ).select_related("ticket")
 
     def get_for_all_day_or_time_ticket_type(
-        self, customer: Customer, ticket_type: str, ticket_id: int
+        self, customer: Customer, ticket_type: str, ticket_id: Optional[int]
     ) -> Optional[CustomerTicket]:
         """
         고객 객체와 티켓 아이디, 티켓 타입으로 해당 고객이 소유하고 있는 (호텔 타입이 아닌) 티켓을 조회합니다.

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, time
+from typing import Optional
 
 from django.db.models import QuerySet
 
@@ -34,7 +35,7 @@ class AbstractReservationService(ABC):
 
     @abstractmethod
     def get_available_reservation_dates(
-        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: int
+        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: Optional[int]
     ) -> list[str]:
         raise NotImplementedException()
 

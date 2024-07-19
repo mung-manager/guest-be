@@ -79,7 +79,7 @@ class AbstractCustomerTicketSelector(ABC):
 
     @abstractmethod
     def get_for_all_day_or_time_ticket_type(
-        self, customer: Customer, ticket_type: str, ticket_id: int
+        self, customer: Customer, ticket_type: str, ticket_id: Optional[int]
     ) -> Optional[CustomerTicket]:
         raise NotImplementedException()
 
