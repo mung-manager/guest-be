@@ -56,5 +56,5 @@ class HotelReservationStrategy(AbstractReservationStrategy):
                 code=SYSTEM_CODE.code("INVALID_END_AT"),
             )
 
-    # def reserve(self, customer, ticket_id) -> None:
-    #     pass
+    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+        pass

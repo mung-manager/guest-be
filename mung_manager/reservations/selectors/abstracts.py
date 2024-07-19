@@ -44,6 +44,16 @@ class AbstractReservationSelector(ABC):
     ) -> QuerySet[Annotated[Reservation, is_expired_type], dict[str, Any]]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_queryset_for_duplicate_reservation(
+        self,
+        customer_id: int,
+        customer_pet_id: int,
+        customer_ticket_id: int,
+        pet_kindergarden_id: int,
+    ) -> list[str]:
+        raise NotImplementedException()
+
 
 class AbstractDailyReservationSelector(ABC):
     @abstractmethod
@@ -59,6 +69,12 @@ class AbstractDailyReservationSelector(ABC):
         date_range: list[datetime],
         daily_pet_limit: int,
     ) -> ValuesQuerySet[DailyReservation, date] | None:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_queryset_by_pet_kindergarden_id_and_reserved_at(
+        self, pet_kindergarden_id: int, reserved_at: str
+    ) -> QuerySet[DailyReservation]:
         raise NotImplementedException()
 
 

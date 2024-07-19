@@ -39,5 +39,5 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
         )
 
-    # def reserve(self, customer, ticket_id) -> None:
-    #     pass
+    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+        pass

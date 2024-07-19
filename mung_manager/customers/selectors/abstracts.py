@@ -83,6 +83,12 @@ class AbstractCustomerTicketSelector(ABC):
     ) -> Optional[CustomerTicket]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_with_ticket_by_id_and_customer_id(
+        self, customer_ticket_id: int, customer_id: int
+    ) -> Optional[CustomerTicket]:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketUsageLogSelector(ABC):
 

@@ -209,3 +209,26 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
             )
         except CustomerTicket.DoesNotExist:
             return None
+
+    def get_with_ticket_by_id_and_customer_id(
+        self, customer_ticket_id: int, customer_id: int
+    ) -> Optional[CustomerTicket]:
+        """
+        이 함수는 고객 티켓 아이디와 고객 아이디로 티켓을 포함한 고객 티켓을 조회합니다.
+
+        Args:
+            customer_ticket_id (int): 고객 티켓 아이디
+            customer_id (int): 고객 아이디
+
+        Returns:
+            Optional[CustomerTicket]: 고객 티켓이 존재하지 않을 경우 None 반환
+        """
+        try:
+            return (
+                CustomerTicket.objects.filter(id=customer_ticket_id, customer_id=customer_id)
+                .select_related("ticket")
+                .get()
+            )
+
+        except CustomerTicket.DoesNotExist:
+            return None

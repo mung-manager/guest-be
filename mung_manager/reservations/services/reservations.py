@@ -390,4 +390,4 @@ class ReservationService(AbstractReservationService):
         ticket_type = reservation_data["ticket_type"][-2:]
         strategy = self.get_strategy(ticket_type)
         strategy.validate(customer, pet_kindergarden, reservation_data)
-        # strategy.reserve(reservation_data)  # 로그 생성, 데일리 예약 증가, 티켓 회수 등
+        strategy.reserve(customer, pet_kindergarden, reservation_data)

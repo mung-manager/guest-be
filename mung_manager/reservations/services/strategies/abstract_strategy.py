@@ -12,7 +12,9 @@ from mung_manager.reservations.services.abstracts import AbstractReservationServ
 class AbstractReservationStrategy(ABC):
 
     def __init__(
-        self, customer_pet_selector: AbstractCustomerPetSelector, reservation_service: AbstractReservationService
+        self,
+        customer_pet_selector: AbstractCustomerPetSelector,
+        reservation_service: AbstractReservationService,
     ):
         self._customer_pet_selector = customer_pet_selector
         self._reservation_service = reservation_service
@@ -21,16 +23,6 @@ class AbstractReservationStrategy(ABC):
 
         self.common_validation(customer, pet_kindergarden, reservation_data)
         self.specific_validation(customer, pet_kindergarden, reservation_data)
-
-    @abstractmethod
-    def specific_validation(
-        self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
-    ) -> None:
-        raise NotImplementedException()
-
-    # @abstractmethod
-    # def reserve(self, reservation_data: dict) -> None:
-    #     raise NotImplementedException()
 
     def common_validation(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
 
@@ -56,3 +48,13 @@ class AbstractReservationStrategy(ABC):
                 detail=SYSTEM_CODE.message("INVALID_RESERVED_AT"),
                 code=SYSTEM_CODE.code("INVALID_RESERVED_AT"),
             )
+
+    @abstractmethod
+    def specific_validation(
+        self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
+    ) -> None:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+        raise NotImplementedException()
