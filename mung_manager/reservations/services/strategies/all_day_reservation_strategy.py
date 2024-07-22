@@ -151,7 +151,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             Reservation: 예약 객체
         """
         reserved_at = datetime.combine(
-            datetime.strptime(reservation_data["reserved_date"], "%Y-%m-%d").date(),
+            reservation_data["reserved_date"].date(),
             pet_kindergarden.business_start_hour,
         )
         end_at = datetime.combine(reservation_data["reserved_date"].date(), pet_kindergarden.business_end_hour)
@@ -165,6 +165,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             customer_pet_id=reservation_data["pet_id"],
             customer_ticket_id=reservation_data["ticket_id"],
         )
+        print("3")
 
         return reservation
 

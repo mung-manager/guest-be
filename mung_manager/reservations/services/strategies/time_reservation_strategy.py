@@ -219,10 +219,16 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         unused_count = self._customer_ticket_selector.get_by_customer_ticket_id_for_unused_count(customer_tickets.id)
         pet_name = self._customer_pet_selector.get_by_pet_id_for_pet_name(reservation_data["pet_id"])
         duration = int(reservation_data["ticket_type"][:-2])
+
+        reserved_date = reservation_data["reserved_date"]
+        attendance_time = reservation_data["attendance_time"]
+        attendance_datetime = datetime.combine(reserved_date.date(), attendance_time)
+        check_out_time_datetime = attendance_datetime + timedelta(hours=duration)
+        check_out_time = check_out_time_datetime.time()
         reservation_info = {
             "attendance_date": reservation_data["reserved_date"],
             "check_in_time": reservation_data["attendance_time"],
-            "check_out_time": reservation_data["attendance_time"] + timedelta(hours=duration),
+            "check_out_time": check_out_time,
             "usage_count": 1,
             "remain_count": unused_count,
             "pet_name": pet_name,

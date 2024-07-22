@@ -78,8 +78,8 @@ class SYSTEM_CODE:
         "already_exists_reservation_customer_pet",
         "Reservation already exists for customer pet.",
     )
-    INVALID_RESERVED_AT = ("validation_failed", "The reservation time is invalid.")
-    INVALID_END_AT = ("validation_failed", "The reservation end time is invalid.")
+    INVALID_RESERVED_AT = ("validation_failed", "The reservation date is invalid.")
+    INVALID_END_AT = ("validation_failed", "The reservation end date is invalid.")
     INVALID_ATTENDANCE_TIME = ("validation_failed", "The attendance time is invalid.")
     CANNOT_MAKE_RESERVATION = ("cannot_make_reservation", "The reservation cannot be made.")
     CANNOT_CANCEL_RESERVATION = ("cannot_cancel_reservation", "The reservation cannot be canceled.")
