@@ -81,6 +81,7 @@ class SYSTEM_CODE:
     INVALID_RESERVED_AT = ("validation_failed", "The reservation time is invalid.")
     INVALID_END_AT = ("validation_failed", "The reservation end time is invalid.")
     INVALID_ATTENDANCE_TIME = ("validation_failed", "The attendance time is invalid.")
+    CANNOT_MAKE_RESERVATION = ("cannot_make_reservation", "The reservation cannot be made.")
     CANNOT_CANCEL_RESERVATION = ("cannot_cancel_reservation", "The reservation cannot be canceled.")
 
     # Ticket code
@@ -119,7 +120,7 @@ class SYSTEM_CODE:
         "no_customer_ticket_count",
         "There are no remaining ticket counts.",
     )
-    CONFILCT_CUSTOMER_TICKET = (
+    CONFLICT_CUSTOMER_TICKET = (
         "conflict_customer_ticket",
         "A conflict occurred while using the ticket. Please try again.",
     )

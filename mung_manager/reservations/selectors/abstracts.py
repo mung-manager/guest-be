@@ -54,6 +54,15 @@ class AbstractReservationSelector(ABC):
     ) -> list[str]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_queryset_for_hotel_type_reservation(
+        self,
+        customer_id: int,
+        customer_pet_id: int,
+        pet_kindergarden_id: int,
+    ) -> list[str]:
+        raise NotImplementedException()
+
 
 class AbstractDailyReservationSelector(ABC):
     @abstractmethod

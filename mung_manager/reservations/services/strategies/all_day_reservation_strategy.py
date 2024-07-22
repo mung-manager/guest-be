@@ -53,7 +53,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
         )
 
-        # 해당 날짜에 예약 여부 검증
+        # 해당 날짜에 동일한 예약의 존재 여부 검증
         if reservation_data["reserved_date"].strftime(
             "%Y-%m-%d"
         ) in self._reservation_selector.get_queryset_for_duplicate_reservation(
@@ -65,6 +65,20 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             raise ValidationException(
                 detail=SYSTEM_CODE.message("ALREADY_EXISTS_RESERVATION"),
                 code=SYSTEM_CODE.code("ALREADY_EXISTS_RESERVATION"),
+            )
+
+        # 예약하려는 날이 휴무일이나 정원이 초과하는 날인지 검증
+        if reservation_data["reserved_date"].strftime(
+            "%Y-%m-%d"
+        ) not in self._reservation_service.get_available_reservation_dates(
+            pet_kindergarden_id=pet_kindergarden.id,
+            customer=customer,
+            ticket_type=reservation_data["ticket_type"],
+            ticket_id=reservation_data.get("ticket_id"),
+        ):
+            raise ValidationException(
+                detail=SYSTEM_CODE.message("INVALID_RESERVED_AT"),
+                code=SYSTEM_CODE.code("INVALID_RESERVED_AT"),
             )
 
     def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> CustomerTicket:
@@ -108,6 +122,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
         customer: Customer,
         pet_kindergarden: PetKindergarden,
         reservation_data: dict,
+        customer_tickets: CustomerTicket | list[CustomerTicket],
     ) -> Reservation:
         """
         이 함수는 주어진 정보를 활용하여 예약을 생성합니다.
@@ -116,12 +131,15 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
             reservation_data (dict): 사용자 입력
+            customer_tickets (CustomerTicket | list[CustomerTicket]): 예약에 사용된 티켓 정보
 
         Returns:
             Reservation: 예약 객체
         """
-
-        reserved_at = datetime.combine(reservation_data["reserved_date"].date(), pet_kindergarden.business_start_hour)
+        reserved_at = datetime.combine(
+            datetime.strptime(reservation_data["reserved_date"], "%Y-%m-%d").date(),
+            pet_kindergarden.business_start_hour,
+        )
         end_at = datetime.combine(reservation_data["reserved_date"].date(), pet_kindergarden.business_end_hour)
         reservation = Reservation.objects.create(
             reserved_at=reserved_at,
@@ -136,13 +154,16 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
 
         return reservation
 
-    def handle_daily_reservations(self, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+    def handle_daily_reservations(
+        self, pet_kindergarden: PetKindergarden, reservation_data: dict, customer: Customer
+    ) -> None:
         """
         이 함수는 일간 예약과 관련된 정보를 처리합니다.
 
         Args:
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
             reservation_data (dict): 사용자 입력
+            customer (Customer): 고객 객체
 
         Returns:
             None
@@ -159,20 +180,24 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
                 time_pet_count=F("all_day_pet_count") + 1, total_pet_count=F("total_pet_count") + 1
             )
 
-    def handle_tickets_usage(self, customer_ticket: CustomerTicket, reservation: Reservation) -> None:
+    def handle_tickets_usage(
+        self,
+        customer_tickets: CustomerTicket | list[CustomerTicket],
+        reservations: Reservation | list[Reservation],
+    ) -> None:
         """
         이 함수는 고객 티켓 사용 로그를 생성합니다.
 
         Args:
-            customer_ticket (CustomerTicket): 고객 티켓 객체
-            reservation (Reservation): 예약 객체
+            customer_tickets (CustomerTicket): 고객 티켓 객체
+            reservations (Reservation): 예약 객체
 
         Returns:
             None
         """
-
-        CustomerTicketUsageLog.objects.create(
-            customer_ticket_id=customer_ticket.id,
-            reservation_id=reservation.id,
-            used_count=1,
-        )
+        if not isinstance(customer_tickets, list) and not isinstance(reservations, list):
+            CustomerTicketUsageLog.objects.create(
+                customer_ticket_id=customer_tickets.id,
+                reservation_id=reservations.id,
+                used_count=1,
+            )

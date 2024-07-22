@@ -60,4 +60,5 @@ class ReservationStrategyFactory:
                 customer_pet_selector=self._customer_pet_selector,
                 reservation_service=reservation_service,
                 customer_ticket_selector=self._customer_ticket_selector,
+                reservation_selector=self._reservation_selector,
             )

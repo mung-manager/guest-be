@@ -8,10 +8,7 @@ from django.utils import timezone
 from django_stubs_ext import ValuesQuerySet
 
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import (
-    check_object_or_not_found,
-    get_object_or_not_found,
-)
+from mung_manager.commons.selectors import get_object_or_not_found
 from mung_manager.customers.models import Customer
 from mung_manager.customers.selectors.customer_pets import CustomerPetSelector
 from mung_manager.customers.selectors.customer_ticket_usage_logs import (
@@ -283,7 +280,7 @@ class ReservationService(AbstractReservationService):
 
         # 티켓 조회(호텔권 -> 목록 조회, 시간/종일권 -> 단일 조회)
         if ticket_type == TicketType.HOTEL.value:
-            tickets_queryset = check_object_or_not_found(
+            tickets_queryset = get_object_or_not_found(
                 self._customer_ticket_selector.get_queryset_by_customer_for_hotel_ticket_type(customer=customer),
                 msg=SYSTEM_CODE.message("NOT_FOUND_TICKET"),
                 code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
