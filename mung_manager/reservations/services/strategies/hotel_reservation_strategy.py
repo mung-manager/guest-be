@@ -62,7 +62,6 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         Returns:
             None
         """
-
         # 사용 가능한 호텔 타입의 티켓이 존재하는지 검증
         check_object_or_not_found(
             self._customer_ticket_selector.get_queryset_by_customer_for_hotel_ticket_type(customer=customer),
@@ -88,7 +87,6 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             customer_id=customer.id,
             customer_pet_id=reservation_data["pet_id"],
             pet_kindergarden_id=pet_kindergarden.id,
-            customer_ticket_id=reservation_data.get("ticket_id"),
         )
         current_date = reservation_data["reserved_date"]
         while current_date < reservation_data["end_date"]:

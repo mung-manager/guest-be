@@ -24,7 +24,12 @@ class AbstractReservationStrategy(ABC):
         self._reservation_service = reservation_service
         self._reservation_selector = reservation_selector
 
-    def validate(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+    def validate(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
+    ) -> None:
         """
         이 함수는 공통 검증 로직과 티켓 타입별 검증 로직을 실행합니다.
 
@@ -36,11 +41,15 @@ class AbstractReservationStrategy(ABC):
         Returns:
             None
         """
-
         self.common_validation(customer, pet_kindergarden, reservation_data)
         self.specific_validation(customer, pet_kindergarden, reservation_data)
 
-    def common_validation(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+    def common_validation(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
+    ) -> None:
         """
         이 함수는 티켓 타입별 공통된 내용을 검증합니다.
 
@@ -52,7 +61,6 @@ class AbstractReservationStrategy(ABC):
         Returns:
             None
         """
-
         # 해당 반려동물이 해당 고객에게 속해있는지 검증
         check_object_or_not_found(
             self._customer_pet_selector.exists_by_customer_and_pet_id(
@@ -63,14 +71,13 @@ class AbstractReservationStrategy(ABC):
         )
 
         if reservation_data["ticket_type"] != TicketType.HOTEL.value:
-            # 해당 날짜에 동일한 예약의 존재 여부 검증
+            # 해당 날에 이미 예약을 했는지 검증
             if reservation_data["reserved_date"].strftime(
                 "%Y-%m-%d"
             ) in self._reservation_selector.get_queryset_for_duplicate_reservation(
                 customer_id=customer.id,
                 customer_pet_id=reservation_data["pet_id"],
                 pet_kindergarden_id=pet_kindergarden.id,
-                customer_ticket_id=reservation_data.get("ticket_id"),
             ):
                 raise ValidationException(
                     detail=SYSTEM_CODE.message("ALREADY_EXISTS_RESERVATION"),

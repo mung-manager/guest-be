@@ -41,7 +41,10 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         self._reservation_selector = reservation_selector
 
     def specific_validation(
-        self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
     ) -> None:
         """
         이 함수는 시간권 예약에 대한 검증 로직을 실행합니다.
@@ -54,7 +57,6 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         Returns:
             None
         """
-
         # 해당 고객이 주어진 티켓 타입과 티켓 아이디에 해당하는 티켓을 소유하고 있는지 검증
         check_object_or_not_found(
             self._customer_ticket_selector.get_for_all_day_or_time_ticket_type(
@@ -79,7 +81,11 @@ class TimeReservationStrategy(AbstractReservationStrategy):
                 code=SYSTEM_CODE.code("INVALID_ATTENDANCE_TIME"),
             )
 
-    def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> CustomerTicket:
+    def get_customer_tickets(
+        self,
+        customer: Customer,
+        reservation_data: dict,
+    ) -> CustomerTicket:
         """
         이 함수는 주어진 정보를 바탕으로 티켓(들)을 반환합니다.
         티켓 횟수 증감 처리를 낙관적 락을 통해 구현했습니다.
@@ -92,7 +98,6 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         Returns:
             CustomerTicket: 고객 티켓 객체
         """
-
         customer_ticket = self._customer_ticket_selector.get_with_ticket_by_id_and_customer_id(
             customer_ticket_id=reservation_data["ticket_id"],
             customer_id=customer.id,
@@ -132,7 +137,6 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         Returns:
             None
         """
-
         reserved_at = datetime.combine(reservation_data["reserved_date"].date(), reservation_data["attendance_time"])
         daily_reservation, created = DailyReservation.objects.get_or_create(
             pet_kindergarden_id=pet_kindergarden.id,
@@ -163,7 +167,6 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         Returns:
             Reservation: 예약 객체
         """
-
         reserved_at = datetime.combine(reservation_data["reserved_date"].date(), reservation_data["attendance_time"])
         end_at = reserved_at + timedelta(hours=int(reservation_data["ticket_type"][:-2]))
         reservation = Reservation.objects.create(
@@ -194,7 +197,6 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         Returns:
             None
         """
-
         CustomerTicketUsageLog.objects.create(
             customer_ticket_id=customer_tickets.id,
             reservation_id=reservations.id,

@@ -318,7 +318,6 @@ class ReservationSelector(AbstractReservationSelector):
         customer_id: int,
         customer_pet_id: int,
         pet_kindergarden_id: int,
-        customer_ticket_id: Optional[int] = None,
     ) -> list[str]:
         """
         이 함수는 중복된 예약을 찾기 위해 필터 조건에 해당하는 날짜를 반환합니다.
@@ -326,14 +325,15 @@ class ReservationSelector(AbstractReservationSelector):
         Args:
             customer_id (int): 고객 아이디
             customer_pet_id (int): 고객 반려동물 아이디
-            customer_ticket_id (Optional[int]): 고객 티켓 아이디
             pet_kindergarden_id (int): 반려동물 유치원 아이디
 
         Returns:
             list[str]: 예약 날짜 리스트를 반환하며, 존재하지 않을 경우 빈 리스트를 반환합니다.
         """
         reserved_dates = Reservation.objects.filter(
-            customer_id=customer_id, customer_pet_id=customer_pet_id, pet_kindergarden_id=pet_kindergarden_id
+            customer_id=customer_id,
+            customer_pet_id=customer_pet_id,
+            pet_kindergarden_id=pet_kindergarden_id,
         ).values_list("reserved_at", flat=True)
 
         formatted_dates = [date.strftime("%Y-%m-%d") for date in reserved_dates]
