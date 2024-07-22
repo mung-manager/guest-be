@@ -100,11 +100,14 @@ class AbstractReservationStrategy(ABC):
     ) -> None:
         raise NotImplementedException()
 
-    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> None:
+    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> dict:
         customer_tickets = self.get_customer_tickets(customer, reservation_data)
         self.handle_daily_reservations(pet_kindergarden, reservation_data, customer)
         reservations = self.create_reservations(customer, pet_kindergarden, reservation_data, customer_tickets)
         self.handle_tickets_usage(customer_tickets, reservations)
+        reservation_info = self.get_reservation_info(reservation_data, customer_tickets)
+
+        return reservation_info
 
     @abstractmethod
     def get_customer_tickets(
@@ -139,4 +142,12 @@ class AbstractReservationStrategy(ABC):
         customer_tickets: Any,
         reservations: Any,
     ) -> None:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_reservation_info(
+        self,
+        reservation_data: dict,
+        customer_tickets: Any,
+    ) -> dict:
         raise NotImplementedException()

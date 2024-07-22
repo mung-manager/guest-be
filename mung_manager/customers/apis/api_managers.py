@@ -32,6 +32,7 @@ from mung_manager.schemas.errors.customers import (
     ErrorCustomerPermissionDeniedSchema,
     ErrorCustomerPetNotFoundSchema,
     ErrorCustomerTicketConflictSchema,
+    ErrorCustomerTicketNotFoundSchema,
 )
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
@@ -188,9 +189,16 @@ class CustomerReservationAPIManager(BaseAPIManager):
                 response=OpenApiTypes.OBJECT,
                 examples=[
                     ErrorPetKindergardenNotFoundSchema,
+                    ErrorCustomerTicketNotFoundSchema,
                     ErrorCustomerPetNotFoundSchema,
                     ErrorCustomerNotFoundSchema,
                     ErrorTicketNotFoundSchema,
+                ],
+            ),
+            status.HTTP_409_CONFLICT: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                examples=[
+                    ErrorCustomerTicketConflictSchema,
                 ],
             ),
             status.HTTP_500_INTERNAL_SERVER_ERROR: OpenApiResponse(

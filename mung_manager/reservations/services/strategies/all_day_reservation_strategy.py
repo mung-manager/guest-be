@@ -36,6 +36,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
         reservation_selector: AbstractReservationSelector,
     ):
         super().__init__(customer_pet_selector, reservation_service, reservation_selector)
+        self._customer_pet_selector = customer_pet_selector
         self._customer_ticket_selector = customer_ticket_selector
         self._reservation_selector = reservation_selector
 
@@ -187,3 +188,29 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             reservation_id=reservations.id,
             used_count=1,
         )
+
+    def get_reservation_info(
+        self,
+        reservation_data: dict,
+        customer_tickets: CustomerTicket,
+    ) -> dict:
+        """
+        이 함수는 생성한 예약 정보를 반환합니다.
+
+        Args:
+            reservation_data (dict): 사용자 입력
+            customer_tickets (CustomerTicket): 고객 티켓 객체
+
+        Returns:
+            dict: 예약 정보 반환
+        """
+        unused_count = self._customer_ticket_selector.get_by_customer_ticket_id_for_unused_count(customer_tickets.id)
+        pet_name = self._customer_pet_selector.get_by_pet_id_for_pet_name(reservation_data["pet_id"])
+        reservation_info = {
+            "attendance_date": reservation_data["reserved_date"],
+            "usage_count": 1,
+            "remain_count": unused_count,
+            "pet_name": pet_name,
+        }
+
+        return reservation_info

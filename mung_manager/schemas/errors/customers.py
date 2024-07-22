@@ -34,6 +34,23 @@ ErrorCustomerNotFoundSchema = OpenApiExample(
     response_only=True,
 )
 
+ErrorCustomerTicketNotFoundSchema = OpenApiExample(
+    name="404(ticket_not_found)",
+    summary="[Not Found]: Ticket Not Found",
+    description="""
+    해당 티켓을 찾을 수 없을 때 반환되는 응답입니다.
+    """,
+    value={
+        "success": False,
+        "statusCode": 404,
+        "code": "not_found_customer_ticket",
+        "message": "Customer ticket does not exist.",
+        "data": {},
+    },
+    status_codes=["404"],
+    response_only=True,
+)
+
 ErrorCustomerPetNotFoundSchema = OpenApiExample(
     name="404(customer_pet_not_found)",
     summary="[Validation Failed]: Customer Pet Not Found",

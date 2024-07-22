@@ -51,6 +51,10 @@ class AbstractCustomerPetSelector(ABC):
     def exists_by_customer_and_pet_id(self, customer: Customer, pet_id: int) -> bool:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_by_pet_id_for_pet_name(self, pet_id: int) -> Optional[str]:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketSelector(ABC):
     @abstractmethod
@@ -87,6 +91,10 @@ class AbstractCustomerTicketSelector(ABC):
     def get_with_ticket_by_id_and_customer_id(
         self, customer_ticket_id: int, customer_id: int
     ) -> Optional[CustomerTicket]:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_by_customer_ticket_id_for_unused_count(self, customer_ticket_id: int) -> Optional[int]:
         raise NotImplementedException()
 
 

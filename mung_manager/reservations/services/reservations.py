@@ -366,7 +366,7 @@ class ReservationService(AbstractReservationService):
     @transaction.atomic
     def register_reservation(
         self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
-    ) -> None:
+    ) -> dict:
         """
         이 함수는 티켓의 유형에 맞게 값을 검증 후 예약을 생성합니다.
 
@@ -382,9 +382,11 @@ class ReservationService(AbstractReservationService):
                 attendance_time (datetime, optional): 등원 시간으로, 시간권일 경우만 필요
 
         Returns:
-            None
+            dict
         """
         ticket_type = reservation_data["ticket_type"][-2:]
         strategy = self.get_strategy(ticket_type)
         strategy.validate(customer, pet_kindergarden, reservation_data)
-        strategy.reserve(customer, pet_kindergarden, reservation_data)
+        reservation_info = strategy.reserve(customer, pet_kindergarden, reservation_data)
+
+        return reservation_info

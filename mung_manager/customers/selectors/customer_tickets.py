@@ -232,3 +232,19 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
 
         except CustomerTicket.DoesNotExist:
             return None
+
+    def get_by_customer_ticket_id_for_unused_count(self, customer_ticket_id: int) -> Optional[int]:
+        """
+        이 함수는 티켓 아이디로 티켓의 잔여 횟수를 조회합니다.
+
+        Args:
+            customer_ticket_id (int): 고객 티켓 아이디
+
+        Returns:
+            Optional[int]: 고객 티켓이 존재하지 않을 경우 None 반환
+        """
+        try:
+            return CustomerTicket.objects.filter(id=customer_ticket_id).values_list("unused_count", flat=True).get()
+
+        except CustomerTicket.DoesNotExist:
+            return None

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.db.models.query import QuerySet
 
 from mung_manager.customers.models import Customer, CustomerPet
@@ -33,3 +35,20 @@ class CustomerPetSelector(AbstractCustomerPetSelector):
             bool: 존재하면 True, 존재하지 않으면 False
         """
         return CustomerPet.objects.filter(customer=customer, id=pet_id, is_deleted=False).exists()
+
+    def get_by_pet_id_for_pet_name(self, pet_id: int) -> Optional[str]:
+        """
+        이 함수는 반려동물 아이디로 반려동물의 이름을 조회합니다.
+
+        Args:
+            pet_id (int): 반려동물 아이디
+
+        Returns:
+            str: 이름을 문자열로 반환
+        """
+
+        try:
+            return CustomerPet.objects.filter(id=pet_id, is_deleted=False).values_list("name", flat=True).get()
+
+        except CustomerPet.DoesNotExist:
+            return None

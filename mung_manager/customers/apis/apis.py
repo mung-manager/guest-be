@@ -216,7 +216,13 @@ class CustomerCreateReservationAPI(APIAuthMixin, APIView):
             validators = [CreateReservationAPIParameterValidator()]
 
     class OutputSerializer(BaseSerializer):
-        pass
+        attendance_date = serializers.DateTimeField(label="등원 날짜", format="%Y-%m-%d")
+        end_date = serializers.DateTimeField(label="하원 날짜", format="%Y-%m-%d", required=False)
+        check_in_time = serializers.TimeField(label="등원 시간", format="%H:%M", required=False)
+        check_out_time = serializers.TimeField(label="하원 시간", format="%H:%M", required=False)
+        usage_count = serializers.IntegerField(label="사용 횟수")
+        remain_count = serializers.IntegerField(label="잔여 횟수")
+        pet_name = serializers.CharField(label="반려동물 이름")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -233,5 +239,8 @@ class CustomerCreateReservationAPI(APIAuthMixin, APIView):
             msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
             code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
         )
-        self._reservation_service.register_reservation(customer, pet_kindergarden, input_serializer.validated_data)
-        return Response(data="", status=status.HTTP_200_OK)
+        reservation_info = self._reservation_service.register_reservation(
+            customer, pet_kindergarden, input_serializer.validated_data
+        )
+        data = self.OutputSerializer(reservation_info).data
+        return Response(data=data, status=status.HTTP_200_OK)
