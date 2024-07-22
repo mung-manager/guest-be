@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from concurrency.exceptions import RecordModifiedError
 from django.db.models import F
@@ -34,13 +35,24 @@ class TimeReservationStrategy(AbstractReservationStrategy):
         customer_ticket_selector: AbstractCustomerTicketSelector,
         reservation_selector: AbstractReservationSelector,
     ):
-        super().__init__(customer_pet_selector, reservation_service)
+        super().__init__(customer_pet_selector, reservation_service, reservation_selector)
         self._customer_ticket_selector = customer_ticket_selector
         self._reservation_selector = reservation_selector
 
     def specific_validation(
         self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
     ) -> None:
+        """
+        이 함수는 시간권 예약에 대한 검증 로직을 실행합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict): 사용자 입력
+
+        Returns:
+            None
+        """
 
         # 해당 고객이 주어진 티켓 타입과 티켓 아이디에 해당하는 티켓을 소유하고 있는지 검증
         check_object_or_not_found(
@@ -64,34 +76,6 @@ class TimeReservationStrategy(AbstractReservationStrategy):
             raise ValidationException(
                 detail=SYSTEM_CODE.message("INVALID_ATTENDANCE_TIME"),
                 code=SYSTEM_CODE.code("INVALID_ATTENDANCE_TIME"),
-            )
-
-        # 해당 날짜에 동일한 예약의 존재 여부 검증
-        if reservation_data["reserved_date"].strftime(
-            "%Y-%m-%d"
-        ) in self._reservation_selector.get_queryset_for_duplicate_reservation(
-            customer_id=customer.id,
-            customer_pet_id=reservation_data["pet_id"],
-            customer_ticket_id=reservation_data["ticket_id"],
-            pet_kindergarden_id=pet_kindergarden.id,
-        ):
-            raise ValidationException(
-                detail=SYSTEM_CODE.message("ALREADY_EXISTS_RESERVATION"),
-                code=SYSTEM_CODE.code("ALREADY_EXISTS_RESERVATION"),
-            )
-
-        # 예약하려는 날이 휴무일이나 정원이 초과하는 날인지 검증
-        if reservation_data["reserved_date"].strftime(
-            "%Y-%m-%d"
-        ) not in self._reservation_service.get_available_reservation_dates(
-            pet_kindergarden_id=pet_kindergarden.id,
-            customer=customer,
-            ticket_type=reservation_data["ticket_type"],
-            ticket_id=reservation_data.get("ticket_id"),
-        ):
-            raise ValidationException(
-                detail=SYSTEM_CODE.message("INVALID_RESERVED_AT"),
-                code=SYSTEM_CODE.code("INVALID_RESERVED_AT"),
             )
 
     def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> CustomerTicket:
@@ -130,43 +114,11 @@ class TimeReservationStrategy(AbstractReservationStrategy):
 
         return customer_ticket
 
-    def create_reservations(
+    def handle_daily_reservations(
         self,
-        customer: Customer,
         pet_kindergarden: PetKindergarden,
         reservation_data: dict,
-        customer_tickets: dict = None,
-    ) -> Reservation:
-        """
-        이 함수는 주어진 정보를 활용하여 예약을 생성합니다.
-
-        Args:
-            customer (Customer): 고객 객체
-            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
-            customer_tickets (dict): 예약에 사용된 티켓 정보
-
-        Returns:
-            Reservation: 예약 객체
-        """
-
-        reserved_at = datetime.combine(reservation_data["reserved_date"].date(), reservation_data["attendance_time"])
-        end_at = reserved_at + timedelta(hours=int(reservation_data["ticket_type"][:-2]))
-        reservation = Reservation.objects.create(
-            reserved_at=reserved_at,
-            end_at=end_at,
-            is_attended=False,
-            reservation_status=ReservationStatus.COMPLETED.value,
-            pet_kindergarden_id=pet_kindergarden.id,
-            customer_id=customer.id,
-            customer_pet_id=reservation_data["pet_id"],
-            customer_ticket_id=reservation_data["ticket_id"],
-        )
-
-        return reservation
-
-    def handle_daily_reservations(
-        self, pet_kindergarden: PetKindergarden, reservation_data: dict, customer: Customer = None
+        customer: Customer,
     ) -> None:
         """
         이 함수는 일간 예약과 관련된 정보를 처리합니다.
@@ -191,10 +143,45 @@ class TimeReservationStrategy(AbstractReservationStrategy):
                 time_pet_count=F("time_pet_count") + 1, total_pet_count=F("total_pet_count") + 1
             )
 
+    def create_reservations(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
+        customer_tickets: Optional[list[CustomerTicket]] = None,
+    ) -> Reservation:
+        """
+        이 함수는 주어진 정보를 활용하여 예약을 생성합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict): 사용자 입력
+            customer_tickets (Optional[list[CustomerTicket]]): 예약에 사용된 티켓 정보
+
+        Returns:
+            Reservation: 예약 객체
+        """
+
+        reserved_at = datetime.combine(reservation_data["reserved_date"].date(), reservation_data["attendance_time"])
+        end_at = reserved_at + timedelta(hours=int(reservation_data["ticket_type"][:-2]))
+        reservation = Reservation.objects.create(
+            reserved_at=reserved_at,
+            end_at=end_at,
+            is_attended=False,
+            reservation_status=ReservationStatus.COMPLETED.value,
+            pet_kindergarden_id=pet_kindergarden.id,
+            customer_id=customer.id,
+            customer_pet_id=reservation_data["pet_id"],
+            customer_ticket_id=reservation_data["ticket_id"],
+        )
+
+        return reservation
+
     def handle_tickets_usage(
         self,
-        customer_tickets: CustomerTicket | list[CustomerTicket],
-        reservations: Reservation | list[Reservation],
+        customer_tickets: CustomerTicket,
+        reservations: Reservation,
     ) -> None:
         """
         이 함수는 고객 티켓 사용 로그를 생성합니다.

@@ -317,8 +317,8 @@ class ReservationSelector(AbstractReservationSelector):
         self,
         customer_id: int,
         customer_pet_id: int,
-        customer_ticket_id: Optional[int],
         pet_kindergarden_id: int,
+        customer_ticket_id: Optional[int] = None,
     ) -> list[str]:
         """
         이 함수는 중복된 예약을 찾기 위해 필터 조건에 해당하는 날짜를 반환합니다.

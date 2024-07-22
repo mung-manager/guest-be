@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 
 from concurrency.exceptions import RecordModifiedError
 from django.db.models import F
@@ -14,7 +15,10 @@ from mung_manager.customers.selectors.abstracts import (
     AbstractCustomerPetSelector,
     AbstractCustomerTicketSelector,
 )
-from mung_manager.errors.exceptions import ValidationException
+from mung_manager.errors.exceptions import (
+    InvalidParameterFormatException,
+    ValidationException,
+)
 from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.enums import ReservationStatus
 from mung_manager.reservations.models import DailyReservation, Reservation
@@ -35,14 +39,28 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         customer_ticket_selector: AbstractCustomerTicketSelector,
         reservation_selector: AbstractReservationSelector,
     ):
-        super().__init__(customer_pet_selector, reservation_service)
+        super().__init__(customer_pet_selector, reservation_service, reservation_selector)
         self._customer_ticket_selector = customer_ticket_selector
         self._reservation_selector = reservation_selector
-        self.reservation_dates = []
+        self.reservation_dates: list[datetime] = []
 
     def specific_validation(
-        self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
     ) -> None:
+        """
+        이 함수는 호텔권 예약에 대한 검증 로직을 실행합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict): 사용자 입력
+
+        Returns:
+            None
+        """
 
         # 사용 가능한 호텔 타입의 티켓이 존재하는지 검증
         check_object_or_not_found(
@@ -68,8 +86,8 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         reserved_dates = self._reservation_selector.get_queryset_for_duplicate_reservation(
             customer_id=customer.id,
             customer_pet_id=reservation_data["pet_id"],
-            customer_ticket_id=reservation_data.get("ticket_id"),
             pet_kindergarden_id=pet_kindergarden.id,
+            customer_ticket_id=reservation_data.get("ticket_id"),
         )
         current_date = reservation_data["reserved_date"]
         while current_date < reservation_data["end_date"]:
@@ -89,7 +107,11 @@ class HotelReservationStrategy(AbstractReservationStrategy):
                 )
             current_date += timedelta(days=1)
 
-    def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> list[CustomerTicket]:
+    def get_customer_tickets(
+        self,
+        customer: Customer,
+        reservation_data: dict,
+    ) -> list[CustomerTicket]:
         """
         이 함수는 주어진 정보를 바탕으로 호텔 티켓 사용 현황을 반환합니다.
         티켓 횟수 증감 처리를 낙관적 락을 통해 구현했습니다.
@@ -121,6 +143,11 @@ class HotelReservationStrategy(AbstractReservationStrategy):
                 )
 
             available_ticket = available_tickets.filter(expired_at__gte=date).order_by("expired_at").first()
+            if available_ticket is None:
+                raise ValidationException(
+                    detail=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER_TICKET"),
+                    code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER_TICKET"),
+                )
 
             try:
                 available_ticket.unused_count -= 1
@@ -135,56 +162,11 @@ class HotelReservationStrategy(AbstractReservationStrategy):
 
         return customer_tickets
 
-    def create_reservations(
+    def handle_daily_reservations(
         self,
-        customer: Customer,
         pet_kindergarden: PetKindergarden,
         reservation_data: dict,
-        customer_tickets: CustomerTicket | list[CustomerTicket],
-    ) -> Reservation | list[Reservation]:
-        """
-        이 함수는 주어진 정보를 활용하여 여러 날짜에 걸친 예약을 생성합니다.
-
-        Args:
-            customer (Customer): 고객 객체
-            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
-            customer_tickets (list[CustomerTicket]): 예약에 사용된 티켓 정보
-
-        Returns:
-            list[Reservation]: 생성된 예약 객체 리스트
-        """
-        reservations = []
-        ticket_iter = iter(customer_tickets) if isinstance(customer_tickets, list) else iter([customer_tickets])
-        parent_id = None
-        depth = 0
-        is_extented = True if len(self.reservation_dates) > 1 else False
-        for date in self.reservation_dates:
-            reserved_at = datetime.combine(date, pet_kindergarden.business_start_hour)
-            end_at = datetime.combine(date, pet_kindergarden.business_end_hour)
-            ticket = next(ticket_iter)
-
-            reservation = Reservation.objects.create(
-                reserved_at=reserved_at,
-                end_at=end_at,
-                is_attended=False,
-                reservation_status=ReservationStatus.COMPLETED.value,
-                pet_kindergarden_id=pet_kindergarden.id,
-                customer_id=customer.id,
-                customer_pet_id=reservation_data["pet_id"],
-                customer_ticket_id=ticket.id,
-                parent_id=parent_id,
-                depth=depth,
-                is_extented=is_extented,
-            )
-            parent_id = reservation.id
-            depth += 1
-            reservations.append(reservation)
-
-        return reservations
-
-    def handle_daily_reservations(
-        self, pet_kindergarden: PetKindergarden, reservation_data: dict, customer: Customer
+        customer: Customer,
     ) -> None:
         """
         이 함수는 일간 예약과 관련된 정보를 처리합니다.
@@ -224,10 +206,64 @@ class HotelReservationStrategy(AbstractReservationStrategy):
                     pet_kindergarden_id=pet_kindergarden.id, reserved_at=reserved_at
                 ).update(hotel_pet_count=F("hotel_pet_count") + 1, total_pet_count=F("total_pet_count") + 1)
 
+    def create_reservations(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict,
+        customer_tickets: Optional[list[CustomerTicket]] = None,
+    ) -> list[Reservation]:
+        """
+        이 함수는 주어진 정보를 활용하여 여러 날짜에 걸친 예약을 생성합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict): 사용자 입력
+            customer_tickets (Optional[list[CustomerTicket]]): 예약에 사용된 티켓 정보
+
+        Returns:
+            list[Reservation]: 생성된 예약 객체 리스트
+        """
+        if customer_tickets is None:
+            raise InvalidParameterFormatException(
+                detail=SYSTEM_CODE.message("INVALID_PARAMETER_FORMAT"),
+                code=SYSTEM_CODE.code("INVALID_PARAMETER_FORMAT"),
+            )
+
+        reservations = []
+        ticket_iter = iter(customer_tickets)
+        parent_id = None
+        depth = 0
+        is_extented = True if len(self.reservation_dates) > 1 else False
+        for date in self.reservation_dates:
+            reserved_at = datetime.combine(date, pet_kindergarden.business_start_hour)
+            end_at = datetime.combine(date, pet_kindergarden.business_end_hour)
+            ticket = next(ticket_iter)
+
+            reservation = Reservation.objects.create(
+                reserved_at=reserved_at,
+                end_at=end_at,
+                is_attended=False,
+                reservation_status=ReservationStatus.COMPLETED.value,
+                pet_kindergarden_id=pet_kindergarden.id,
+                customer_id=customer.id,
+                customer_pet_id=reservation_data["pet_id"],
+                customer_ticket_id=ticket.id,
+                parent_id=parent_id,
+                depth=depth,
+                is_extented=is_extented,
+            )
+            parent_id = reservation.id
+            depth += 1
+            reservations.append(reservation)
+
+        return reservations
+
     def handle_tickets_usage(
         self,
-        customer_tickets: CustomerTicket | list[CustomerTicket],
-        reservations: Reservation | list[Reservation],
+        customer_tickets: list[CustomerTicket],
+        reservations: list[Reservation],
     ) -> None:
         """
         이 함수는 고객 티켓 사용 로그를 생성합니다.
@@ -239,16 +275,24 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         Returns:
             None
         """
-        if isinstance(customer_tickets, list) and isinstance(reservations, list):
-            for i in range(len(customer_tickets)):
-                CustomerTicketUsageLog.objects.create(
-                    customer_ticket_id=customer_tickets[i].id,
-                    reservation_id=reservations[i].id,
-                    used_count=1,
-                )
+        for i in range(len(customer_tickets)):
+            CustomerTicketUsageLog.objects.create(
+                customer_ticket_id=customer_tickets[i].id,
+                reservation_id=reservations[i].id,
+                used_count=1,
+            )
 
     @staticmethod
     def extend_and_convert_dates(date_strings: list[str]) -> list[datetime]:
+        """
+        이 함수는 문자열 날짜 리스트를 DateTime 객체 리스트로 변환합니다.
+
+        Args:
+            date_strings (list[str]): 고객 객체
+
+        Returns:
+            list[datetime]: DateTime 객체 리스트 반환
+        """
         dates = [datetime.strptime(date_str, "%Y-%m-%d") for date_str in date_strings]
         dates.sort()
 

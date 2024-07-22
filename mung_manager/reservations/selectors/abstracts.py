@@ -49,8 +49,8 @@ class AbstractReservationSelector(ABC):
         self,
         customer_id: int,
         customer_pet_id: int,
-        customer_ticket_id: int,
         pet_kindergarden_id: int,
+        customer_ticket_id: Optional[int] = None,
     ) -> list[str]:
         raise NotImplementedException()
 

@@ -40,6 +40,16 @@ class ReservationStrategyFactory:
         ticket_type: str,
         reservation_service: AbstractReservationService,
     ) -> AbstractReservationStrategy:
+        """
+        이 함수는 티켓 타입에 따라 예약 로직을 실행합니다.
+
+        Args:
+            ticket_type (str): 티켓 타입
+            reservation_service (AbstractReservationService): 예약 서비스 객체
+
+        Returns:
+            AbstractReservationStrategy: 구현한 전략 패턴 구현체 반환
+        """
 
         if ticket_type == TicketType.TIME.value:
             return TimeReservationStrategy(
