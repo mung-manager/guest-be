@@ -332,13 +332,9 @@ class ReservationSelector(AbstractReservationSelector):
         Returns:
             list[str]: 예약 날짜 리스트를 반환하며, 존재하지 않을 경우 빈 리스트를 반환합니다.
         """
-        filter_conditions = Q(
+        reserved_dates = Reservation.objects.filter(
             customer_id=customer_id, customer_pet_id=customer_pet_id, pet_kindergarden_id=pet_kindergarden_id
-        )
-        if customer_ticket_id is not None:
-            filter_conditions &= Q(customer_ticket_id=customer_ticket_id)
-
-        reserved_dates = Reservation.objects.filter(filter_conditions).values_list("reserved_at", flat=True)
+        ).values_list("reserved_at", flat=True)
 
         formatted_dates = [date.strftime("%Y-%m-%d") for date in reserved_dates]
 
