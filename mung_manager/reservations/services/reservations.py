@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+from typing import Optional
 
 from concurrency.exceptions import RecordModifiedError
 from django.db import transaction
@@ -7,11 +8,9 @@ from django.utils import timezone
 from django_stubs_ext import ValuesQuerySet
 
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import (
-    check_object_or_not_found,
-    get_object_or_not_found,
-)
+from mung_manager.commons.selectors import get_object_or_not_found
 from mung_manager.customers.models import Customer
+from mung_manager.customers.selectors.customer_pets import CustomerPetSelector
 from mung_manager.customers.selectors.customer_ticket_usage_logs import (
     CustomerTicketUsageLogSelector,
 )
@@ -33,6 +32,12 @@ from mung_manager.reservations.selectors.daily_reservations import (
 from mung_manager.reservations.selectors.days_off import DayOffSelector
 from mung_manager.reservations.selectors.reservations import ReservationSelector
 from mung_manager.reservations.services.abstracts import AbstractReservationService
+from mung_manager.reservations.services.strategies.abstract_strategy import (
+    AbstractReservationStrategy,
+)
+from mung_manager.reservations.services.strategies.strategy_factory import (
+    ReservationStrategyFactory,
+)
 from mung_manager.tickets.enums import TicketType
 
 
@@ -49,6 +54,8 @@ class ReservationService(AbstractReservationService):
         customer_ticket_selector: CustomerTicketSelector,
         day_off_selector: DayOffSelector,
         pet_kindergarden_selector: PetKindergardenSelector,
+        customer_pet_selector: CustomerPetSelector,
+        strategy_factory: ReservationStrategyFactory,
     ):
         self._reservation_selector = reservation_selector
         self._daily_reservation_selector = daily_reservation_selector
@@ -56,6 +63,8 @@ class ReservationService(AbstractReservationService):
         self._customer_ticket_selector = customer_ticket_selector
         self._day_off_selector = day_off_selector
         self._pet_kindergarden_selector = pet_kindergarden_selector
+        self._customer_pet_selector = customer_pet_selector
+        self._strategy_factory = strategy_factory
 
     @staticmethod
     def validate_reservation_cancellation(pet_kindergarden: PetKindergarden, reservation: Reservation) -> None:
@@ -248,7 +257,7 @@ class ReservationService(AbstractReservationService):
         return available_dates
 
     def get_available_reservation_dates(
-        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: int
+        self, pet_kindergarden_id: int, customer: Customer, ticket_type: str, ticket_id: Optional[int]
     ) -> list[str]:
         """
         반려동물 유치원 아이디, 고객 객체, 티켓 타입으로  예약 가능한 날짜 목록을 조회합니다.
@@ -271,7 +280,7 @@ class ReservationService(AbstractReservationService):
 
         # 티켓 조회(호텔권 -> 목록 조회, 시간/종일권 -> 단일 조회)
         if ticket_type == TicketType.HOTEL.value:
-            tickets_queryset = check_object_or_not_found(
+            tickets_queryset = get_object_or_not_found(
                 self._customer_ticket_selector.get_queryset_by_customer_for_hotel_ticket_type(customer=customer),
                 msg=SYSTEM_CODE.message("NOT_FOUND_TICKET"),
                 code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
@@ -295,7 +304,7 @@ class ReservationService(AbstractReservationService):
             else (datetime.now() + timedelta(days=1))
         )
         end_date = (
-            tickets_queryset.order_by("-expired_at").first().expired_at
+            tickets_queryset.order_by("-expired_at").first().expired_at + timedelta(days=1)
             if ticket_type == TicketType.HOTEL.value
             else tickets_queryset.expired_at
         )
@@ -350,3 +359,34 @@ class ReservationService(AbstractReservationService):
             current_time += timedelta(minutes=30)
 
         return available_times
+
+    def get_strategy(self, ticket_type: str) -> AbstractReservationStrategy:
+        return self._strategy_factory.create_strategy(ticket_type, self)
+
+    @transaction.atomic
+    def register_reservation(
+        self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict
+    ) -> dict:
+        """
+        이 함수는 티켓의 유형에 맞게 값을 검증 후 예약을 생성합니다.
+
+        Args:
+            customer (Customer): 고객 객체
+            pet_kindergarden (PetKindergarden): 유치원 객체
+            reservation_data (dict): 예약 관련 데이터로, 필드에는 다음의 값들이 포함됩니다:
+                pet_id (int): 반려동물 아이디
+                ticket_type (str): 티켓 타입 (예: "4시간", "종일", "호텔")
+                ticket_id (int, optional): 티켓 아이디로, 호텔권일 경우 불필요
+                reserved_date (datetime): 등원 날짜
+                end_date (datetime, optional): 하원 날짜, 호텔권일 경우만 필요
+                attendance_time (datetime, optional): 등원 시간으로, 시간권일 경우만 필요
+
+        Returns:
+            dict
+        """
+        ticket_type = reservation_data["ticket_type"][-2:]
+        strategy = self.get_strategy(ticket_type)
+        strategy.validate(customer, pet_kindergarden, reservation_data)
+        reservation_info = strategy.reserve(customer, pet_kindergarden, reservation_data)
+
+        return reservation_info

@@ -124,3 +124,32 @@ class AvailableDatesAPIParameterValidator:
                 raise ValidationError(message=self.message, code=self.code)
         elif ticket_id is None:
             raise ValidationError(message=self.message, code=self.code)
+
+
+class CreateReservationAPIParameterValidator:
+    """
+    이 클래스는 예약하기 기능에서의 파라미터를 검사합니다.
+
+    Attributes:
+        message: 파라미터 유효성 검사 실패시 반환 메시지
+        code: 파라미터 유효성 검사 실패시 반환 코드
+    """
+
+    message = SYSTEM_CODE.message("INVALID_PARAMETER_FORMAT")
+    code = SYSTEM_CODE.code("INVALID_PARAMETER_FORMAT")
+
+    def __call__(self, attrs):
+        required_fields = {
+            TicketType.TIME.value: ["pet_id", "ticket_type", "ticket_id", "reserved_date", "attendance_time"],
+            TicketType.ALL_DAY.value: ["pet_id", "ticket_type", "ticket_id", "reserved_date"],
+            TicketType.HOTEL.value: ["pet_id", "ticket_type", "reserved_date", "end_date"],
+        }
+
+        ticket_type = attrs.get("ticket_type")[-2:]
+
+        if ticket_type not in required_fields:
+            raise ValidationError(message=self.message, code=self.code)
+
+        for field in required_fields[ticket_type]:
+            if field not in attrs or not attrs[field]:
+                raise ValidationError(message=self.message, code=self.code)
