@@ -177,7 +177,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
         ).select_related("ticket")
 
     def get_for_all_day_or_time_ticket_type(
-        self, customer: Customer, ticket_type: str, ticket_id: int
+        self, customer: Customer, ticket_type: str, ticket_id: Optional[int]
     ) -> Optional[CustomerTicket]:
         """
         고객 객체와 티켓 아이디, 티켓 타입으로 해당 고객이 소유하고 있는 (호텔 타입이 아닌) 티켓을 조회합니다.
@@ -207,5 +207,44 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
                 ticket__ticket_type=type_value,
                 ticket__usage_time=time_value,
             )
+        except CustomerTicket.DoesNotExist:
+            return None
+
+    def get_with_ticket_by_id_and_customer_id(
+        self, customer_ticket_id: int, customer_id: int
+    ) -> Optional[CustomerTicket]:
+        """
+        이 함수는 고객 티켓 아이디와 고객 아이디로 티켓을 포함한 고객 티켓을 조회합니다.
+
+        Args:
+            customer_ticket_id (int): 고객 티켓 아이디
+            customer_id (int): 고객 아이디
+
+        Returns:
+            Optional[CustomerTicket]: 고객 티켓이 존재하지 않을 경우 None 반환
+        """
+        try:
+            return (
+                CustomerTicket.objects.filter(id=customer_ticket_id, customer_id=customer_id)
+                .select_related("ticket")
+                .get()
+            )
+
+        except CustomerTicket.DoesNotExist:
+            return None
+
+    def get_by_customer_ticket_id_for_unused_count(self, customer_ticket_id: int) -> Optional[int]:
+        """
+        이 함수는 티켓 아이디로 티켓의 잔여 횟수를 조회합니다.
+
+        Args:
+            customer_ticket_id (int): 고객 티켓 아이디
+
+        Returns:
+            Optional[int]: 고객 티켓이 존재하지 않을 경우 None 반환
+        """
+        try:
+            return CustomerTicket.objects.filter(id=customer_ticket_id).values_list("unused_count", flat=True).get()
+
         except CustomerTicket.DoesNotExist:
             return None

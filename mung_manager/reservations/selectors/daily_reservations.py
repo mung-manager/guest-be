@@ -60,3 +60,18 @@ class DailyReservationSelector(AbstractDailyReservationSelector):
             reserved_at__range=date_range,
             total_pet_count__gte=daily_pet_limit,
         ).values_list("reserved_at", flat=True)
+
+    def get_queryset_by_pet_kindergarden_id_and_reserved_at(
+        self, pet_kindergarden_id: int, reserved_at: str
+    ) -> QuerySet[DailyReservation]:
+        """
+        반려동물 유치원 아이디와 예약일로 일별 예약 리스트를 조회합니다.
+
+        Args:
+            pet_kindergarden_id (int): 반려동물 유치원 아이디
+            reserved_at (str): 예약일
+
+        Returns:
+            QuerySet[DailyReservation]: 일별 예약 리스트 쿼리셋이며 존재하지 않으면 빈 쿼리셋을 반환
+        """
+        return DailyReservation.objects.filter(pet_kindergarden_id=pet_kindergarden_id, reserved_at=reserved_at)
