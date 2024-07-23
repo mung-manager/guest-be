@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from concurrency.exceptions import RecordModifiedError
 from django.db.models import F
@@ -44,7 +44,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> None:
         """
         이 함수는 종일권 예약에 대한 검증 로직을 실행합니다.
@@ -52,7 +52,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
         Args:
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
 
         Returns:
             None
@@ -68,7 +68,11 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
             code=SYSTEM_CODE.code("NOT_FOUND_TICKET"),
         )
 
-    def get_customer_tickets(self, customer: Customer, reservation_data: dict) -> CustomerTicket:
+    def get_customer_tickets(
+        self,
+        customer: Customer,
+        reservation_data: dict[str, Any],
+    ) -> CustomerTicket:
         """
         이 함수는 주어진 정보를 바탕으로 티켓(들)을 반환합니다.
         티켓 횟수 증감 처리를 낙관적 락을 통해 구현했습니다.
@@ -76,7 +80,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
 
         Args:
             customer (Customer): 영업 시작 시간
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
 
         Returns:
             CustomerTicket: 고객 티켓 객체
@@ -106,7 +110,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
     def handle_daily_reservations(
         self,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer: Customer,
     ) -> None:
         """
@@ -114,7 +118,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
 
         Args:
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
             customer (Customer): 고객 객체
 
         Returns:
@@ -135,7 +139,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer_tickets: Optional[list[CustomerTicket]] = None,
     ) -> Reservation:
         """
@@ -144,7 +148,7 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
         Args:
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
             customer_tickets (Optional[list[CustomerTicket]]): 예약에 사용된 티켓 정보
 
         Returns:
@@ -191,18 +195,18 @@ class AllDayReservationStrategy(AbstractReservationStrategy):
 
     def get_reservation_info(
         self,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer_tickets: CustomerTicket,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         이 함수는 생성한 예약 정보를 반환합니다.
 
         Args:
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
             customer_tickets (CustomerTicket): 고객 티켓 객체
 
         Returns:
-            dict: 예약 정보 반환
+            dict[str, Any]: 예약 정보 반환
         """
         unused_count = self._customer_ticket_selector.get_by_customer_ticket_id_for_unused_count(customer_tickets.id)
         pet_name = self._customer_pet_selector.get_by_pet_id_for_pet_name(reservation_data["pet_id"])

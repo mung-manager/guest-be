@@ -28,7 +28,7 @@ class AbstractReservationStrategy(ABC):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> None:
         """
         이 함수는 공통 검증 로직과 티켓 타입별 검증 로직을 실행합니다.
@@ -36,7 +36,7 @@ class AbstractReservationStrategy(ABC):
         Args:
             customer (Customer): 영업 시작 시간
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
 
         Returns:
             None
@@ -48,7 +48,7 @@ class AbstractReservationStrategy(ABC):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> None:
         """
         이 함수는 티켓 타입별 공통된 내용을 검증합니다.
@@ -56,7 +56,7 @@ class AbstractReservationStrategy(ABC):
         Args:
             customer (Customer): 영업 시작 시간
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
 
         Returns:
             None
@@ -103,11 +103,27 @@ class AbstractReservationStrategy(ABC):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> None:
         raise NotImplementedException()
 
-    def reserve(self, customer: Customer, pet_kindergarden: PetKindergarden, reservation_data: dict) -> dict:
+    def reserve(
+        self,
+        customer: Customer,
+        pet_kindergarden: PetKindergarden,
+        reservation_data: dict[str, Any],
+    ) -> dict[str, Any]:
+        """
+        이 함수는 예약 생성과 관련된 로직을 수행합니다.
+
+        Args:
+            customer (Customer): 영업 시작 시간
+            pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
+            reservation_data (dict[str, Any]): 사용자 입력
+
+        Returns:
+            dict[str, Any]: 예약 생성 결과 반환
+        """
         customer_tickets = self.get_customer_tickets(customer, reservation_data)
         self.handle_daily_reservations(pet_kindergarden, reservation_data, customer)
         reservations = self.create_reservations(customer, pet_kindergarden, reservation_data, customer_tickets)
@@ -120,7 +136,7 @@ class AbstractReservationStrategy(ABC):
     def get_customer_tickets(
         self,
         customer: Customer,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> Any:
         raise NotImplementedException()
 
@@ -128,7 +144,7 @@ class AbstractReservationStrategy(ABC):
     def handle_daily_reservations(
         self,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer: Customer,
     ) -> None:
         raise NotImplementedException()
@@ -138,7 +154,7 @@ class AbstractReservationStrategy(ABC):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer_tickets: Optional[list[CustomerTicket]] = None,
     ) -> Any:
         raise NotImplementedException()
@@ -154,7 +170,7 @@ class AbstractReservationStrategy(ABC):
     @abstractmethod
     def get_reservation_info(
         self,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer_tickets: Any,
-    ) -> dict:
+    ) -> dict[str, Any]:
         raise NotImplementedException()

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Optional
 
 from concurrency.exceptions import RecordModifiedError
 from django.db.models import F
@@ -49,7 +49,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> None:
         """
         이 함수는 호텔권 예약에 대한 검증 로직을 실행합니다.
@@ -57,7 +57,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         Args:
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
 
         Returns:
             None
@@ -109,7 +109,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
     def get_customer_tickets(
         self,
         customer: Customer,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
     ) -> list[CustomerTicket]:
         """
         이 함수는 주어진 정보를 바탕으로 호텔 티켓 사용 현황을 반환합니다.
@@ -117,10 +117,10 @@ class HotelReservationStrategy(AbstractReservationStrategy):
 
         Args:
             customer (Customer): 고객 객체
-            reservation_data (dict): 예약 정보
+            reservation_data (dict[str, Any]): 예약 정보
 
         Returns:
-            dict: 사용된 티켓 ID와 각 티켓의 사용 횟수
+            dict[str, Any]: 사용된 티켓 ID와 각 티켓의 사용 횟수
         """
         current_date = reservation_data["reserved_date"]
         while current_date < reservation_data["end_date"]:
@@ -164,7 +164,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
     def handle_daily_reservations(
         self,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer: Customer,
     ) -> None:
         """
@@ -172,7 +172,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
 
         Args:
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
             customer (Customer): 고객 객체
 
         Returns:
@@ -209,7 +209,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         self,
         customer: Customer,
         pet_kindergarden: PetKindergarden,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer_tickets: Optional[list[CustomerTicket]] = None,
     ) -> list[Reservation]:
         """
@@ -218,7 +218,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         Args:
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
             customer_tickets (Optional[list[CustomerTicket]]): 예약에 사용된 티켓 정보
 
         Returns:
@@ -283,18 +283,18 @@ class HotelReservationStrategy(AbstractReservationStrategy):
 
     def get_reservation_info(
         self,
-        reservation_data: dict,
+        reservation_data: dict[str, Any],
         customer_tickets: list[CustomerTicket],
-    ) -> dict:
+    ) -> dict[str, Any]:
         """
         이 함수는 생성한 예약 정보를 반환합니다.
 
         Args:
-            reservation_data (dict): 사용자 입력
+            reservation_data (dict[str, Any]): 사용자 입력
             customer_tickets (CustomerTicket): 고객 티켓 객체
 
         Returns:
-            dict: 예약 정보 반환
+            dict[str, Any]: 예약 정보 반환
         """
         unused_count = 0
         for customer_ticket in set(customer_tickets):
