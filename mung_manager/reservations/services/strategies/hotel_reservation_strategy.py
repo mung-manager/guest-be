@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from itertools import groupby
+from operator import itemgetter
 from typing import Any, Optional
 
 from concurrency.exceptions import RecordModifiedError
@@ -184,7 +186,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             customer_pet_id=reservation_data["pet_id"],
             pet_kindergarden_id=pet_kindergarden.id,
         )
-        hotel_type_full_reserved_dates = self.extend_and_convert_dates(hotel_type_reserved_dates)
+        hotel_type_full_reserved_dates = self.append_next_day_to_date_series(hotel_type_reserved_dates)
 
         # 일일 예약 현황 업데이트(등하원 날짜가 겹치는 연속된 예약은 1회로 처리)
         daily_reservation_dates = self.reservation_dates + [self.reservation_dates[-1] + timedelta(days=1)]
@@ -313,9 +315,9 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         return reservation_info
 
     @staticmethod
-    def extend_and_convert_dates(date_strings: list[str]) -> list[datetime]:
+    def append_next_day_to_date_series(date_strings: list[str]) -> list[datetime]:
         """
-        이 함수는 문자열 날짜 리스트를 DateTime 객체 리스트로 변환합니다.
+        이 함수는 연속된 날짜들을 찾아내고, 각 연속 구간의 끝에 하루를 추가합니다.
 
         Args:
             date_strings (list[str]): 고객 객체
@@ -323,21 +325,12 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         Returns:
             list[datetime]: DateTime 객체 리스트 반환
         """
-        dates = [datetime.strptime(date_str, "%Y-%m-%d") for date_str in date_strings]
-        dates.sort()
+        dates = sorted(datetime.strptime(date_str, "%Y-%m-%d") for date_str in date_strings)
 
         extended_dates = []
-        i = 0
-        while i < len(dates):
-            current_date = dates[i]
-            extended_dates.append(current_date)
-
-            while i + 1 < len(dates) and (dates[i + 1] - current_date).days == 1:
-                current_date = dates[i + 1]
-                extended_dates.append(current_date)
-                i += 1
-
-            extended_dates.append(current_date + timedelta(days=1))
-            i += 1
+        for k, g in groupby(enumerate(dates), lambda x: x[0] - x[1].toordinal()):
+            group = list(map(itemgetter(1), g))
+            extended_dates.extend(group)
+            extended_dates.append(group[-1] + timedelta(days=1))
 
         return extended_dates
