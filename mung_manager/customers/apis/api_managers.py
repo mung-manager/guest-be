@@ -152,7 +152,7 @@ class CustomerReservationAPIManager(BaseAPIManager):
         Rogic
             - 고객의 반려동물 유치원 예약하기 API 입니다.
         """,
-        parameters=[VIEWS_BY_METHOD["POST"]().cls.InputSerializer],
+        request=VIEWS_BY_METHOD["POST"]().cls.InputSerializer,
         responses={
             status.HTTP_200_OK: VIEWS_BY_METHOD["POST"]().cls.OutputSerializer,
             status.HTTP_400_BAD_REQUEST: OpenApiResponse(
