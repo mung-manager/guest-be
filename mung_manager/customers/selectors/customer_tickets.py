@@ -47,12 +47,20 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
                 full_ticket_type=Case(
                     When(
                         ticket__ticket_type=TicketType.TIME.value,
-                        then=Concat(F("ticket__usage_time"), F("ticket__ticket_type"), output_field=CharField()),
+                        then=Concat(F("ticket__usage_time"), Value("시간"), output_field=CharField()),
                     ),
                     default=F("ticket__ticket_type"),
                     output_field=CharField(),
-                )
+                ),
+                sort_order=Case(
+                    When(ticket__ticket_type=TicketType.TIME.value, then=F("ticket__usage_time")),
+                    When(full_ticket_type="종일", then=Value(98)),
+                    When(full_ticket_type="호텔", then=Value(99)),
+                    default=Value(100),
+                    output_field=IntegerField(),
+                ),
             )
+            .order_by("sort_order", "full_ticket_type")
             .values_list("full_ticket_type", flat=True)
             .distinct()
         )
