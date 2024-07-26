@@ -58,13 +58,12 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
                     When(full_ticket_type="호텔", then=Value(99)),
                     default=Value(100),
                     output_field=IntegerField(),
-                )
+                ),
             )
             .order_by("sort_order", "full_ticket_type")
             .values_list("full_ticket_type", flat=True)
             .distinct()
         )
-        print(customer_ticket_types)
 
         return {"ticket_types": customer_ticket_types}
 
