@@ -110,21 +110,21 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
         ).aggregate(
             time_count=Sum(
                 Case(
-                    When(ticket__ticket_type=TicketType.TIME.value, then=1),
+                    When(ticket__ticket_type=TicketType.TIME.value, then="unused_count"),
                     default=0,
                     output_field=IntegerField(),
                 )
             ),
             all_day_count=Sum(
                 Case(
-                    When(ticket__ticket_type=TicketType.ALL_DAY.value, then=1),
+                    When(ticket__ticket_type=TicketType.ALL_DAY.value, then="unused_count"),
                     default=0,
                     output_field=IntegerField(),
                 )
             ),
             hotel_count=Sum(
                 Case(
-                    When(ticket__ticket_type=TicketType.HOTEL.value, then=1),
+                    When(ticket__ticket_type=TicketType.HOTEL.value, then="unused_count"),
                     default=0,
                     output_field=IntegerField(),
                 )
@@ -208,7 +208,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
 
         try:
             return CustomerTicket.objects.select_related("ticket").get(
-                id=ticket_id,
+                id=ticket_id,  # type: ignore
                 customer=customer,
                 expired_at__gte=timezone.now(),
                 unused_count__gt=0,
