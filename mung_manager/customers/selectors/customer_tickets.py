@@ -208,7 +208,7 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
 
         try:
             return CustomerTicket.objects.select_related("ticket").get(
-                id=ticket_id,
+                id=ticket_id,  # type: ignore
                 customer=customer,
                 expired_at__gte=timezone.now(),
                 unused_count__gt=0,
