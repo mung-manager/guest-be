@@ -15,6 +15,7 @@ from mung_manager.errors.exceptions import (
     AuthenticationFailedException,
     InvalidTokenException,
 )
+from mung_manager.pet_kindergardens.containers import PetKindergardenContainer
 
 
 class KakaoLoginAPI(APIView):
@@ -34,6 +35,7 @@ class KakaoLoginAPI(APIView):
         self._user_service = AuthenticationContainer.user_service()
         self._customer_selector = CustomerContainer.customer_selector()
         self._customer_service = CustomerContainer.customer_service()
+        self._pet_kindergarden_selector = PetKindergardenContainer.pet_kindergarden_selector()
 
     def get(self, request: Request) -> Response:
         input_serializer = self.InputSerializer(data=request.GET)
@@ -88,7 +90,15 @@ class KakaoLoginAPI(APIView):
 
         # 유저 토큰 발급
         self._auth_service.authenticate_user(user)
-        refresh_token, access_token = self._auth_service.generate_token(user)
+
+        pet_kindergardens = list(self._pet_kindergarden_selector.get_queryset_by_user(user))
+        if len(pet_kindergardens) == 1:
+            pet_kindergarden_id = pet_kindergardens[0]["id"]
+            refresh_token, access_token\
+                = self._auth_service.update_token_with_pet_kindergarden_id(user, pet_kindergarden_id)
+        else:
+            refresh_token, access_token = self._auth_service.generate_token(user)
+
         auth_data = self.OutputSerializer(
             {
                 "access_token": access_token,
