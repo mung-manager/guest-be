@@ -94,8 +94,9 @@ class KakaoLoginAPI(APIView):
         pet_kindergardens = list(self._pet_kindergarden_selector.get_queryset_by_user(user))
         if len(pet_kindergardens) == 1:
             pet_kindergarden_id = pet_kindergardens[0]["id"]
-            refresh_token, access_token\
-                = self._auth_service.update_token_with_pet_kindergarden_id(user, pet_kindergarden_id)
+            refresh_token, access_token = self._auth_service.update_token_with_pet_kindergarden_id(
+                user, pet_kindergarden_id
+            )
         else:
             refresh_token, access_token = self._auth_service.generate_token(user)
 
