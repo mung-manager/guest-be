@@ -244,3 +244,27 @@ class CustomerCreateReservationAPI(APIAuthMixin, APIView):
         )
         data = self.OutputSerializer(reservation_info).data
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class CustomerActiveStatusAPI(APIAuthMixin, APIView):
+    class OutputSerializer(BaseSerializer):
+        is_active_customer = serializers.BooleanField(label="고객의 활성화 여부")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._customer_selector = CustomerContainer.customer_selector()
+
+    def get(self, request: Request) -> Response:
+        user = request.user
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
+        )
+        data = self.OutputSerializer(
+            {
+                "is_active_customer": customer.is_active,
+            }
+        ).data
+        return Response(data=data, status=status.HTTP_200_OK)

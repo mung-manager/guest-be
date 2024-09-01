@@ -1,6 +1,7 @@
 from django.urls import path
 
 from mung_manager.customers.apis.api_managers import (
+    CustomerActiveStatusAPIManager,
     CustomerReservationAPIManager,
     CustomerReservationCancelAPIManager,
     CustomerReservationDetailListAPIManager,
@@ -33,5 +34,10 @@ urlpatterns = [
         "/reservations/<int:reservation_id>/cancel",
         CustomerReservationCancelAPIManager.as_view(),
         name="customer-reservation-cancel",
+    ),
+    path(
+        "/active",
+        CustomerActiveStatusAPIManager.as_view(),
+        name="customer-active-status",
     ),
 ]
