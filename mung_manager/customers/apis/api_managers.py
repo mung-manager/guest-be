@@ -77,10 +77,7 @@ class CustomerTicketCountAPIManager(BaseAPIManager):
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                examples=[
-                    ErrorPermissionDeniedSchema,
-                    ErrorCustomerPermissionDeniedSchema,
-                ],
+                examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT, examples=[ErrorPetKindergardenNotFoundSchema]

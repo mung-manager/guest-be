@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import get_object_or_permission_denied, get_object_or_not_found
+from mung_manager.commons.selectors import get_object_or_not_found
 from mung_manager.commons.validators import (
     AvailableDatesAPIParameterValidator,
     InvalidTicketTypeValidator,
