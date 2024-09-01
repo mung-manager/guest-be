@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.commons.base.serializers import BaseSerializer
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import get_object_or_permission_denied
+from mung_manager.commons.selectors import get_object_or_not_found
 from mung_manager.commons.validators import (
     AvailableDatesAPIParameterValidator,
     InvalidTicketTypeValidator,
@@ -27,11 +27,11 @@ class ReservationCustomerPetListAPI(APIAuthMixin, APIView):
 
     def get(self, request: Request) -> Response:
         user = request.user
-        pet_kindergarden_id = request.pet_kindergarden.id
-        customer = get_object_or_permission_denied(
-            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
-            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
-            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
         )
         pets = self._customer_pet_selector.get_queryset_by_customer(customer)
         customer_pets_data = self.OutputSerializer(pets, many=True).data
@@ -49,11 +49,11 @@ class ReservationCustomerTicketTypesAPI(APIAuthMixin, APIView):
 
     def get(self, request: Request) -> Response:
         user = request.user
-        pet_kindergarden_id = request.pet_kindergarden.id
-        customer = get_object_or_permission_denied(
-            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
-            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
-            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
         )
         ticket_types = self._customer_ticket_selector.get_queryset_by_customer(customer)
         ticket_types_data = self.OutputSerializer(ticket_types).data
@@ -78,11 +78,11 @@ class ReservationCustomerTicketTypeDetailAPI(APIAuthMixin, APIView):
         input_serializer = self.InputSerializer(data=request.query_params)
         input_serializer.is_valid(raise_exception=True)
         user = request.user
-        pet_kindergarden_id = request.pet_kindergarden.id
-        customer = get_object_or_permission_denied(
-            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
-            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
-            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
         )
         tickets = self._customer_ticket_selector.get_queryset_by_customer_and_ticket_type_for_ticket_detail(
             customer, input_serializer.validated_data["ticket_type"]
@@ -135,14 +135,14 @@ class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
         input_serializer = self.InputSerializer(data=request.query_params)
         input_serializer.is_valid(raise_exception=True)
         user = request.user
-        pet_kindergarden_id = request.pet_kindergarden.id
-        customer = get_object_or_permission_denied(
-            self._customer_selector.get_by_user_and_pet_kindergarden_id_for_active_customer(user, pet_kindergarden_id),
-            msg=SYSTEM_CODE.message("INACTIVE_CUSTOMER"),
-            code=SYSTEM_CODE.code("INACTIVE_CUSTOMER"),
+        pet_kindergarden = request.pet_kindergarden
+        customer = get_object_or_not_found(
+            self._customer_selector.get_by_user_and_pet_kindergarden_id(user, pet_kindergarden.id),
+            msg=SYSTEM_CODE.message("NOT_FOUND_CUSTOMER"),
+            code=SYSTEM_CODE.code("NOT_FOUND_CUSTOMER"),
         )
         available_dates_data = self._reservation_service.get_available_reservation_dates(
-            pet_kindergarden_id=pet_kindergarden_id,
+            pet_kindergarden_id=pet_kindergarden.id,
             customer=customer,
             ticket_type=input_serializer.validated_data.get("ticket_type"),
             ticket_id=input_serializer.validated_data.get("ticket_id"),

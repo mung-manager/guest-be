@@ -27,10 +27,7 @@ from mung_manager.schemas.errors.commons import (
     ErrorPermissionDeniedSchema,
     ErrorUnknownServerSchema,
 )
-from mung_manager.schemas.errors.customers import (
-    ErrorCustomerNotFoundSchema,
-    ErrorCustomerPermissionDeniedSchema,
-)
+from mung_manager.schemas.errors.customers import ErrorCustomerNotFoundSchema
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
 )
@@ -68,10 +65,7 @@ class ReservationCustomerPetListAPIManager(BaseAPIManager):
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                examples=[
-                    ErrorPermissionDeniedSchema,
-                    ErrorCustomerPermissionDeniedSchema,
-                ],
+                examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
@@ -119,10 +113,7 @@ class ReservationCustomerTicketTypesAPIManager(BaseAPIManager):
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                examples=[
-                    ErrorPermissionDeniedSchema,
-                    ErrorCustomerPermissionDeniedSchema,
-                ],
+                examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
@@ -174,10 +165,7 @@ class ReservationCustomerTicketTypeDetailAPIManager(BaseAPIManager):
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                examples=[
-                    ErrorPermissionDeniedSchema,
-                    ErrorCustomerPermissionDeniedSchema,
-                ],
+                examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
@@ -276,10 +264,7 @@ class ReservationPetKindergardenAvailableDatesAPIManager(BaseAPIManager):
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                examples=[
-                    ErrorPermissionDeniedSchema,
-                    ErrorCustomerPermissionDeniedSchema,
-                ],
+                examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
@@ -331,10 +316,7 @@ class ReservationPetKindergardenAttendanceTimesAPIManager(BaseAPIManager):
             ),
             status.HTTP_403_FORBIDDEN: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
-                examples=[
-                    ErrorPermissionDeniedSchema,
-                    ErrorCustomerPermissionDeniedSchema,
-                ],
+                examples=[ErrorPermissionDeniedSchema],
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=OpenApiTypes.OBJECT,
