@@ -91,7 +91,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             pet_kindergarden_id=pet_kindergarden.id,
         )
         current_date = reservation_data["reserved_date"]
-        while current_date < reservation_data["end_date"]:
+        while current_date <= reservation_data["end_date"]:
             # 휴일이거나 정원이 초과된 날인지 검증
             current_date_str = current_date.strftime("%Y-%m-%d")
             if current_date_str not in available_dates:
