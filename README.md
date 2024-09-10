@@ -29,24 +29,24 @@
 <br>
 
 ## 컨벤션 규칙
-[그라운드 룰](https://hiallen.notion.site/Ground-Rule-c2a808cbf2fb479eaa56ded4fe617e7b?pvs=4)
+[그라운드 룰](https://butter-yew-22b.notion.site/Ground-Rule-4a38824c8a9c4cbba2bd685da24c4c1f?pvs=4)
 
-[Git 브랜치 컨벤션](https://hiallen.notion.site/Git-Branch-6314f735522e441d830f774553b4a401?pvs=4)
+[Git 브랜치 컨벤션](https://butter-yew-22b.notion.site/Git-Branch-Convention-f2a9e9b940d24a26956d9f019f4b83ac?pvs=4)
 
-[Git 커밋 컨벤션](https://hiallen.notion.site/Commit-Rule-001cdacdd0464530a02888bf8ca322bd?pvs=4)
+[Git 커밋 컨벤션](https://butter-yew-22b.notion.site/Commit-Convention-b2d97079c90f45df8adee3dba3bde85a?pvs=4)
 
-[PR 및 이슈 컨벤션](https://hiallen.notion.site/PR-Issue-Bug-Convention-7f02a8337ea0441689f63be2d4c1ce71?pvs=4)
+[PR 및 이슈 컨벤션](https://butter-yew-22b.notion.site/PR-Issue-Bug-Convention-03bed90012ec407fbc14fcc016e2cfcc?pvs=4)
 
-[주석 컨벤션](https://hiallen.notion.site/Comment-Convention-5dd546ebadaa4dacae4a2f2510574bfc?pvs=4)
+[주석 컨벤션](https://butter-yew-22b.notion.site/Comment-Convention-bb98efea1e5e46848bfff7707aa41bf3?pvs=4)
 
-[테스트 작성 컨벤션](https://hiallen.notion.site/5c7d9fbede43426fb466ea30151bc194?pvs=4)
+<!-- [테스트 작성 컨벤션](https://butter-yew-22b.notion.site/d3e88411184a45a2902e988dc5c8d9e0?pvs=4) -->
 
 - 프로젝트는 Layered 아키텍처로 진행하고 있습니다. 대략적인 구조 및 가이드는 아래 문서를 참조합니다.
   - [Django Style Guide](https://github.com/HackSoftware/Django-Styleguide)
   - [Django Style Guide Example](https://github.com/HackSoftware/Django-Styleguide-Example)
  
-- 그외 팀 내에서 정한 규칙
-  - [Selector / Service 네이밍 규칙](https://hiallen.notion.site/Selector-Service-632ba6c6a67d49e0ac7520484d74b343?pvs=4)
+- 그 외 팀 내에서 정한 규칙
+  - [Selector / Service 네이밍 규칙](https://butter-yew-22b.notion.site/Selector-Service-7f11d55871c74e5f95e388196287bdf7?pvs=4)
  
 - 그외 읽어보면 좋을 글
   - [Django Layered 아키텍처](https://medium.com/athenaslab/django%EC%99%80-layered-architecture-%EC%82%AC%EC%9D%B4%EC%97%90%EC%84%9C-%ED%83%80%ED%98%91%EC%A0%90-%EC%B0%BE%EA%B8%B0-70769c13ef9d)
@@ -151,8 +151,8 @@ make start
 # 데이터베이스 마이그레이트
 make migrate
 ```
-- 실행 전에 PostGIS를 사용하기에 [GEOS, GDAL](https://docs.djangoproject.com/en/5.0/ref/contrib/gis/install/geolibs/)를 설치해야합니다.
-- PostgreSQL은 [PostGIS](https://docs.aws.amazon.com/ko_kr/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.PostGIS.html)를 설치해야합니다.
+- 실행 전에 PostGIS를 사용하기에 [GEOS, GDAL](https://docs.djangoproject.com/en/5.0/ref/contrib/gis/install/geolibs/)를 설치해야 합니다.
+- PostgreSQL은 [PostGIS](https://docs.aws.amazon.com/ko_kr/AmazonRDS/latest/UserGuide/Appendix.PostgreSQL.CommonDBATasks.PostGIS.html)를 설치해야 합니다.
 
 <br>
 
