@@ -1,6 +1,6 @@
 from django.db.models import QuerySet
 
-from ung_manager.tickets.selectors.abstracts import AbstractTicketSelector
+from mung_manager.tickets.selectors.abstracts import AbstractTicketSelector
 from mung_manager_db.models import Ticket
 
 

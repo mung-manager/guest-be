@@ -8,7 +8,7 @@ from django_stubs_ext import ValuesQuerySet
 
 from mung_manager.errors.exceptions import NotImplementedException
 from mung_manager.reservations.types import attendance_type, is_expired_type
-from mung_manager_db.models import Customer, PetKindergarden, Reservation
+from mung_manager_db.models import Customer, PetKindergarden, Reservation, DailyReservation, DayOff
 
 
 class AbstractReservationSelector(ABC):
