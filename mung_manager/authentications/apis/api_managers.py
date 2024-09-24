@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 
 from mung_manager.authentications.apis.apis import JWTRefreshAPI, KakaoLoginAPI
-from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.schemas.errors.authentications import (
     ErrorAuthenticationUserInactiveSchema,
     ErrorKakaoAccessTokenFailedSchema,
@@ -17,6 +16,7 @@ from mung_manager.schemas.errors.commons import (
     ErrorInvalidTokenSchema,
     ErrorUnknownServerSchema,
 )
+from mung_manager_commons.base import BaseAPIManager
 
 
 class KakaoLoginAPIManager(BaseAPIManager):
