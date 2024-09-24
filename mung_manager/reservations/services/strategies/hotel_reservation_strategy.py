@@ -16,7 +16,10 @@ from mung_manager.reservations.services.strategies.abstract_strategy import (
     AbstractReservationStrategy,
 )
 from mung_manager_commons.constants import SYSTEM_CODE
-from mung_manager_commons.errors import ValidationException, InvalidParameterFormatException
+from mung_manager_commons.errors import (
+    InvalidParameterFormatException,
+    ValidationException,
+)
 from mung_manager_commons.selector import check_object_or_not_found
 from mung_manager_db.enum_types import ReservationStatus, TicketType
 from mung_manager_db.models import (
