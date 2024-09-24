@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from django.db.models import QuerySet
 
 from mung_manager.errors.exceptions import NotImplementedException
-from mung_manager.tickets.models import Ticket
+from mung_manager_db.models import Ticket
 
 
 class AbstractTicketSelector(ABC):

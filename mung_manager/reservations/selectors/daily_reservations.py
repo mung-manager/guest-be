@@ -3,10 +3,10 @@ from datetime import date, datetime
 from django.db.models.query import QuerySet
 from django_stubs_ext import ValuesQuerySet
 
-from mung_manager.reservations.models import DailyReservation
 from mung_manager.reservations.selectors.abstracts import (
     AbstractDailyReservationSelector,
 )
+from mung_manager_db.models import DailyReservation
 
 
 class DailyReservationSelector(AbstractDailyReservationSelector):

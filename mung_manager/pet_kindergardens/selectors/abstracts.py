@@ -6,8 +6,8 @@ from django_stubs_ext import ValuesQuerySet
 from typing_extensions import Annotated
 
 from mung_manager.errors.exceptions import NotImplementedException
-from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.pet_kindergardens.types import full_address_type
+from mung_manager_db.models import PetKindergarden
 
 
 class AbstractPetKindergardenSelector(ABC):

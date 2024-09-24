@@ -2,9 +2,9 @@ from typing import Optional
 
 from django.db.models.query import QuerySet
 
-from mung_manager.authentications.models import User
-from mung_manager.customers.models import Customer
+
 from mung_manager.customers.selectors.abstracts import AbstractCustomerSelector
+from mung_manager_db.models import Customer, User
 
 
 class CustomerSelector(AbstractCustomerSelector):

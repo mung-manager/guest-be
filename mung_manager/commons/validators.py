@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 
 from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.tickets.enums import TicketType
+from mung_manager_db.enum_types import TicketType
 
 
 class InvalidPhoneNumberValidator(RegexValidator):

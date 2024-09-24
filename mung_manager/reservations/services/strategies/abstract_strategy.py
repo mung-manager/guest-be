@@ -3,13 +3,13 @@ from typing import Any, Optional
 
 from mung_manager.commons.constants import SYSTEM_CODE
 from mung_manager.commons.selectors import check_object_or_not_found
-from mung_manager.customers.models import Customer, CustomerTicket
+
 from mung_manager.customers.selectors.abstracts import AbstractCustomerPetSelector
 from mung_manager.errors.exceptions import NotImplementedException, ValidationException
-from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
 from mung_manager.reservations.services.abstracts import AbstractReservationService
-from mung_manager.tickets.enums import TicketType
+from mung_manager_db.enum_types import TicketType
+from mung_manager_db.models import Customer, CustomerTicket, PetKindergarden
 
 
 class AbstractReservationStrategy(ABC):

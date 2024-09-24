@@ -1,7 +1,7 @@
 from typing import Optional
 
-from mung_manager.authentications.models import User
 from mung_manager.authentications.selectors.abstracts import AbstractUserSelector
+from mung_manager_db.models import User
 
 
 class UserSelector(AbstractUserSelector):

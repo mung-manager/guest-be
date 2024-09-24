@@ -5,14 +5,12 @@ from django.db import connection
 from django.db.models import BooleanField, Case, CharField, F, Q, QuerySet, Value, When
 from django.utils import timezone
 
-from mung_manager.customers.models import Customer
+
 from mung_manager.customers.types import is_expired_type
-from mung_manager.pet_kindergardens.models import PetKindergarden
-from mung_manager.reservations.enums import ReservationStatus
-from mung_manager.reservations.models import Reservation
+from mung_manager_db.enum_types import ReservationStatus, TicketType, TicketStatus
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
 from mung_manager.reservations.types import attendance_type
-from mung_manager.tickets.enums import TicketStatus, TicketType
+from mung_manager_db.models import Customer, PetKindergarden, Reservation
 
 
 class ReservationSelector(AbstractReservationSelector):

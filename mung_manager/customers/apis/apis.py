@@ -18,7 +18,7 @@ from mung_manager.commons.validators import (
 )
 from mung_manager.customers.containers import CustomerContainer
 from mung_manager.reservations.containers import ReservationContainer
-from mung_manager.tickets.enums import TicketStatus
+from mung_manager_db.enum_types import TicketStatus
 
 
 class CustomerTicketCountAPI(APIAuthMixin, APIView):

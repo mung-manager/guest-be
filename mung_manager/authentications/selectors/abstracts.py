@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from mung_manager.authentications.models import User
 from mung_manager.errors.exceptions import NotImplementedException
+from mung_manager_db.models import User
 
 
 class AbstractUserSelector(ABC):

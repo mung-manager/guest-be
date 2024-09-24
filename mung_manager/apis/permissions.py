@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.views import APIView
 
 from mung_manager.authentications.containers import AuthenticationContainer
-from mung_manager.authentications.enums import AuthGroup
+from mung_manager_db.enum_types import AuthGroup
 
 
 class IsGuestPermission(permissions.BasePermission):
