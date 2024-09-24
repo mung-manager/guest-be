@@ -4,8 +4,8 @@ from django.http import HttpRequest
 from django.http import HttpResponse
 from typing import Callable
 from mung_manager.pet_kindergardens.containers import PetKindergardenContainer
-from mung_manager.errors.exceptions import NotFoundException
 from mung_manager_commons.constants import SYSTEM_CODE
+from mung_manager_commons.errors import NotFoundException
 from mung_manager_db.models import PetKindergarden
 
 

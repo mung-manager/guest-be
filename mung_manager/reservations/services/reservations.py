@@ -12,7 +12,6 @@ from mung_manager.customers.selectors.customer_ticket_usage_logs import (
     CustomerTicketUsageLogSelector,
 )
 from mung_manager.customers.selectors.customer_tickets import CustomerTicketSelector
-from mung_manager.errors.exceptions import ValidationException
 from mung_manager.pet_kindergardens.selectors.pet_kindergardens import (
     PetKindergardenSelector,
 )
@@ -29,6 +28,7 @@ from mung_manager.reservations.services.strategies.strategy_factory import (
     ReservationStrategyFactory,
 )
 from mung_manager_commons.constants import SYSTEM_CODE
+from mung_manager_commons.errors import ValidationException
 from mung_manager_commons.selector import get_object_or_not_found
 from mung_manager_db.enum_types import (
     ReservationAvailabilityOption,

@@ -4,7 +4,7 @@ from typing import Annotated, Any, Optional
 from django.db.models.query import QuerySet
 
 from mung_manager.customers.types import is_expired_type
-from mung_manager.errors.exceptions import NotImplementedException
+from mung_manager_commons.errors import NotImplementedException
 from mung_manager_db.models import (
     Customer,
     CustomerPet,

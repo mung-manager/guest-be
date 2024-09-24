@@ -129,7 +129,7 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
-    "EXCEPTION_HANDLER": "mung_manager.errors.exception_handler.default_exception_handler",
+    "EXCEPTION_HANDLER": "mung_manager_commons.errors.exception_handler.default_exception_handler",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_SCHEMA_CLASS": "config.settings.swagger.openapi.AutoSchema",

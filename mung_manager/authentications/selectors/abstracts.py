@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from mung_manager.errors.exceptions import NotImplementedException
+from mung_manager_commons.errors import NotImplementedException
 from mung_manager_db.models import User
 
 

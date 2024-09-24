@@ -4,8 +4,8 @@ from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from mung_manager.authentications.services.abstracts import AbstractAuthService
-from mung_manager.errors.exceptions import AuthenticationFailedException
 from mung_manager_commons.constants import SYSTEM_CODE
+from mung_manager_commons.errors import AuthenticationFailedException
 from mung_manager_commons.selector import check_object_or_not_found
 from mung_manager_db.models import User
 
