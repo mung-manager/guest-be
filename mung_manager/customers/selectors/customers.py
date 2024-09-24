@@ -2,7 +2,6 @@ from typing import Optional
 
 from django.db.models.query import QuerySet
 
-
 from mung_manager.customers.selectors.abstracts import AbstractCustomerSelector
 from mung_manager_db.models import Customer, User
 

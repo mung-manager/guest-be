@@ -8,7 +8,6 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from mung_manager.authentications.containers import AuthenticationContainer
-
 from mung_manager.customers.containers import CustomerContainer
 from mung_manager.errors.exceptions import (
     AuthenticationFailedException,

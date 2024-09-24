@@ -6,7 +6,6 @@ from typing import Any, Optional
 from concurrency.exceptions import RecordModifiedError
 from django.db.models import F
 
-
 from mung_manager.customers.selectors.abstracts import (
     AbstractCustomerPetSelector,
     AbstractCustomerTicketSelector,
@@ -15,16 +14,22 @@ from mung_manager.errors.exceptions import (
     InvalidParameterFormatException,
     ValidationException,
 )
-from mung_manager_commons.constants import SYSTEM_CODE
-from mung_manager_commons.selector import check_object_or_not_found
-from mung_manager_db.enum_types import ReservationStatus, TicketType
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
 from mung_manager.reservations.services.abstracts import AbstractReservationService
 from mung_manager.reservations.services.strategies.abstract_strategy import (
     AbstractReservationStrategy,
 )
-from mung_manager_db.models import Customer, CustomerTicket, CustomerTicketUsageLog, PetKindergarden, DailyReservation, \
-    Reservation
+from mung_manager_commons.constants import SYSTEM_CODE
+from mung_manager_commons.selector import check_object_or_not_found
+from mung_manager_db.enum_types import ReservationStatus, TicketType
+from mung_manager_db.models import (
+    Customer,
+    CustomerTicket,
+    CustomerTicketUsageLog,
+    DailyReservation,
+    PetKindergarden,
+    Reservation,
+)
 
 
 class HotelReservationStrategy(AbstractReservationStrategy):

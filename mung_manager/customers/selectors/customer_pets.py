@@ -2,9 +2,8 @@ from typing import Optional
 
 from django.db.models.query import QuerySet
 
-
 from mung_manager.customers.selectors.abstracts import AbstractCustomerPetSelector
-from mung_manager_db.models import CustomerPet, Customer
+from mung_manager_db.models import Customer, CustomerPet
 
 
 class CustomerPetSelector(AbstractCustomerPetSelector):

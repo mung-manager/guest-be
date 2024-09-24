@@ -5,10 +5,15 @@ from typing import Annotated, Any, Optional
 from django.db.models import QuerySet
 from django_stubs_ext import ValuesQuerySet
 
-
 from mung_manager.errors.exceptions import NotImplementedException
 from mung_manager.reservations.types import attendance_type, is_expired_type
-from mung_manager_db.models import Customer, PetKindergarden, Reservation, DailyReservation, DayOff
+from mung_manager_db.models import (
+    Customer,
+    DailyReservation,
+    DayOff,
+    PetKindergarden,
+    Reservation,
+)
 
 
 class AbstractReservationSelector(ABC):

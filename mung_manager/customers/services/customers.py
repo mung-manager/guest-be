@@ -1,6 +1,5 @@
 from django.db import transaction
 
-
 from mung_manager.customers.selectors.customers import CustomerSelector
 from mung_manager.customers.services.abstracts import AbstractCustomerService
 from mung_manager_commons.constants import SYSTEM_CODE

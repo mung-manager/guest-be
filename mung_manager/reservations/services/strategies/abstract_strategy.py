@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 
-
 from mung_manager.customers.selectors.abstracts import AbstractCustomerPetSelector
 from mung_manager.errors.exceptions import NotImplementedException, ValidationException
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector

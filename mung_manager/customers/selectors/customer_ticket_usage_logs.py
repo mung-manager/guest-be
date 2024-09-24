@@ -1,6 +1,5 @@
 from django.db.models.query import QuerySet
 
-
 from mung_manager.customers.selectors.abstracts import (
     AbstractCustomerTicketUsageLogSelector,
 )

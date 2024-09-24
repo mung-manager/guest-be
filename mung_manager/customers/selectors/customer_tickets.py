@@ -15,7 +15,6 @@ from django.db.models import (
 from django.db.models.functions import Concat
 from django.utils import timezone
 
-
 from mung_manager.customers.selectors.abstracts import AbstractCustomerTicketSelector
 from mung_manager.customers.types import is_expired_type
 from mung_manager_db.enum_types import TicketType
