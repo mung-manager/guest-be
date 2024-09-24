@@ -69,14 +69,12 @@ jobs:
           event-type: guest-deploy
           client-payload: |
             {
-              "partner_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_partner",
-              "admin_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_admin",
-              "guest_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest",
+              "prev_common_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}",
               "guest_image_tag": "${{ github.event.inputs.docker_image_tag }}",
               "s3_bucket": "mung-manager-deploy/dev/guest/",
               "actor": "${{ github.actor }}",
               "branch": "${{ github.ref }}",
-              "django_settings_module": "config.django.dev"
+              "django_settings_module": "config.django.dev",
             }
 
       # 7. Notify Slack
