@@ -4,8 +4,8 @@ from typing import Any, Dict, Tuple
 from attrs import define
 from rest_framework_simplejwt.tokens import Token
 
-from mung_manager.authentications.models import User
-from mung_manager.errors.exceptions import NotImplementedException
+from mung_manager_commons.errors import NotImplementedException
+from mung_manager_db.models import User
 
 
 @define

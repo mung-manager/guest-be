@@ -2,8 +2,8 @@ from datetime import date, datetime
 
 from django_stubs_ext import ValuesQuerySet
 
-from mung_manager.reservations.models import DayOff
 from mung_manager.reservations.selectors.abstracts import AbstractDayOffSelector
+from mung_manager_db.models import DayOff
 
 
 class DayOffSelector(AbstractDayOffSelector):

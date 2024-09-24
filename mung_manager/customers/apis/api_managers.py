@@ -2,7 +2,6 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 
-from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.customers.apis.apis import (
     CustomerActiveStatusAPI,
     CustomerCreateReservationAPI,
@@ -45,6 +44,7 @@ from mung_manager.schemas.errors.reservations import (
     ErrorReservationNotFoundSchema,
 )
 from mung_manager.schemas.errors.tickets import ErrorTicketNotFoundSchema
+from mung_manager_commons.base import BaseAPIManager
 
 
 class CustomerTicketCountAPIManager(BaseAPIManager):

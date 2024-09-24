@@ -6,7 +6,7 @@ SERVER_ENV = os.environ.get("DJANGO_SETTINGS_MODULE", "config.django.base")
 
 env.read_env(os.path.join(BASE_DIR, ".env.guest"))
 
-SECRET_KEY = "test"
+SECRET_KEY = env.str("SECRET_KEY", default="test")
 
 DEBUG = True
 
@@ -16,13 +16,14 @@ ALLOWED_HOSTS = ["*"]
 #                     설치된 앱, 사용하는 앱 config                         #
 # ==================================================================== #
 LOCAL_APPS = [
-    "mung_manager.commons.apps.CommonConfig",
-    "mung_manager.schemas.apps.SchemasConfig",
     "mung_manager.authentications.apps.AuthenticationConfig",
     "mung_manager.customers.apps.CustomersConfig",
     "mung_manager.pet_kindergardens.apps.PetKindergardensConfig",
     "mung_manager.reservations.apps.ReservationsConfig",
+    "mung_manager.schemas.apps.SchemasConfig",
     "mung_manager.tickets.apps.TicketsConfig",
+    "mung_manager_commons.apps.MungManagerCommonsConfig",
+    "mung_manager_db.apps.MungManagerDBConfig",
 ]
 
 THIRD_PARTY_APPS = [
@@ -97,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTH_USER_MODEL = "authentications.User"
+AUTH_USER_MODEL = "mung_manager_db.User"
 
 APP_DOMAIN = env("APP_DOMAIN", default="http://localhost:8000")
 
@@ -122,13 +123,13 @@ USE_TZ = False  # 장고 시간대 사용 여부
 # https://www.django-rest-framework.org/
 
 REST_FRAMEWORK = {
-    "DEFAULT_RENDERER_CLASSES": ("mung_manager.apis.render.CamelCaseJSONRenderer",),
+    "DEFAULT_RENDERER_CLASSES": ("mung_manager_commons.render.CamelCaseJSONRenderer",),
     "DEFAULT_PARSER_CLASSES": (
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
         "djangorestframework_camel_case.parser.CamelCaseFormParser",
         "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
-    "EXCEPTION_HANDLER": "mung_manager.errors.exception_handler.default_exception_handler",
+    "EXCEPTION_HANDLER": "mung_manager_commons.errors.exception_handler.default_exception_handler",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
     "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_SCHEMA_CLASS": "config.settings.swagger.openapi.AutoSchema",

@@ -3,15 +3,15 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mung_manager.apis.mixins import APIAuthMixin
 from mung_manager.authentications.containers import AuthenticationContainer
-from mung_manager.commons.base.serializers import BaseSerializer
-from mung_manager.commons.utils import inline_serializer
 from mung_manager.pet_kindergardens.containers import PetKindergardenContainer
 from mung_manager.tickets.containers import TicketContainer
+from mung_manager_commons.base import BaseSerializer
+from mung_manager_commons.mixins import GuestAPIAuthMixin
+from mung_manager_commons.utils import inline_serializer
 
 
-class PetKindergardenListAPI(APIAuthMixin, APIView):
+class PetKindergardenListAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="유치원 아이디")
         name = serializers.CharField(label="유치원 이름")
@@ -28,7 +28,7 @@ class PetKindergardenListAPI(APIAuthMixin, APIView):
         return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)
 
 
-class PetKindergardenSelectionAPI(APIAuthMixin, APIView):
+class PetKindergardenSelectionAPI(GuestAPIAuthMixin, APIView):
     class InputSerializer(BaseSerializer):
         pet_kindergarden_id = serializers.IntegerField(label="유치원 id")
 
@@ -58,7 +58,7 @@ class PetKindergardenSelectionAPI(APIAuthMixin, APIView):
         return Response(data=auth_data, status=status.HTTP_200_OK)
 
 
-class PetKindergardenSummaryInfoAPI(APIAuthMixin, APIView):
+class PetKindergardenSummaryInfoAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="유치원 아이디")
         name = serializers.CharField(label="유치원 이름")
@@ -70,7 +70,7 @@ class PetKindergardenSummaryInfoAPI(APIAuthMixin, APIView):
         return Response(data=pet_kindergardens_data, status=status.HTTP_200_OK)
 
 
-class PetKindergardenDetailInfoAPI(APIAuthMixin, APIView):
+class PetKindergardenDetailInfoAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         pet_kindergarden = inline_serializer(
             fields={

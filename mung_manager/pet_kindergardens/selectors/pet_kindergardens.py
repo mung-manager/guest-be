@@ -5,11 +5,11 @@ from django.db.models.functions import Concat
 from django_stubs_ext import ValuesQuerySet
 from typing_extensions import Annotated
 
-from mung_manager.pet_kindergardens.models import PetKindergarden
 from mung_manager.pet_kindergardens.selectors.abstracts import (
     AbstractPetKindergardenSelector,
 )
 from mung_manager.pet_kindergardens.types import full_address_type
+from mung_manager_db.models import PetKindergarden
 
 
 class PetKindergardenSelector(AbstractPetKindergardenSelector):

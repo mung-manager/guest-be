@@ -3,19 +3,19 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mung_manager.apis.mixins import APIAuthMixin
-from mung_manager.commons.base.serializers import BaseSerializer
-from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import get_object_or_not_found
-from mung_manager.commons.validators import (
+from mung_manager.customers.containers import CustomerContainer
+from mung_manager.reservations.containers import ReservationContainer
+from mung_manager_commons.base import BaseSerializer
+from mung_manager_commons.constants import SYSTEM_CODE
+from mung_manager_commons.mixins import GuestAPIAuthMixin
+from mung_manager_commons.selector import get_object_or_not_found
+from mung_manager_commons.validators import (
     AvailableDatesAPIParameterValidator,
     InvalidTicketTypeValidator,
 )
-from mung_manager.customers.containers import CustomerContainer
-from mung_manager.reservations.containers import ReservationContainer
 
 
-class ReservationCustomerPetListAPI(APIAuthMixin, APIView):
+class ReservationCustomerPetListAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         id = serializers.IntegerField(label="반려동물 아이디")
         name = serializers.CharField(label="반려동물 이름")
@@ -38,7 +38,7 @@ class ReservationCustomerPetListAPI(APIAuthMixin, APIView):
         return Response(data=customer_pets_data, status=status.HTTP_200_OK)
 
 
-class ReservationCustomerTicketTypesAPI(APIAuthMixin, APIView):
+class ReservationCustomerTicketTypesAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         ticket_types = serializers.ListField(label="티켓 타입 목록")
 
@@ -60,7 +60,7 @@ class ReservationCustomerTicketTypesAPI(APIAuthMixin, APIView):
         return Response(data=ticket_types_data, status=status.HTTP_200_OK)
 
 
-class ReservationCustomerTicketTypeDetailAPI(APIAuthMixin, APIView):
+class ReservationCustomerTicketTypeDetailAPI(GuestAPIAuthMixin, APIView):
     class InputSerializer(BaseSerializer):
         ticket_type = serializers.CharField(label="티켓 타입", validators=[InvalidTicketTypeValidator()])
 
@@ -91,7 +91,7 @@ class ReservationCustomerTicketTypeDetailAPI(APIAuthMixin, APIView):
         return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
 
 
-class ReservationTicketCheckExpirationAPI(APIAuthMixin, APIView):
+class ReservationTicketCheckExpirationAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         customer_ticket_id = serializers.IntegerField(label="티켓 아이디", source="customer_ticket__id")
         expired_at = serializers.DateTimeField(
@@ -115,7 +115,7 @@ class ReservationTicketCheckExpirationAPI(APIAuthMixin, APIView):
         return Response(data=customer_tickets_data, status=status.HTTP_200_OK)
 
 
-class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
+class ReservationPetKindergardenAvailableDatesAPI(GuestAPIAuthMixin, APIView):
     class InputSerializer(BaseSerializer):
         ticket_type = serializers.CharField(label="티켓 타입", validators=[InvalidTicketTypeValidator()])
         ticket_id = serializers.IntegerField(label="티켓 아이디", required=False)
@@ -151,7 +151,7 @@ class ReservationPetKindergardenAvailableDatesAPI(APIAuthMixin, APIView):
         return Response(data=available_dates_per_ticket_data, status=status.HTTP_200_OK)
 
 
-class ReservationPetKindergardenAttendanceTimesAPI(APIAuthMixin, APIView):
+class ReservationPetKindergardenAttendanceTimesAPI(GuestAPIAuthMixin, APIView):
     class InputSerializer(BaseSerializer):
         usage_time = serializers.IntegerField(label="사용 가능한 시간")
 

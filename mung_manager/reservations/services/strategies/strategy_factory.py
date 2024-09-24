@@ -19,7 +19,7 @@ from mung_manager.reservations.services.strategies.hotel_reservation_strategy im
 from mung_manager.reservations.services.strategies.time_reservation_strategy import (
     TimeReservationStrategy,
 )
-from mung_manager.tickets.enums import TicketType
+from mung_manager_db.enum_types import TicketType
 
 
 class ReservationStrategyFactory:

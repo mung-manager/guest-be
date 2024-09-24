@@ -11,7 +11,7 @@ from mung_manager.authentications.services.abstracts import (
     KakaoAccessToken,
     KakaoLoginCredentials,
 )
-from mung_manager.errors.exceptions import AuthenticationFailedException
+from mung_manager_commons.errors import AuthenticationFailedException
 
 
 class KakaoLoginFlowService(AbstractKakaoLoginFlowService):

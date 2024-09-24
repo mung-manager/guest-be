@@ -17,7 +17,7 @@
 
 ## 기술 스택
 - Language: Python 3.11
-- Backend: Django 5.0, Django Rest Framework, Celery, Celery-beats 
+- Backend: Django 5.0, Django Rest Framework, Celery, Celery-beats
 - DB: Postgresql16.0, PostGis
 - Infra: AWS, Docker, Docker Compose, Nginx, Redis
 - Management: Git, Github, Github Actions
@@ -44,10 +44,10 @@
 - 프로젝트는 Layered 아키텍처로 진행하고 있습니다. 대략적인 구조 및 가이드는 아래 문서를 참조합니다.
   - [Django Style Guide](https://github.com/HackSoftware/Django-Styleguide)
   - [Django Style Guide Example](https://github.com/HackSoftware/Django-Styleguide-Example)
- 
+
 - 그 외 팀 내에서 정한 규칙
   - [Selector / Service 네이밍 규칙](https://butter-yew-22b.notion.site/Selector-Service-7f11d55871c74e5f95e388196287bdf7?pvs=4)
- 
+
 - 그외 읽어보면 좋을 글
   - [Django Layered 아키텍처](https://medium.com/athenaslab/django%EC%99%80-layered-architecture-%EC%82%AC%EC%9D%B4%EC%97%90%EC%84%9C-%ED%83%80%ED%98%91%EC%A0%90-%EC%B0%BE%EA%B8%B0-70769c13ef9d)
 

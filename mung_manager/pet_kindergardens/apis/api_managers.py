@@ -2,7 +2,6 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 
-from mung_manager.commons.base.api_managers import BaseAPIManager
 from mung_manager.pet_kindergardens.apis.apis import (
     PetKindergardenDetailInfoAPI,
     PetKindergardenListAPI,
@@ -28,6 +27,7 @@ from mung_manager.schemas.errors.commons import (
 from mung_manager.schemas.errors.pet_kindergardens import (
     ErrorPetKindergardenNotFoundSchema,
 )
+from mung_manager_commons.base import BaseAPIManager
 
 
 class PetkindergardenListAPIManager(BaseAPIManager):

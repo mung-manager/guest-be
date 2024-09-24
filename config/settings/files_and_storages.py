@@ -16,18 +16,18 @@ AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
 # ==================================================================== #
 USE_S3 = env.bool("USE_S3", default=False)
 
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
-    },
-    "staticfiles": {
-        "BACKEND": "storages.backends.s3.S3StaticStorage",
-    },
-}
-
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 if USE_S3:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.s3.S3StaticStorage",
+        },
+    }
+
     AWS_LOCATION = "guest/static"
     STATIC_URL = f"{AWS_S3_URL}/{AWS_LOCATION}/"
 else:

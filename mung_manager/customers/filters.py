@@ -1,6 +1,6 @@
 import django_filters
 
-from mung_manager.customers.models import Customer
+from mung_manager_db.models import Customer
 
 
 class CustomerFilter(django_filters.FilterSet):

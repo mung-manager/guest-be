@@ -3,25 +3,25 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mung_manager.apis.mixins import APIAuthMixin
-from mung_manager.apis.pagination import LimitOffsetPagination, get_paginated_data
-from mung_manager.commons.base.serializers import BaseSerializer
-from mung_manager.commons.constants import SYSTEM_CODE
-from mung_manager.commons.selectors import (
+from mung_manager.customers.containers import CustomerContainer
+from mung_manager.reservations.containers import ReservationContainer
+from mung_manager_commons.base import BaseSerializer
+from mung_manager_commons.constants import SYSTEM_CODE
+from mung_manager_commons.mixins import GuestAPIAuthMixin
+from mung_manager_commons.pagination import LimitOffsetPagination, get_paginated_data
+from mung_manager_commons.selector import (
     get_object_or_not_found,
     get_object_or_permission_denied,
 )
-from mung_manager.commons.utils import inline_serializer
-from mung_manager.commons.validators import (
+from mung_manager_commons.utils import inline_serializer
+from mung_manager_commons.validators import (
     CreateReservationAPIParameterValidator,
     InvalidTicketTypeValidator,
 )
-from mung_manager.customers.containers import CustomerContainer
-from mung_manager.reservations.containers import ReservationContainer
-from mung_manager.tickets.enums import TicketStatus
+from mung_manager_db.enum_types import TicketStatus
 
 
-class CustomerTicketCountAPI(APIAuthMixin, APIView):
+class CustomerTicketCountAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         time_count = serializers.IntegerField(label="시간권 예약")
         all_day_count = serializers.IntegerField(label="종일권 예약")
@@ -45,7 +45,7 @@ class CustomerTicketCountAPI(APIAuthMixin, APIView):
         return Response(data=customer_ticket_count_data, status=status.HTTP_200_OK)
 
 
-class CustomerReservationListAPI(APIAuthMixin, APIView):
+class CustomerReservationListAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         is_active_customer = serializers.BooleanField(label="고객의 활성화 여부")
         reservation = inline_serializer(
@@ -84,7 +84,7 @@ class CustomerReservationListAPI(APIAuthMixin, APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
-class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
+class CustomerReservationDetailListAPI(GuestAPIAuthMixin, APIView):
     class Pagination(LimitOffsetPagination):
         default_limit = 10
 
@@ -145,7 +145,7 @@ class CustomerReservationDetailListAPI(APIAuthMixin, APIView):
         return Response(data=pagination_reservation_data, status=status.HTTP_200_OK)
 
 
-class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
+class CustomerTicketPurchaseListAPI(GuestAPIAuthMixin, APIView):
     class Pagination(LimitOffsetPagination):
         default_limit = 10
 
@@ -191,7 +191,7 @@ class CustomerTicketPurchaseListAPI(APIAuthMixin, APIView):
         return Response(data=tickets_data, status=status.HTTP_200_OK)
 
 
-class CustomerReservationCancelAPI(APIAuthMixin, APIView):
+class CustomerReservationCancelAPI(GuestAPIAuthMixin, APIView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._reservation_selector = ReservationContainer.reservation_selector()
@@ -202,7 +202,7 @@ class CustomerReservationCancelAPI(APIAuthMixin, APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CustomerCreateReservationAPI(APIAuthMixin, APIView):
+class CustomerCreateReservationAPI(GuestAPIAuthMixin, APIView):
 
     class InputSerializer(BaseSerializer):
         pet_id = serializers.IntegerField(label="반려동물 아이디")
@@ -246,7 +246,7 @@ class CustomerCreateReservationAPI(APIAuthMixin, APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
-class CustomerActiveStatusAPI(APIAuthMixin, APIView):
+class CustomerActiveStatusAPI(GuestAPIAuthMixin, APIView):
     class OutputSerializer(BaseSerializer):
         is_active_customer = serializers.BooleanField(label="고객의 활성화 여부")
 

@@ -1,0 +1,6 @@
+[submodule "mung_manager_db"]
+	path = mung_manager_db
+	url = https://github.com/mung-manager/mung_manager_db.git
+[submodule "mung_manager_commons"]
+	path = mung_manager_commons
+	url = https://github.com/mung-manager/mung_manager_commons.git
