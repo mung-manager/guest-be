@@ -60,7 +60,7 @@ jobs:
                   "color": "#36a64f",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{ github.repository }}",
-                  "text": "GitHub Action format-lint CI 성공 😄",
+                  "text": "GitHub Action guest format-lint CI 성공 😄",
                   "fields": [
                     {
                       "title": "Repository",
@@ -93,7 +93,7 @@ jobs:
                   "color": "#ff0000",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{ github.repository }}",
-                  "text": "GitHub Action format-lint CI 실패 😭",
+                  "text": "GitHub Action guest format-lint CI 실패 😭",
                   "fields": [
                     {
                       "title": "Repository",
