@@ -1,6 +1,7 @@
 import logging
 
 from django.urls import include, path
+from config.django.base import SERVER_ENV
 
 logger = logging.getLogger("configuration")
 
@@ -24,7 +25,7 @@ def show_toolbar(*args, **kwargs) -> bool:
     """
     from config.settings.debug_toolbar.settings import DEBUG_TOOLBAR_ENABLED
 
-    if not DEBUG_TOOLBAR_ENABLED:
+    if not DEBUG_TOOLBAR_ENABLED or SERVER_ENV == "config.django.prod":
         return False
 
     try:

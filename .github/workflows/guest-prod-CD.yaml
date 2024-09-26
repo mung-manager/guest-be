@@ -1,4 +1,4 @@
-name: Guest DEV Docker Push
+name: Guest PROD Docker Push
 run-name: Deploy to AWS ECR(Guest Docker Image v.${{ github.event.inputs.docker_image_tag }}) by @${{ github.actor }}
 
 on:
@@ -57,12 +57,12 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./docker/dev.Dockerfile
+          file: ./docker/prod.Dockerfile
           platforms: linux/x86_64
           push: true
           tags: |
-            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest:${{ github.event.inputs.docker_image_tag }}
-            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest:latest
+            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_prod_guest:${{ github.event.inputs.docker_image_tag }}
+            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_prod_guest:latest
 
       # 6. Trigger Infra Repository Dispatch
       - name: Infra Repository Dispatch
@@ -75,10 +75,10 @@ jobs:
             {
               "prev_common_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}",
               "guest_image_tag": "${{ github.event.inputs.docker_image_tag }}",
-              "s3_bucket": "mung-manager-deploy/dev/guest/",
+              "s3_bucket": "mung-manager-deploy/prod/guest/",
               "actor": "${{ github.actor }}",
               "branch": "${{ github.ref }}",
-              "django_settings_module": "config.django.dev"
+              "django_settings_module": "config.django.prod"
             }
 
       # 7. Notify Slack
@@ -95,7 +95,7 @@ jobs:
                   "color": "#36a64f",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{github.repository}}",
-                  "text": "GitHub Action guest DEV-DOCKER-PUSH 성공 😄",
+                  "text": "GitHub Action guest PROD-DOCKER-PUSH 성공 😄",
                   "fields": [
                     {
                       "title": "Repository",
@@ -128,7 +128,7 @@ jobs:
                   "color": "#ff0000",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{github.repository}}",
-                  "text": "GitHub Action guest DEV-DOCKER-PUSH 실패 😭",
+                  "text": "GitHub Action guest PROD-DOCKER-PUSH 실패 😭",
                   "fields": [
                     {
                       "title": "Repository",

@@ -5,7 +5,7 @@ SECRET_KEY = env("SECRET_KEY")
 
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = env.list("PROD_ALLOWED_HOSTS", default=[])
 
 DATABASES = {
     "default": {
@@ -13,7 +13,7 @@ DATABASES = {
         "NAME": env("PROD_POSTGRESQL_DATABASE"),
         "USER": env("PROD_POSTGRESQL_USER"),
         "PASSWORD": env("PROD_POSTGRESQL_PASSWORD"),
-        "HOST": env("PORD_POSTGRESQL_HOST"),
+        "HOST": env("PROD_POSTGRESQL_HOST"),
         "PORT": env("PROD_POSTGRESQL_PORT"),
         "CONN_MAX_AGE": 60,
     }
@@ -21,7 +21,7 @@ DATABASES = {
 
 
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST", default=[])
+CORS_ORIGIN_WHITELIST = env.list("DJANGO_CORS_ORIGIN_WHITELIST", default=[])
 
 CSRF_TRUSTED_ORIGINS = CORS_ORIGIN_WHITELIST
 
