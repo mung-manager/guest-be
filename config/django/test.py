@@ -6,10 +6,10 @@ from config.env import env
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": env("TEST_POSTGRESQL_DATABASE", default="github_actions"),
+        "NAME": env("TEST_POSTGRESQL_DATABASE", default="mung_manager"),
         "USER": env("TEST_POSTGRESQL_USER", default="postgres"),
         "PASSWORD": env("TEST_POSTGRESQL_PASSWORD", default="password"),
-        "HOST": env("TEST_POSTGRESQL_HOST", default="postgres-db"),
+        "HOST": env("TEST_POSTGRESQL_HOST", default="postgres_db"),
         "PORT": env("TEST_POSTGRESQL_PORT", default="5432"),
         "CONN_MAX_AGE": 60,
     }

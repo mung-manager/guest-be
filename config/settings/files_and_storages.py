@@ -1,5 +1,6 @@
 import os
 from config.env import env, BASE_DIR
+from config.django.base import SERVER_ENV
 
 FILE_MAX_SIZE = env.int("FILE_MAX_SIZE", default=10485760)  # 10 MiB
 
@@ -7,8 +8,13 @@ AWS_S3_ACCESS_KEY_ID = env("AWS_S3_ACCESS_KEY_ID")
 AWS_S3_SECRET_ACCESS_KEY = env("AWS_S3_SECRET_ACCESS_KEY")
 AWS_S3_REGION_NAME = env.str("AWS_S3_REGION_NAME")
 
-AWS_STORAGE_BUCKET_NAME = env.str("AWS_STORAGE_BUCKET_NAME")
-AWS_S3_URL = env("AWS_S3_URL")
+if SERVER_ENV == "config.django.prod":
+    AWS_STORAGE_BUCKET_NAME = env.str("AWS_PROD_STORAGE_BUCKET_NAME")
+    AWS_S3_URL = env.str("AWS_PROD_S3_URL")
+else:
+    AWS_STORAGE_BUCKET_NAME = env.str("AWS_DEV_STORAGE_BUCKET_NAME")
+    AWS_S3_URL = env.str("AWS_DEV_S3_URL")
+
 AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
 
 # ==================================================================== #
