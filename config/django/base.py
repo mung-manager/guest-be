@@ -6,6 +6,7 @@ SERVER_ENV = os.environ.get("DJANGO_SETTINGS_MODULE", "config.django.base")
 
 env.read_env(os.path.join(BASE_DIR, ".env.guest"))
 
+SERVICE_NAME = env.str("SERVICE_NAME")
 SECRET_KEY = env.str("SECRET_KEY", default="test")
 
 DEBUG = True
