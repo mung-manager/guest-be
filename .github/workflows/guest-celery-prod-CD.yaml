@@ -1,5 +1,5 @@
-name: Guest PROD Docker Push
-run-name: Deploy to AWS ECR(Guest Docker Image v.${{ github.event.inputs.docker_image_tag }}) by @${{ github.actor }}
+name: Guest CELERY PROD Docker Push
+run-name: Deploy to AWS ECR(Guest Celery Docker Image v.${{ github.event.inputs.docker_image_tag }}) by @${{ github.actor }}
 
 on:
   workflow_dispatch:
@@ -16,11 +16,10 @@ on:
         - DongwookKim0823
 
 jobs:
-  guest-docker-push:
+  guest-celery-docker-push:
     runs-on: ubuntu-latest
     if: github.repository == 'mung-manager/guest-be'
     steps:
-      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -28,7 +27,6 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # 2. Create environment file
       - name: Create env file
         env:
           DJANGO_GUEST_ENV: ${{ secrets.DJANGO_GUEST_ENV }}
@@ -36,7 +34,6 @@ jobs:
           touch .env.guest
           echo "$DJANGO_GUEST_ENV" >> .env.guest
 
-      # 3. Configure AWS credentials
       - name: AWS configure
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -44,14 +41,12 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      # 4. Login to Amazon ECR Public
       - name: Login to Amazon ECR Public
         id: login-ecr-public
         uses: aws-actions/amazon-ecr-login@v2
         with:
           registry-type: public
 
-      # 5. Build and push Docker image
       - name: Build and push
         id: build-and-push
         uses: docker/build-push-action@v5
@@ -61,16 +56,15 @@ jobs:
           platforms: linux/x86_64
           push: true
           tags: |
-            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest:${{ github.event.inputs.docker_image_tag }}
-            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest:latest
+            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_guest_celery:${{ github.event.inputs.docker_image_tag }}
+            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_guest_celery:latest
 
-      # 6. Trigger Infra Repository Dispatch
       - name: Infra Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.OWNER_ACCESS_TOKEN }}
-          repository: mung-manager/infra-be
-          event-type: guest-prod-deploy
+          repository: Mung-Manager/BE-Infra
+          event-type: guest-celery-prod-deploy
           client-payload: |
             {
               "prev_common_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}",
@@ -81,7 +75,6 @@ jobs:
               "django_settings_module": "config.django.prod"
             }
 
-      # 7. Notify Slack
       - name: Notify Slack on Success
         if: success()
         id: slack-success
@@ -95,7 +88,7 @@ jobs:
                   "color": "#36a64f",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{github.repository}}",
-                  "text": "GitHub Action guest PROD-DOCKER-PUSH 성공 😄",
+                  "text": "GitHub Action Guest PROD-DOCKER-PUSH 성공 😄",
                   "fields": [
                     {
                       "title": "Repository",
@@ -128,12 +121,12 @@ jobs:
                   "color": "#ff0000",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{github.repository}}",
-                  "text": "GitHub Action guest PROD-DOCKER-PUSH 실패 😭",
+                  "text": "GitHub Action Partner PROD-DOCKER-PUSH 실패 😭",
                   "fields": [
                     {
                       "title": "Repository",
                       "value": "${{ github.repository }}",
-                      "short": true
+                    "short": true
                     },
                     {
                       "title": "Tag",

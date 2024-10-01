@@ -1931,6 +1931,20 @@ files = [
 ]
 
 [[package]]
+name = "slack-sdk"
+version = "3.33.1"
+description = "The Slack API Platform SDK for Python"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "slack_sdk-3.33.1-py2.py3-none-any.whl", hash = "sha256:ef93beec3ce9c8f64da02fd487598a05ec4bc9c92ceed58f122dbe632691cbe2"},
+    {file = "slack_sdk-3.33.1.tar.gz", hash = "sha256:e328bb661d95db5f66b993b1d64288ac7c72201a745b4c7cf8848dafb7b74e40"},
+]
+
+[package.extras]
+optional = ["SQLAlchemy (>=1.4,<3)", "aiodns (>1.0)", "aiohttp (>=3.7.3,<4)", "boto3 (<=2)", "websocket-client (>=1,<2)", "websockets (>=9.1,<14)"]
+
+[[package]]
 name = "sqlparse"
 version = "0.5.0"
 description = "A non-validating SQL parser."
@@ -2087,4 +2101,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "272556891f64d83f075cdd9743c5ac84198d913e9bbd5bae5f69b6fc3559a8c2"
+content-hash = "ac8ea812d70c2ec8a73885274f3b0cd0dcb708258ddc971d98e03e16ceed960d"
