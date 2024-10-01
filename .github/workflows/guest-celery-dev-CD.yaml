@@ -1,0 +1,142 @@
+name: Guest CELERY DEV Docker Push
+run-name: Deploy to AWS ECR(Guest Celery Docker Image v.${{ github.event.inputs.docker_image_tag }}) by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      docker_image_tag:
+        description: '이전 버전과 다른 상위 버전을 입력해주세요. (ex. 1.0.0)'
+        default: '1.0.0'
+        required: true
+        type: string
+
+    permissions:
+      users:
+        - saJaeHyukc
+        - DongwookKim0823
+
+jobs:
+  guest-celery-docker-push:
+    runs-on: ubuntu-latest
+    if: github.repository == 'mung-manager/guest-be'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.OWNER_ACCESS_TOKEN }}
+          submodules: true
+          fetch-depth: 0
+
+      - name: Create env file
+        env:
+          DJANGO_GUEST_ENV: ${{ secrets.DJANGO_GUEST_ENV }}
+        run: |
+          touch .env.guest
+          echo "$DJANGO_GUEST_ENV" >> .env.guest
+
+      - name: AWS configure
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build and push
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/dev.Dockerfile
+          platforms: linux/x86_64
+          push: true
+          tags: |
+            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_guest_celery:${{ github.event.inputs.docker_image_tag }}
+            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_guest_celery:latest
+
+      - name: Infra Repository Dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.OWNER_ACCESS_TOKEN }}
+          repository: Mung-Manager/BE-Infra
+          event-type: guest-celery-dev-deploy
+          client-payload: |
+            {
+              "prev_common_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}",
+              "guest_image_tag": "${{ github.event.inputs.docker_image_tag }}",
+              "s3_bucket": "mung-manager-deploy/dev/guest/",
+              "actor": "${{ github.actor }}",
+              "branch": "${{ github.ref }}",
+              "django_settings_module": "config.django.dev"
+            }
+
+      - name: Notify Slack on Success
+        if: success()
+        id: slack-success
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "attachments": [
+                {
+                  "color": "#36a64f",
+                  "title": "${{ github.repository }}",
+                  "title_link": "https://github.com/${{github.repository}}",
+                  "text": "GitHub Action Guest DEV-CELERY-DOCKER-PUSH 성공 😄",
+                  "fields": [
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Tag",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack on Failure
+        if: failure()
+        id: slack-failure
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "channel": "${{ secrets.SLACK_CHANNEL_ID }}",
+              "attachments": [
+                {
+                  "color": "#ff0000",
+                  "title": "${{ github.repository }}",
+                  "title_link": "https://github.com/${{github.repository}}",
+                  "text": "GitHub Action Guest DEV-CELERY-DOCKER-PUSH 실패 😭",
+                  "fields": [
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                    "short": true
+                    },
+                    {
+                      "title": "Tag",
+                      "value": "${{ github.ref_name }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
