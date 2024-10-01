@@ -22,6 +22,7 @@ LOCAL_APPS = [
     "mung_manager.reservations.apps.ReservationsConfig",
     "mung_manager.schemas.apps.SchemasConfig",
     "mung_manager.tickets.apps.TicketsConfig",
+    "mung_manager.tasks.apps.TasksConfig",
     "mung_manager_commons.apps.MungManagerCommonsConfig",
     "mung_manager_db.apps.MungManagerDBConfig",
 ]
@@ -142,6 +143,7 @@ from config.settings.sentry import *  # noqa
 from config.settings.jwt import *  # noqa
 from config.settings.logging import *  # noqa
 from config.settings.oauth import *  # noqa
+from config.settings.celery import *  # noqa
 
 from config.settings.debug_toolbar.settings import *  # noqa
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
