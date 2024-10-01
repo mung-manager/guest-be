@@ -70,7 +70,7 @@ jobs:
         with:
           token: ${{ secrets.OWNER_ACCESS_TOKEN }}
           repository: mung-manager/infra-be
-          event-type: guest-deploy
+          event-type: guest-dev-deploy
           client-payload: |
             {
               "prev_common_docker_image": "${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}",
