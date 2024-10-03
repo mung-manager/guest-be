@@ -245,7 +245,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             reservation = Reservation.objects.create(
                 reserved_at=reserved_at,
                 end_at=end_at,
-                is_attended=False,
+                is_attended=None,
                 reservation_status=ReservationStatus.COMPLETED.value,
                 pet_kindergarden_id=pet_kindergarden.id,
                 customer_id=customer.id,
