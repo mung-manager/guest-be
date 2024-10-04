@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime, timedelta
 from itertools import groupby
 from operator import itemgetter
@@ -112,7 +113,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         self,
         customer: Customer,
         reservation_data: dict[str, Any],
-    ) -> list[CustomerTicket]:
+    ) -> dict[CustomerTicket, list[datetime]]:
         """
         이 함수는 주어진 정보를 바탕으로 호텔 티켓 사용 현황을 반환합니다.
         티켓 횟수 증감 처리를 낙관적 락을 통해 구현했습니다.
@@ -122,14 +123,14 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             reservation_data (dict[str, Any]): 예약 정보
 
         Returns:
-            dict[str, Any]: 사용된 티켓 ID와 각 티켓의 사용 횟수
+            dict[CustomerTicket, list[datetime]]: 티켓별 사용 날짜 목록
         """
         current_date = reservation_data["reserved_date"]
         while current_date < reservation_data["end_date"]:
             self.reservation_dates.append(current_date)
             current_date += timedelta(days=1)
 
-        customer_tickets = []
+        customer_tickets = defaultdict(list)
         for date in self.reservation_dates:
             available_tickets = (
                 self._customer_ticket_selector.get_queryset_by_customer_and_ticket_type_for_ticket_detail(
@@ -154,7 +155,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
                 available_ticket.unused_count -= 1
                 available_ticket.used_count += 1
                 available_ticket.save(update_fields=["used_count", "unused_count", "updated_at", "version"])
-                customer_tickets.append(available_ticket)
+                customer_tickets[available_ticket].append(date)
             except RecordModifiedError:
                 raise ValidationException(
                     detail=SYSTEM_CODE.message("CONFLICT_CUSTOMER_TICKET"),
@@ -212,7 +213,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         customer: Customer,
         pet_kindergarden: PetKindergarden,
         reservation_data: dict[str, Any],
-        customer_tickets: Optional[list[CustomerTicket]] = None,
+        customer_tickets: Optional[dict[CustomerTicket, list[datetime]]] = None,
     ) -> list[Reservation]:
         """
         이 함수는 주어진 정보를 활용하여 여러 날짜에 걸친 예약을 생성합니다.
@@ -221,31 +222,26 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             customer (Customer): 고객 객체
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
             reservation_data (dict[str, Any]): 사용자 입력
-            customer_tickets (Optional[list[CustomerTicket]]): 예약에 사용된 티켓 정보
+            customer_tickets (Optional[dict[CustomerTicket, list[datetime]]]): 예약에 사용된 티켓 정보
 
         Returns:
             list[Reservation]: 생성된 예약 객체 리스트
         """
-        if customer_tickets is None:
+        if not customer_tickets:
             raise InvalidParameterFormatException(
                 detail=SYSTEM_CODE.message("INVALID_PARAMETER_FORMAT"),
                 code=SYSTEM_CODE.code("INVALID_PARAMETER_FORMAT"),
             )
 
         reservations = []
-        ticket_iter = iter(customer_tickets)
         parent_id = None
         depth = 0
-        is_extented = True if len(self.reservation_dates) > 1 else False
-        for date in self.reservation_dates:
-            reserved_at = datetime.combine(date, pet_kindergarden.business_start_hour)
-            end_at = datetime.combine(date, pet_kindergarden.business_end_hour)
-            ticket = next(ticket_iter)
-
+        is_extented = True if len(customer_tickets) > 1 else False
+        for ticket in customer_tickets:
             reservation = Reservation.objects.create(
-                reserved_at=reserved_at,
-                end_at=end_at,
-                is_attended=False,
+                reserved_at=self.reservation_dates[0],
+                end_at=self.reservation_dates[-1] + timedelta(days=1),
+                is_attended=None,
                 reservation_status=ReservationStatus.COMPLETED.value,
                 pet_kindergarden_id=pet_kindergarden.id,
                 customer_id=customer.id,
@@ -263,43 +259,43 @@ class HotelReservationStrategy(AbstractReservationStrategy):
 
     def handle_tickets_usage(
         self,
-        customer_tickets: list[CustomerTicket],
+        customer_tickets: dict[CustomerTicket, list[datetime]],
         reservations: list[Reservation],
     ) -> None:
         """
         이 함수는 고객 티켓 사용 로그를 생성합니다.
 
         Args:
-            customer_tickets (list[CustomerTicket]): 예약에 사용된 티켓 정보
+            customer_tickets (dict[CustomerTicket, list[datetime]]): 예약에 사용된 티켓 정보
             reservations (list[Reservation]): 예약 객체
 
         Returns:
             None
         """
-        for i in range(len(customer_tickets)):
+        for index, ticket in enumerate(customer_tickets):
             CustomerTicketUsageLog.objects.create(
-                customer_ticket_id=customer_tickets[i].id,
-                reservation_id=reservations[i].id,
-                used_count=1,
+                customer_ticket_id=ticket.id,
+                reservation_id=reservations[index].id,
+                used_count=len(customer_tickets[ticket]),
             )
 
     def get_reservation_info(
         self,
         reservation_data: dict[str, Any],
-        customer_tickets: list[CustomerTicket],
+        customer_tickets: dict[CustomerTicket, list[datetime]],
     ) -> dict[str, Any]:
         """
         이 함수는 생성한 예약 정보를 반환합니다.
 
         Args:
             reservation_data (dict[str, Any]): 사용자 입력
-            customer_tickets (CustomerTicket): 고객 티켓 객체
+            customer_tickets (dict[CustomerTicket, list[datetime]]): 고객 티켓 객체
 
         Returns:
             dict[str, Any]: 예약 정보 반환
         """
         unused_count = 0
-        for customer_ticket in set(customer_tickets):
+        for customer_ticket in customer_tickets:
             count = self._customer_ticket_selector.get_by_customer_ticket_id_for_unused_count(customer_ticket.id)
             unused_count += count if count is not None else 0
 
@@ -307,7 +303,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         reservation_info = {
             "attendance_date": reservation_data["reserved_date"],
             "end_date": reservation_data["end_date"],
-            "usage_count": len(customer_tickets),
+            "usage_count": sum(len(tickets) for tickets in customer_tickets.values()),
             "remain_count": unused_count,
             "pet_name": pet_name,
         }
