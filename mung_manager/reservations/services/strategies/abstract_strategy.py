@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 
 from mung_manager.customers.selectors.abstracts import AbstractCustomerPetSelector
 from mung_manager.reservations.selectors.abstracts import AbstractReservationSelector
@@ -8,7 +8,7 @@ from mung_manager_commons.constants import SYSTEM_CODE
 from mung_manager_commons.errors import NotImplementedException, ValidationException
 from mung_manager_commons.selector import check_object_or_not_found
 from mung_manager_db.enum_types import TicketType
-from mung_manager_db.models import Customer, CustomerTicket, PetKindergarden
+from mung_manager_db.models import Customer, PetKindergarden
 
 
 class AbstractReservationStrategy(ABC):
@@ -157,19 +157,19 @@ class AbstractReservationStrategy(ABC):
         customer_tickets: Any = None,
     ) -> Any:
         raise NotImplementedException()
-    #
-    # @abstractmethod
-    # def handle_tickets_usage(
-    #     self,
-    #     customer_tickets: Any,
-    #     reservations: Any,
-    # ) -> None:
-    #     raise NotImplementedException()
-    #
-    # @abstractmethod
-    # def get_reservation_info(
-    #     self,
-    #     reservation_data: dict[str, Any],
-    #     customer_tickets: Any,
-    # ) -> dict[str, Any]:
-    #     raise NotImplementedException()
+
+    @abstractmethod
+    def handle_tickets_usage(
+        self,
+        customer_tickets: Any,
+        reservations: Any,
+    ) -> None:
+        raise NotImplementedException()
+
+    @abstractmethod
+    def get_reservation_info(
+        self,
+        reservation_data: dict[str, Any],
+        customer_tickets: Any,
+    ) -> dict[str, Any]:
+        raise NotImplementedException()
