@@ -154,22 +154,22 @@ class AbstractReservationStrategy(ABC):
         customer: Customer,
         pet_kindergarden: PetKindergarden,
         reservation_data: dict[str, Any],
-        customer_tickets: Optional[list[CustomerTicket]] = None,
+        customer_tickets: Any = None,
     ) -> Any:
         raise NotImplementedException()
-
-    @abstractmethod
-    def handle_tickets_usage(
-        self,
-        customer_tickets: Any,
-        reservations: Any,
-    ) -> None:
-        raise NotImplementedException()
-
-    @abstractmethod
-    def get_reservation_info(
-        self,
-        reservation_data: dict[str, Any],
-        customer_tickets: Any,
-    ) -> dict[str, Any]:
-        raise NotImplementedException()
+    #
+    # @abstractmethod
+    # def handle_tickets_usage(
+    #     self,
+    #     customer_tickets: Any,
+    #     reservations: Any,
+    # ) -> None:
+    #     raise NotImplementedException()
+    #
+    # @abstractmethod
+    # def get_reservation_info(
+    #     self,
+    #     reservation_data: dict[str, Any],
+    #     customer_tickets: Any,
+    # ) -> dict[str, Any]:
+    #     raise NotImplementedException()

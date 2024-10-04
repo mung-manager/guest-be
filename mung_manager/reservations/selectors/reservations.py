@@ -331,6 +331,8 @@ class ReservationSelector(AbstractReservationSelector):
             customer_id=customer_id,
             customer_pet_id=customer_pet_id,
             pet_kindergarden_id=pet_kindergarden_id,
+        ).exclude(
+            reservation_status=ReservationStatus.CANCELED.value,
         ).values_list("reserved_at", flat=True)
 
         formatted_dates = [date.strftime("%Y-%m-%d") for date in reserved_dates]
