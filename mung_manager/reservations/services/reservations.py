@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import date, datetime, time, timedelta
 from typing import Optional
 
@@ -73,7 +74,9 @@ class ReservationService(AbstractReservationService):
     @staticmethod
     def validate_reservation_cancellation(pet_kindergarden: PetKindergarden, reservation: Reservation) -> None:
         """
-        이 함수는 당일 취소 불가능 옵션이면서 취소하려는 예약 날짜가 오늘일 때를 검증합니다.
+        이 함수는 다음 사항을 검증합니다.
+        - 연박 중간의 예약인지
+        - 당일 취소 불가능 옵션이면서 취소하려는 예약 날짜가 오늘일 때
 
         Args:
             pet_kindergarden (PetKindergarden): 반려동물 유치원 객체
@@ -82,6 +85,13 @@ class ReservationService(AbstractReservationService):
         Returns:
             None
         """
+        if reservation.is_extented:
+            if reservation.depth != 0:
+                raise ValidationException(
+                    detail=SYSTEM_CODE.message("CANNOT_CANCEL_RESERVATION"),
+                    code=SYSTEM_CODE.code("CANNOT_CANCEL_RESERVATION"),
+                )
+
         if pet_kindergarden.reservation_change_option == ReservationChangeOption.SAME_DAY_UNCHANGE.value:
             if reservation.reserved_at.date() == timezone.now().date():
                 raise ValidationException(
@@ -109,9 +119,9 @@ class ReservationService(AbstractReservationService):
         self.validate_reservation_cancellation(pet_kindergarden, reservation)
 
         reservations = self.update_reservation_status_to_canceled(reservation)
-        self.update_ticket_usage_logs(reservations)
-        self.update_daily_reservations(reservations)
-        self.restore_ticket_counts(reservations)
+        used_count_dict = self.update_ticket_usage_logs(reservations)
+        self.update_daily_reservations(used_count_dict)
+        self.restore_ticket_counts(used_count_dict)
 
     def update_reservation_status_to_canceled(self, reservation: Reservation) -> QuerySet[Reservation]:
         """
@@ -134,7 +144,7 @@ class ReservationService(AbstractReservationService):
         reservations.update(reservation_status=ReservationStatus.CANCELED.value)
         return reservations
 
-    def update_ticket_usage_logs(self, reservations: QuerySet[Reservation]) -> None:
+    def update_ticket_usage_logs(self, reservations: QuerySet[Reservation]) -> dict[Reservation, int]:
         """
         이 함수는 전달 받은 예약 쿼리셋에 속하는 예약들의 사용 로그를 수정합니다.
 
@@ -142,29 +152,36 @@ class ReservationService(AbstractReservationService):
             reservations (QuerySet[Reservation]): 예약 쿼리셋
 
         Returns:
-            None
+            dict[Reservation, int]: 각 예약별 사용된 티켓 수
         """
         reservation_ids = list(reservations.values_list("id", flat=True))
         customer_ticket_usage_logs = self._customer_ticket_usage_log_selector.get_queryset_by_reservation_ids(
             reservation_ids=reservation_ids,
         )
+
+        used_count_dict = defaultdict(int)
+        for log in customer_ticket_usage_logs:
+            used_count_dict[log.reservation] = log.used_count
+
         customer_ticket_usage_logs.update(used_count=0)
 
-    def update_daily_reservations(self, reservations: QuerySet[Reservation]) -> None:
+        return used_count_dict
+
+    def update_daily_reservations(self, used_count_dict: dict[Reservation, int]) -> None:
         """
         이 함수는 전달 받은 예약 쿼리셋을 통해 일별 예약 현황을 수정합니다.
 
         Args:
-            reservations (QuerySet[Reservation]): 예약 쿼리셋
+            used_count_dict (dict[Reservation, int]): 각 예약별 사용된 티켓 수
 
         Returns:
             None
         """
-        reservation = reservations[0]
-        reserved_at = min(res.reserved_at for res in reservations)
-        end_at = max(res.end_at for res in reservations if res.end_at is not None)
+        reservation: Reservation = next(iter(used_count_dict))
+        reserved_at = reservation.reserved_at
+        end_at = reservation.end_at
         daily_reservations = self._daily_reservation_selector.get_by_pet_kindergarden_id_and_reserved_at_and_end_at(
-            pet_kindergarden_id=reservation.pet_kindergarden_id,
+            pet_kindergarden_id=reservation.pet_kindergarden.id,
             reserved_at=reserved_at,
             end_at=end_at,
         )
@@ -179,22 +196,22 @@ class ReservationService(AbstractReservationService):
                 total_pet_count=F("total_pet_count") - 1, all_day_pet_count=F("all_day_pet_count") - 1
             )
 
-    def restore_ticket_counts(self, reservations: QuerySet[Reservation]) -> None:
+    def restore_ticket_counts(self, used_count_dict: dict[Reservation, int]) -> None:
         """
         이 함수는 만료 기간이 남은 이용권의 횟수를 복원합니다.
 
         Args:
-            reservations (QuerySet[Reservation]): 예약 쿼리셋
+            used_count_dict (dict[Reservation, int]): 각 예약별 사용된 티켓 수
 
         Returns:
             None
         """
-        for reservation in reservations:
+        for reservation in used_count_dict:
             if reservation.customer_ticket.expired_at.date() >= timezone.now().date():
                 try:
                     customer_ticket = reservation.customer_ticket
-                    customer_ticket.used_count -= 1
-                    customer_ticket.unused_count += 1
+                    customer_ticket.used_count -= used_count_dict[reservation]
+                    customer_ticket.unused_count += used_count_dict[reservation]
                     customer_ticket.save(update_fields=["used_count", "unused_count", "version"])
                 except RecordModifiedError:
                     raise ValidationException(
