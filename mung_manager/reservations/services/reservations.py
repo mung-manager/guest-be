@@ -412,6 +412,15 @@ class ReservationService(AbstractReservationService):
         reservation_info = strategy.reserve(customer, pet_kindergarden, reservation_data)
 
         if reservation_info["remain_count"] in [0, 1]:
-            send_alimtalk_on_ticket_low.delay(reservation_info, pet_kindergarden, customer)  # type: ignore
+            send_alimtalk_on_ticket_low.delay(  # type: ignore
+                customer_name=customer.name,
+                customer_phone_number=customer.user.phone_number.replace("-", ""),  # type: ignore
+                remain_count=reservation_info["remain_count"],
+                ticket_type=reservation_info["ticket_type"],
+                ticket_expired_at=reservation_info["ticket_expired_at"],
+                pet_kindergarden_name=pet_kindergarden.name,
+                pet_kindergarden_number=pet_kindergarden.phone_number,
+                reservation_availability_option=pet_kindergarden.reservation_availability_option,
+            )
 
         return reservation_info

@@ -311,7 +311,7 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             "remain_count": unused_count,
             "pet_name": pet_name,
             "ticket_type": reservation_data["ticket_type"],
-            "ticket_expired_at": min(ticket_expiration_dates),
+            "ticket_expired_at": min(ticket_expiration_dates) if ticket_expiration_dates else None,
         }
 
         return reservation_info
