@@ -235,6 +235,8 @@ class TimeReservationStrategy(AbstractReservationStrategy):
             "usage_count": 1,
             "remain_count": unused_count,
             "pet_name": pet_name,
+            "ticket_type": reservation_data["ticket_type"],
+            "ticket_expired_at": customer_tickets.expired_at,
         }
 
         return reservation_info
