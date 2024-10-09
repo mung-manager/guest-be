@@ -295,9 +295,13 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             dict[str, Any]: 예약 정보 반환
         """
         unused_count = 0
+        ticket_expiration_dates = []
         for customer_ticket in customer_tickets:
             count = self._customer_ticket_selector.get_by_customer_ticket_id_for_unused_count(customer_ticket.id)
             unused_count += count if count is not None else 0
+
+            if customer_ticket.unused_count > 0:
+                ticket_expiration_dates.append(customer_ticket.expired_at)
 
         pet_name = self._customer_pet_selector.get_by_pet_id_for_pet_name(reservation_data["pet_id"])
         reservation_info = {
@@ -306,6 +310,8 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             "usage_count": sum(len(tickets) for tickets in customer_tickets.values()),
             "remain_count": unused_count,
             "pet_name": pet_name,
+            "ticket_type": reservation_data["ticket_type"],
+            "ticket_expired_at": min(ticket_expiration_dates) if ticket_expiration_dates else None,
         }
 
         return reservation_info
