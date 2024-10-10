@@ -419,7 +419,7 @@ class ReservationService(AbstractReservationService):
                 ticket_type=reservation_info["ticket_type"],
                 ticket_expired_at=reservation_info["ticket_expired_at"],
                 pet_kindergarden_name=pet_kindergarden.name,
-                pet_kindergarden_number=pet_kindergarden.phone_number,
+                visible_phone_number=pet_kindergarden.visible_phone_number,
                 reservation_availability_option=pet_kindergarden.reservation_availability_option,
             )
 
