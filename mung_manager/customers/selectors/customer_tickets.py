@@ -1,3 +1,4 @@
+from datetime import timedelta
 from typing import Annotated, Any, Optional
 
 from django.db.models import (
@@ -256,3 +257,17 @@ class CustomerTicketSelector(AbstractCustomerTicketSelector):
 
         except CustomerTicket.DoesNotExist:
             return None
+
+    def get_queryset_for_unused_tickets_with_five_days_left(self) -> Optional[QuerySet[CustomerTicket]]:
+        """
+        이 함수는 잔여 티켓이 존재하면서 만료가 5일 남은 티켓 쿼리셋을 조회합니다.
+
+        Returns:
+            Optional[QuerySet[CustomerTicket]]: 잔여 티켓이 존재하면서 만료가 5일 남은 티켓 쿼리셋을 반환합
+        """
+        five_days_later = timezone.now().date() + timedelta(days=5)
+
+        return CustomerTicket.objects.filter(
+            expired_at__date__lte=five_days_later,
+            unused_count__gt=0,
+        )
