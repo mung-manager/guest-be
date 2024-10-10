@@ -97,6 +97,10 @@ class AbstractCustomerTicketSelector(ABC):
     def get_by_customer_ticket_id_for_unused_count(self, customer_ticket_id: int) -> Optional[int]:
         raise NotImplementedException()
 
+    @abstractmethod
+    def get_queryset_for_unused_tickets_with_five_days_left(self) -> Optional[QuerySet[CustomerTicket]]:
+        raise NotImplementedException()
+
 
 class AbstractCustomerTicketUsageLogSelector(ABC):
 
