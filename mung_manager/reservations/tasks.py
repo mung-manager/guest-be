@@ -31,7 +31,7 @@ def send_alimtalk_on_ticket_low(
         ticket_type (str): 이용권 종류
         ticket_expired_at (datetime): 이용권 만료 시간
         pet_kindergarden_name (str): 유치원 이름
-        visible_phone_number (array): 노출하는 연락처
+        visible_phone_number (list): 노출하는 연락처
         reservation_availability_option (str): 당일 예약 가능 여부
     """
 
