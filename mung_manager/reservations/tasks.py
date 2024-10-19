@@ -59,7 +59,8 @@ def send_alimtalk_on_ticket_low(
         if remain_count == 0:
             user_phone_number = visible_phone_number["user_phone_number"]
             pet_kindergarden_phone_number = visible_phone_number["pet_kindergarden_phone_number"]
-            phone_number = f"{user_phone_number}({pet_kindergarden_phone_number})".replace("()", "")
+            phone_number = f"{user_phone_number}({pet_kindergarden_phone_number})".replace("()", "")\
+                if user_phone_number else pet_kindergarden_phone_number
 
             replacements = {
                 "#{보호자이름}": customer_name,
@@ -73,7 +74,7 @@ def send_alimtalk_on_ticket_low(
                 "#{유치원명}": pet_kindergarden_name,
                 "#{이용권명}": ticket_type,
                 "#{잔여횟수}": remain_count,  # type: ignore
-                "#{이용권 사용기한}": ticket_expired_at.astimezone(seoul_tz).strftime("%Y년 %-m월 %-d일"),
+                "#{이용권 사용기한}": ticket_expired_at.astimezone(seoul_tz).date().strftime("%Y년 %m월 %d일"),
                 "#{당일 예약 가능 여부}": reservation_availability_option.split()[-1],
             }
 
