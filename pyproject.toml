@@ -33,6 +33,7 @@ django-stubs-ext = "^5.0.2"
 types-pytz = "2024.1.0.20240417"
 slack-sdk = "^3.33.1"
 redis = "^5.0.8"
+pycurl = "^7.45.3"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.2"

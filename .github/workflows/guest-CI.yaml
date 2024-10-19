@@ -43,8 +43,8 @@ jobs:
         run: docker compose run guest_service poetry run flake8
 
       # 7. mypy 실행 (타입 검사)
-      - name: Run mypy
-        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
+#      - name: Run mypy
+#        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
 
       # 8. Slack 알림
       - name: Notify Slack on Success

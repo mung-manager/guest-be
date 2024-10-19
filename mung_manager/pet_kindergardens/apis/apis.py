@@ -76,7 +76,24 @@ class PetKindergardenDetailInfoAPI(GuestAPIAuthMixin, APIView):
             fields={
                 "name": serializers.CharField(label="반려동물 유치원 이름"),
                 "profile_thumbnail_url": serializers.URLField(label="프로필 이미지 URL"),
-                "visible_phone_number": serializers.ListField(child=serializers.CharField(), label="노출 전화번호"),
+                "visible_phone_number": inline_serializer(
+                    required=True,
+                    fields={
+                        "user_phone_number": serializers.CharField(
+                            max_length=16,
+                            label="유저 전화번호",
+                            allow_blank=True,
+                            default="",
+                        ),
+                        "pet_kindergarden_phone_number": serializers.CharField(
+                            max_length=16,
+                            label="반려동물 유치원 전화번호",
+                            allow_blank=True,
+                            default="",
+                        ),
+                    },
+                    label="노출 전화번호",
+                ),
                 "business_start_hour": serializers.TimeField(label="영업 시작 시간", format="%H:%M"),
                 "business_end_hour": serializers.TimeField(label="영업 종료 시간", format="%H:%M"),
                 "road_address": serializers.CharField(label="도로명 주소"),

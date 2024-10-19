@@ -18,7 +18,7 @@ def send_alimtalk_on_ticket_low(
     ticket_type: str,
     ticket_expired_at: datetime,
     pet_kindergarden_name: str,
-    visible_phone_number: list,
+    visible_phone_number: dict[str, str],
     reservation_availability_option: str,
 ) -> None:
     """
@@ -31,7 +31,7 @@ def send_alimtalk_on_ticket_low(
         ticket_type (str): 이용권 종류
         ticket_expired_at (datetime): 이용권 만료 시간
         pet_kindergarden_name (str): 유치원 이름
-        visible_phone_number (list): 노출하는 연락처
+        visible_phone_number (dict[str, str]): 노출하는 연락처
         reservation_availability_option (str): 당일 예약 가능 여부
     """
 
@@ -57,10 +57,12 @@ def send_alimtalk_on_ticket_low(
         template = response["camel_case_json"][0]
 
         if remain_count == 0:
+            user_phone_number = visible_phone_number["user_phone_number"]
+            pet_kindergarden_phone_number = visible_phone_number["pet_kindergarden_phone_number"]
             phone_number = (
-                f"{visible_phone_number[0]}({visible_phone_number[1]})"
-                if len(visible_phone_number) == 2
-                else visible_phone_number[0]
+                f"{user_phone_number}({pet_kindergarden_phone_number})".replace("()", "")
+                if user_phone_number
+                else pet_kindergarden_phone_number
             )
 
             replacements = {
@@ -75,7 +77,7 @@ def send_alimtalk_on_ticket_low(
                 "#{유치원명}": pet_kindergarden_name,
                 "#{이용권명}": ticket_type,
                 "#{잔여횟수}": remain_count,  # type: ignore
-                "#{이용권 사용기한}": ticket_expired_at.astimezone(seoul_tz).strftime("%Y년 %-m월 %-d일 %-H시"),
+                "#{이용권 사용기한}": ticket_expired_at.astimezone(seoul_tz).date().strftime("%Y년 %m월 %d일"),
                 "#{당일 예약 가능 여부}": reservation_availability_option.split()[-1],
             }
 
