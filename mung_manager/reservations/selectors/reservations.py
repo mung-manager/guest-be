@@ -285,7 +285,7 @@ class ReservationSelector(AbstractReservationSelector):
             QuerySet[Annotated[Reservation, is_expired_type], dict[str, Any]]: 존재하지 않을 경우 빈 쿼리셋을 반환
         """
         return (
-            Reservation.objects.filter(id__in=reservation_ids)
+            Reservation.objects.filter(id__in=reservation_ids)  # type: ignore
             .select_related("customer_ticket")
             .annotate(
                 is_expired=Case(
