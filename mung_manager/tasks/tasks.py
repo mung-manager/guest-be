@@ -43,11 +43,10 @@ def send_alimtalk_on_five_day_left(self) -> None:
         if customer_tickets:
             for customer_ticket in customer_tickets:
                 visible_phone_number = customer_ticket.customer.pet_kindergarden.visible_phone_number
-                phone_number = (
-                    f"{visible_phone_number[0]}({visible_phone_number[1]})"
-                    if len(visible_phone_number) == 2
-                    else visible_phone_number[0]
-                )
+                user_phone_number = visible_phone_number["user_phone_number"]
+                pet_kindergarden_phone_number = visible_phone_number["pet_kindergarden_phone_number"]
+                phone_number = f"{user_phone_number}({pet_kindergarden_phone_number})".replace("()", "")
+
                 reservation_availability_option = (
                     customer_ticket.customer.pet_kindergarden.reservation_availability_option
                 )
