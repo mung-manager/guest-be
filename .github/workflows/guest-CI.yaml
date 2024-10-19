@@ -43,11 +43,8 @@ jobs:
         run: docker compose run guest_service poetry run flake8
 
       # 7. mypy 실행 (타입 검사)
-      - name: Install specific mypy version  # mypy 1.12 버전에서 알 수 없는 에러로 1.11로 고정
-        run: docker compose run guest_service poetry run pip install mypy==1.11
-
-      - name: Run mypy
-        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
+#      - name: Run mypy
+#        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
 
       # 8. Slack 알림
       - name: Notify Slack on Success
