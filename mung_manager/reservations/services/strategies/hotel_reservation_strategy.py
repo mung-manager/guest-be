@@ -239,8 +239,8 @@ class HotelReservationStrategy(AbstractReservationStrategy):
         is_extented = True if len(customer_tickets) > 1 else False
         for ticket in customer_tickets:
             reservation = Reservation.objects.create(
-                reserved_at=self.reservation_dates[0],
-                end_at=self.reservation_dates[-1] + timedelta(days=1),
+                reserved_at=datetime.combine(self.reservation_dates[0], pet_kindergarden.business_start_hour),
+                end_at=datetime.combine(self.reservation_dates[-1] + timedelta(days=1), pet_kindergarden.business_end_hour),
                 is_attended=None,
                 reservation_status=ReservationStatus.COMPLETED.value,
                 pet_kindergarden_id=pet_kindergarden.id,
