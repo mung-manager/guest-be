@@ -40,7 +40,7 @@ def send_alimtalk_on_ticket_low(
         이 메서드는 템플릿 내용에서 필요한 필드를 동적으로 치환하여 content를 반환합니다.
         """
 
-        content = template["content"]
+        content = template["content"].strip('"')
         for placeholder, value in replacements.items():
             content = content.replace(placeholder, str(value))
         return content

@@ -234,13 +234,15 @@ class HotelReservationStrategy(AbstractReservationStrategy):
             )
 
         reservations = []
+        reserved_at = datetime.combine(self.reservation_dates[0], pet_kindergarden.business_start_hour)
+        end_at = self.reservation_dates[-1] + timedelta(days=1)
         parent_id = None
         depth = 0
         is_extented = True if len(customer_tickets) > 1 else False
         for ticket in customer_tickets:
             reservation = Reservation.objects.create(
-                reserved_at=self.reservation_dates[0],
-                end_at=self.reservation_dates[-1] + timedelta(days=1),
+                reserved_at=reserved_at,
+                end_at=end_at,
                 is_attended=None,
                 reservation_status=ReservationStatus.COMPLETED.value,
                 pet_kindergarden_id=pet_kindergarden.id,
