@@ -58,11 +58,11 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ${{ env.ECR_REGISTRY }}/mung-manager-dev-package:latest
+            ${{ env.ECR_REGISTRY }}/mung-manager-guest-dev-package:latest
 
       - name: Replace Dockerfile and docker-compose
         run: |
-          sed -i 's|${DEV_PACKAGE_IMAGE}|${{ steps.login-ecr.outputs.registry }}/mung-manager-dev-package:latest|' docker/dev.Dockerfile
+          sed -i 's|${DEV_PACKAGE_IMAGE}|${{ steps.login-ecr.outputs.registry }}/mung-manager-guest-dev-package:latest|' docker/dev.Dockerfile
           sed -i 's|docker/local.Dockerfile|docker/dev.Dockerfile|' docker-compose.yml
 
       - name: Create env file
