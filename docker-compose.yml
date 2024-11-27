@@ -1,5 +1,3 @@
-version: "3.9"
-
 volumes:
   postgres: {}
 
@@ -20,6 +18,8 @@ services:
     image: postgis/postgis:16-3.4
     volumes:
       - postgres:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
@@ -38,8 +38,6 @@ services:
     environment:
       - DJANGO_SETTINGS_MODULE=config.django.test # github action - config.django.test / local - config.django.local
       - TZ=Asia/Seoul
-    volumes:
-      - .:/app
     ports:
       - "8000:8000"
     depends_on:
@@ -49,6 +47,37 @@ services:
     networks:
       - app_net
 
+  guest_celery_service:
+    container_name: guest_celery_service
+    build:
+      context: .
+      dockerfile: docker/local.Dockerfile
+    command: poetry run celery -A mung_manager.tasks worker -l info --without-gossip --without-mingle --without-heartbeat
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.django.test
+      - TZ=Asia/Seoul
+    depends_on:
+      - postgres_db
+      - redis
+    restart: on-failure
+    networks:
+      - app_net
+
+  guest_celery_beat_service:
+    container_name: guest_celery_beat_service
+    build:
+      context: .
+      dockerfile: docker/local.Dockerfile
+    command: poetry run celery -A mung_manager.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.django.test
+      - TZ=Asia/Seoul
+    depends_on:
+      - postgres_db
+      - redis
+    restart: on-failure
+    networks:
+      - app_net
 networks:
   app_net:
     driver: bridge

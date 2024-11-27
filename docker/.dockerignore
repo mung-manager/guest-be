@@ -1,0 +1,92 @@
+# CI
+.codeclimate.yml
+.coverage
+.coveragerc
+.taskcluster.yml
+.travis.yml
+
+# C extensions
+*.so
+
+# Django stuff:
+*.log
+
+# Distribution / packaging
+.Python
+.installed.cfg
+*.egg
+*.egg-info/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+env/
+lib/
+lib64/
+parts/
+sdist/
+var/
+
+# Docker
+.docker
+docker-compose.yml
+
+# Git
+.github
+.git
+.gitignore
+
+# Installer logs
+pip-delete-this-directory.txt
+pip-log.txt
+
+# PyBuilder
+target/
+
+# PyCharm
+.idea
+
+# Python mode for VIM
+.ropeproject
+*/.ropeproject
+*/*/.ropeproject
+*/*/*/.ropeproject
+
+# Sphinx documentation
+docs/_build/
+
+# Translations
+*.mo
+*.pot
+
+# Vim swap files
+*.swp
+*/*.swp
+*/*/*.swp
+*/*/*/*.swp
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*/*/*/__pycache__/
+*.py[cod]
+*/*.py[cod]
+*/*/*.py[cod]
+*/*/*/*.py[cod]
+
+# Virtual environment
+.env/
+.venv/
+venv/
+
+.dockerignore
+.env.example
+.mypy_cache
+.pytest_cache
+README.md
+docker
+mypy.ini
+pytest.ini
+tests

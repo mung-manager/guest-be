@@ -43,8 +43,8 @@ def send_alimtalk_on_five_day_left(self) -> None:
         if customer_tickets:
             for customer_ticket in customer_tickets:
                 visible_phone_number = customer_ticket.customer.pet_kindergarden.visible_phone_number
-                user_phone_number = visible_phone_number["user_phone_number"]
-                pet_kindergarden_phone_number = visible_phone_number["pet_kindergarden_phone_number"]
+                user_phone_number = visible_phone_number["user_phone_number"]  # type: ignore
+                pet_kindergarden_phone_number = visible_phone_number["pet_kindergarden_phone_number"]  # type: ignore
                 phone_number = (
                     f"{user_phone_number}({pet_kindergarden_phone_number})".replace("()", "")
                     if user_phone_number

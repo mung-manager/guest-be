@@ -32,7 +32,7 @@ RUN mkdir /app
 WORKDIR /app
 
 # Copy pyproject.toml
-COPY pyproject.toml .
+COPY pyproject.toml poetry.lock .
 
 # Install dependencies using Poetry, ensuring pycurl uses OpenSSL
 RUN poetry config virtualenvs.create false \

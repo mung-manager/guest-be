@@ -16,11 +16,9 @@ on:
         - DongwookKim0823
 
 jobs:
-  guest-docker-push:
+  build:
     runs-on: ubuntu-latest
-    if: github.repository == 'mung-manager/guest-be'
     steps:
-      # 1. Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -28,7 +26,54 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # 2. Create environment file
+      - name: Set up QEMU for ARM64
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: linux/arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: AWS configure
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get changed files
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            docker/dev-package.Dockerfile
+            docker/dev.Dockerfile
+            pyproject.toml
+            poetry.lock
+
+      - name: Build dev-package docker image and push to ECR
+        id: build-and-push
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        uses: docker/build-push-action@v5
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        with:
+          context: .
+          file: ./docker/dev-package.Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/mung-manager-dev-package:latest
+
+      - name: Replace Dockerfile and docker-compose
+        run: |
+          sed -i 's|${DEV_PACKAGE_IMAGE}|${{ steps.login-ecr.outputs.registry }}/mung-manager-dev-package:latest|' docker/dev.Dockerfile
+          sed -i 's|docker/local.Dockerfile|docker/dev.Dockerfile|' docker-compose.yml
+
       - name: Create env file
         env:
           DJANGO_GUEST_ENV: ${{ secrets.DJANGO_GUEST_ENV }}
@@ -36,40 +81,49 @@ jobs:
           touch .env.guest
           echo "$DJANGO_GUEST_ENV" >> .env.guest
 
-      # 3. Configure AWS credentials
-      - name: AWS configure
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+      - name: Build docker compose images for ARM64
+        env:
+          DOCKER_BUILDKIT: 1
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_DEFAULT_PLATFORM: linux/arm64
+        run: |
+          docker compose build postgres_db guest_service redis
 
-      # 4. Login to Amazon ECR Public
-      - name: Login to Amazon ECR Public
-        id: login-ecr-public
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry-type: public
+      - name: Run isort
+        run: docker compose run guest_service poetry run isort mung_manager/ --check
 
-      # 5. Build and push Docker image
-      - name: Build and push
-        id: build-and-push
+      - name: Run black
+        run: docker compose run guest_service poetry run black mung_manager/ --check
+
+      - name: Run flake8
+        run: docker compose run guest_service poetry run flake8
+
+      - name: Run mypy
+        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
+
+      # - name: Run tests
+      #   run: docker compose run guest_service poetry run pytest --cov=mung_manager/ --cov-fail-under=80 tests/ -n 4
+
+      - name: Build dev docker image and push to ECR
+        id: build-dev-and-push
         uses: docker/build-push-action@v5
+        env:
+          IMAGE_TAG: ${{ github.event.inputs.docker_image_tag }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         with:
           context: .
           file: ./docker/dev.Dockerfile
-          platforms: linux/x86_64
+          platforms: linux/arm64
           push: true
           tags: |
-            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest:${{ github.event.inputs.docker_image_tag }}
-            ${{ steps.login-ecr-public.outputs.registry }}/${{ secrets.ECR_PUBLIC_REGISTRY_ALIAS }}/mung_manager_dev_guest:latest
+            ${{ env.ECR_REGISTRY }}/mung-manager-guest:${{ env.IMAGE_TAG }}
+            ${{ env.ECR_REGISTRY }}/mung-manager-guest:latest
 
-      # 6. Trigger Infra Repository Dispatch
       - name: Infra Repository Dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.OWNER_ACCESS_TOKEN }}
-          repository: mung-manager/infra-be
+          repository: Mung-Manager/BE-Infra
           event-type: guest-dev-deploy
           client-payload: |
             {
@@ -81,7 +135,6 @@ jobs:
               "django_settings_module": "config.django.dev"
             }
 
-      # 7. Notify Slack
       - name: Notify Slack on Success
         if: success()
         id: slack-success
@@ -95,7 +148,7 @@ jobs:
                   "color": "#36a64f",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{github.repository}}",
-                  "text": "GitHub Action guest DEV-DOCKER-PUSH 성공 😄",
+                  "text": "GitHub Action Guest DEV-DOCKER-BUILD 성공 😄",
                   "fields": [
                     {
                       "title": "Repository",
@@ -128,12 +181,12 @@ jobs:
                   "color": "#ff0000",
                   "title": "${{ github.repository }}",
                   "title_link": "https://github.com/${{github.repository}}",
-                  "text": "GitHub Action guest DEV-DOCKER-PUSH 실패 😭",
+                  "text": "GitHub Action Guest DEV-DOCKER-BUILD 실패 😭",
                   "fields": [
                     {
                       "title": "Repository",
                       "value": "${{ github.repository }}",
-                      "short": true
+                    "short": true
                     },
                     {
                       "title": "Tag",

@@ -1,16 +1,13 @@
-name: Guest CI
+name: Guest DEV CI
 
 on:
   pull_request:
-    branches: [ "develop", "main" ]
+    branches: ["main", "develop"]
 
 jobs:
-  guest-format-lint:
+  CI:
     runs-on: ubuntu-latest
-#    env:
-#      DJANGO_SETTINGS_MODULE: config.django.test
     steps:
-      # 1. 저장소 체크아웃
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -18,7 +15,56 @@ jobs:
           submodules: true
           fetch-depth: 0
 
-      # 2. 환경 변수 파일 생성
+      - name: Set up QEMU for ARM64
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: linux/arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: AWS configure
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get changed files
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            docker/dev-package.Dockerfile
+            docker/dev.Dockerfile
+            docker/prod-package.Dockerfile
+            docker/prod.Dockerfile
+            pyproject.toml
+            poetry.lock
+
+      - name: Build dev-package docker image and push to ECR
+        id: build-and-push
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        uses: docker/build-push-action@v5
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        with:
+          context: .
+          file: ./docker/dev-package.Dockerfile
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ${{ env.ECR_REGISTRY }}/mung-manager-dev-package:latest
+
+      - name: Replace Dockerfile and docker-compose
+        run: |
+          sed -i 's|${DEV_PACKAGE_IMAGE}|${{ steps.login-ecr.outputs.registry }}/mung-manager-dev-package:latest|' docker/dev.Dockerfile
+          sed -i 's|docker/local.Dockerfile|docker/dev.Dockerfile|' docker-compose.yml
+
       - name: Create env file
         env:
           DJANGO_GUEST_ENV: ${{ secrets.DJANGO_GUEST_ENV }}
@@ -26,27 +72,36 @@ jobs:
           touch .env.guest
           echo "$DJANGO_GUEST_ENV" >> .env.guest
 
-      # 3. Docker 빌드
-      - name: Build docker
-        run: docker compose build postgres_db guest_service
+      - name: Build docker compose images for ARM64
+        env:
+          DOCKER_BUILDKIT: 1
+          COMPOSE_DOCKER_CLI_BUILD: 1
+          DOCKER_DEFAULT_PLATFORM: linux/arm64
+        run: |
+          docker compose build postgres_db guest_service redis
 
-      # 4. isort 실행 (코드 정렬 검사)
       - name: Run isort
         run: docker compose run guest_service poetry run isort mung_manager/ --check
 
-      # 5. black 실행 (코드 포매팅 검사)
       - name: Run black
         run: docker compose run guest_service poetry run black mung_manager/ --check
 
-      # 6. flake8 실행 (코드 린팅 검사)
       - name: Run flake8
         run: docker compose run guest_service poetry run flake8
 
-      # 7. mypy 실행 (타입 검사)
-#      - name: Run mypy
-#        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
+      - name: Run mypy
+        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
 
-      # 8. Slack 알림
+#     - name: Run tests
+#       run:  docker compose run guest_service poetry run pytest --cov=mung_manager --cov-fail-under=80 tests/ -n 4 &&
+#             docker compose run guest_service poetry run pytest --cov=mung_manager tests/ --cov-report=xml -n 4
+
+#     - name: Report coverage to codecov
+#       uses: codecov/codecov-action@v3
+#       with:
+#         token: ${{ secrets.CODECOV_TOKEN }}
+#         fail_ci_if_error: false
+
       - name: Notify Slack on Success
         if: success()
         id: slack-success
@@ -59,8 +114,8 @@ jobs:
                 {
                   "color": "#36a64f",
                   "title": "${{ github.repository }}",
-                  "title_link": "https://github.com/${{ github.repository }}",
-                  "text": "GitHub Action guest format-lint CI 성공 😄",
+                  "title_link": "https://github.com/${{github.repository}}",
+                  "text": "GitHub Action Guest CI 성공 😄",
                   "fields": [
                     {
                       "title": "Repository",
@@ -79,6 +134,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
 
       - name: Notify Slack on Failure
         if: failure()
@@ -92,8 +148,8 @@ jobs:
                 {
                   "color": "#ff0000",
                   "title": "${{ github.repository }}",
-                  "title_link": "https://github.com/${{ github.repository }}",
-                  "text": "GitHub Action guest format-lint CI 실패 😭",
+                  "title_link": "https://github.com/${{github.repository}}",
+                  "text": "GitHub Action Guest CI 실패 😭",
                   "fields": [
                     {
                       "title": "Repository",
@@ -112,5 +168,3 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-  #  @TODO: 테스트 job 설정
