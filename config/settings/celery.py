@@ -29,7 +29,7 @@ else:
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         "region": "ap-northeast-2",
         "predefined_queues": {
-            "celery": {
+            "guest_default": {
                 "url": AWS_SQS_CELERY_URL,
             },
         },
