@@ -3,7 +3,7 @@ from config.django.base import SERVER_ENV
 import urllib
 
 # Celery
-CELERY_DEFAULT_QUEUE = "default"
+CELERY_DEFAULT_QUEUE = "guest_default"
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
