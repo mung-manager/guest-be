@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import timedelta
 from typing import Annotated, Any, Optional
 
 from django.db import connection
@@ -318,21 +319,24 @@ class ReservationSelector(AbstractReservationSelector):
         Returns:
             list[str]: 예약 날짜 리스트를 반환하며, 존재하지 않을 경우 빈 리스트를 반환합니다.
         """
-        reserved_dates = (
-            Reservation.objects.filter(
-                customer_id=customer_id,
-                customer_pet_id=customer_pet_id,
-                pet_kindergarden_id=pet_kindergarden_id,
-            )
-            .exclude(
-                reservation_status=ReservationStatus.CANCELED.value,
-            )
-            .values_list("reserved_at", flat=True)
+        reservations = Reservation.objects.filter(
+            customer_id=customer_id,
+            customer_pet_id=customer_pet_id,
+            pet_kindergarden_id=pet_kindergarden_id,
+        ).exclude(
+            reservation_status=ReservationStatus.CANCELED.value,
         )
 
-        formatted_dates = [date.strftime("%Y-%m-%d") for date in reserved_dates]
+        formatted_dates = []
+        for reservation in reservations:
+            current_date = reservation.reserved_at.date()
+            end_date = reservation.end_at.date()  # type: ignore
 
-        return formatted_dates
+            while current_date <= end_date:
+                formatted_dates.append(current_date.strftime("%Y-%m-%d"))
+                current_date += timedelta(days=1)
+
+        return list(set(formatted_dates))
 
     def get_queryset_for_hotel_type_reservation(
         self,
