@@ -4,6 +4,7 @@ import urllib
 
 # Celery
 CELERY_DEFAULT_QUEUE = "guest_default"
+CELERY_TASK_DEFAULT_QUEUE = "guest_default"
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
