@@ -123,7 +123,7 @@ class ReservationSelector(AbstractReservationSelector):
                 price=F("customer_ticket__ticket__price"),
                 usage_time=F("customer_ticket__ticket__usage_time"),
                 used_ticket_count=ExpressionWrapper(
-                    ExtractDay(F("end_at") - F("reserved_at")), output_field=IntegerField()
+                    ExtractDay(F("end_at") - F("reserved_at")) + 1, output_field=IntegerField()
                 ),
             )
             .values(
