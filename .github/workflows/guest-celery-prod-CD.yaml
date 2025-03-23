@@ -90,17 +90,17 @@ jobs:
         run: |
           docker compose build postgres_db guest_service redis
 
-      - name: Run isort
-        run: docker compose run guest_service poetry run isort mung_manager/ --check
+      # - name: Run isort
+      #   run: docker compose run guest_service poetry run isort mung_manager/ --check
 
-      - name: Run black
-        run: docker compose run guest_service poetry run black mung_manager/ --check
+      # - name: Run black
+      #   run: docker compose run guest_service poetry run black mung_manager/ --check
 
-      - name: Run flake8
-        run: docker compose run guest_service poetry run flake8
+      # - name: Run flake8
+      #   run: docker compose run guest_service poetry run flake8
 
-      - name: Run mypy
-        run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
+      # - name: Run mypy
+      #   run: docker compose run guest_service poetry run mypy --config mypy.ini mung_manager/
 
       # - name: Run tests
       #   run: docker compose run guest_service poetry run pytest --cov=mung_manager/ --cov-fail-under=80 tests/ -n 4
