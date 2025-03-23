@@ -24,9 +24,9 @@ else:
     aws_sqs_secret_access_key = urllib.parse.quote(f"{AWS_SQS_SECRET_ACCESS_KEY}", safe="")
     CELERY_BROKER_URL = f"sqs://{aws_sqs_access_key_id}:{aws_sqs_secret_access_key}@"
     if SERVER_ENV == "config.django.prod":
-        AWS_SQS_CELERY_URL = env.str("AWS_PROD_SQS_CELERY_URL")
+        AWS_SQS_CELERY_URL = env.str("AWS_PROD_SQS_CELERY_GUEST_URL")
     else:
-        AWS_SQS_CELERY_URL = env.str("AWS_DEV_SQS_CELERY_URL")
+        AWS_SQS_CELERY_URL = env.str("AWS_DEV_SQS_CELERY_GUEST_URL")
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         "region": "ap-northeast-2",
         "predefined_queues": {
