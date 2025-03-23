@@ -5,7 +5,7 @@ from config.env import env
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": env("TEST_POSTGRESQL_DATABASE", default="mung_manager"),
         "USER": env("TEST_POSTGRESQL_USER", default="postgres"),
         "PASSWORD": env("TEST_POSTGRESQL_PASSWORD", default="password"),

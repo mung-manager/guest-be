@@ -9,7 +9,7 @@ ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": env("DEV_POSTGRESQL_DATABASE"),
         "USER": env("DEV_POSTGRESQL_USER"),
         "PASSWORD": env("DEV_POSTGRESQL_PASSWORD"),
